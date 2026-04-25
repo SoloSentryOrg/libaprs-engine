@@ -10,6 +10,8 @@ minimal packet primitives and a conservative codec boundary:
 - Fail closed on empty, oversized, malformed, or non-AX.25-like packet shapes.
 - Expose source, destination, digipeater path components, and payload as byte
   views backed by the preserved raw packet.
+- Classify the APRS data type identifier from the first payload byte while
+  leaving the remaining information field opaque.
 - Avoid network, async, serialization, and transport dependencies in v1.
 
 The initial parser intentionally validates only the minimal

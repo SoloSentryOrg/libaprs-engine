@@ -80,6 +80,60 @@ impl ParsedPacket {
     pub fn payload(&self) -> &[u8] {
         &self.raw.bytes[self.payload_start..]
     }
+
+    /// Returns the APRS data type identifier from the first payload byte.
+    #[must_use]
+    pub fn data_type_identifier(&self) -> DataTypeIdentifier {
+        DataTypeIdentifier::from_byte(self.raw.bytes[self.payload_start])
+    }
+
+    /// Returns payload bytes after the data type identifier.
+    #[must_use]
+    pub fn information(&self) -> &[u8] {
+        &self.raw.bytes[self.payload_start + 1..]
+    }
+}
+
+/// APRS data type identifier from the first payload byte.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum DataTypeIdentifier {
+    /// `!`: position without timestamp, no APRS messaging.
+    PositionNoTimestamp,
+    /// `=`: position without timestamp, APRS messaging supported.
+    PositionNoTimestampMessaging,
+    /// `/`: position with timestamp, no APRS messaging.
+    PositionWithTimestamp,
+    /// `@`: position with timestamp, APRS messaging supported.
+    PositionWithTimestampMessaging,
+    /// `>`: status.
+    Status,
+    /// `:`: message, bulletin, or announcement.
+    Message,
+    /// `;`: object.
+    Object,
+    /// `)`: item.
+    Item,
+    /// `_`: weather report without position.
+    Weather,
+    /// Any currently unclassified identifier byte.
+    Unknown(u8),
+}
+
+impl DataTypeIdentifier {
+    fn from_byte(byte: u8) -> Self {
+        match byte {
+            b'!' => Self::PositionNoTimestamp,
+            b'=' => Self::PositionNoTimestampMessaging,
+            b'/' => Self::PositionWithTimestamp,
+            b'@' => Self::PositionWithTimestampMessaging,
+            b'>' => Self::Status,
+            b':' => Self::Message,
+            b';' => Self::Object,
+            b')' => Self::Item,
+            b'_' => Self::Weather,
+            other => Self::Unknown(other),
+        }
+    }
 }
 
 /// Fail-closed packet parse errors.

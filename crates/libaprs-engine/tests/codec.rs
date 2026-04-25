@@ -1,8 +1,8 @@
-use libaprs_engine::{parse_packet, ParseError, MAX_PACKET_LEN};
+use libaprs_engine::{parse_packet, DataTypeIdentifier, ParseError, MAX_PACKET_LEN};
 
 #[test]
 fn valid_packet_preserves_exact_raw_bytes() {
-    let input = b"N0CALL>APRS,TCPIP*:hello world";
+    let input = b"N0CALL>APRS,TCPIP*:>hello world";
 
     let parsed = parse_packet(input).expect("valid packet should parse");
 
@@ -12,7 +12,9 @@ fn valid_packet_preserves_exact_raw_bytes() {
     assert_eq!(parsed.digipeaters(), vec![b"TCPIP*".as_slice()]);
     assert_eq!(parsed.path_components(), vec![b"APRS".as_slice(), b"TCPIP*".as_slice()]);
     assert_eq!(parsed.path(), b"APRS,TCPIP*");
-    assert_eq!(parsed.payload(), b"hello world");
+    assert_eq!(parsed.payload(), b">hello world");
+    assert_eq!(parsed.data_type_identifier(), DataTypeIdentifier::Status);
+    assert_eq!(parsed.information(), b"hello world");
 }
 
 #[test]
@@ -96,12 +98,24 @@ fn valid_ssid_and_repeated_path_marker_parse() {
 
 #[test]
 fn invalid_utf8_payload_preserves_raw_bytes_and_does_not_panic() {
-    let input = b"N0CALL>APRS:\xff\xfe\xfd";
+    let input = b"N0CALL>APRS:!\xff\xfe\xfd";
 
     let parsed = parse_packet(input).expect("payload bytes are opaque");
 
     assert_eq!(parsed.raw().as_bytes(), input);
-    assert_eq!(parsed.payload(), b"\xff\xfe\xfd");
+    assert_eq!(parsed.payload(), b"!\xff\xfe\xfd");
+    assert_eq!(parsed.data_type_identifier(), DataTypeIdentifier::PositionNoTimestamp);
+    assert_eq!(parsed.information(), b"\xff\xfe\xfd");
+}
+
+#[test]
+fn unknown_data_type_identifier_is_preserved_as_byte() {
+    let input = b"N0CALL>APRS:~opaque";
+
+    let parsed = parse_packet(input).expect("unknown data type byte is still structured");
+
+    assert_eq!(parsed.data_type_identifier(), DataTypeIdentifier::Unknown(b'~'));
+    assert_eq!(parsed.information(), b"opaque");
 }
 
 #[test]

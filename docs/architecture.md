@@ -33,6 +33,8 @@ packet is malformed.
 - The first path component is the destination. Later path components are
   digipeaters.
 - Payload bytes are opaque and may be invalid UTF-8.
+- The first payload byte is exposed as the APRS data type identifier. Remaining
+  information-field bytes stay opaque.
 - Source and path bytes must use conservative address components: uppercase
   ASCII callsigns of 1-6 letters or digits, optional SSID values from 0-15, and
   optional trailing `*` repeated markers on path components only.
