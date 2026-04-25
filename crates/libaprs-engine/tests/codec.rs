@@ -41,6 +41,44 @@ fn packet_with_non_ax25_like_path_fails_closed() {
 }
 
 #[test]
+fn address_callsign_longer_than_six_bytes_fails_closed() {
+    let err = parse_packet(b"TOOLONG>APRS:hello").expect_err("long callsign must be rejected");
+
+    assert_eq!(err, ParseError::InvalidAddress);
+}
+
+#[test]
+fn address_with_out_of_range_ssid_fails_closed() {
+    let err = parse_packet(b"N0CALL-16>APRS:hello").expect_err("SSID above 15 must be rejected");
+
+    assert_eq!(err, ParseError::InvalidAddress);
+}
+
+#[test]
+fn lowercase_address_metadata_fails_closed() {
+    let err = parse_packet(b"n0call>APRS:hello").expect_err("lowercase source must be rejected");
+
+    assert_eq!(err, ParseError::InvalidAddress);
+}
+
+#[test]
+fn repeated_marker_inside_address_fails_closed() {
+    let err = parse_packet(b"N0CALL>AP*RS:hello").expect_err("misplaced repeated marker must be rejected");
+
+    assert_eq!(err, ParseError::InvalidAddress);
+}
+
+#[test]
+fn valid_ssid_and_repeated_path_marker_parse() {
+    let input = b"N0CALL-7>APRS,WIDE1-1*:hello";
+
+    let parsed = parse_packet(input).expect("valid SSID and path marker should parse");
+
+    assert_eq!(parsed.source(), b"N0CALL-7");
+    assert_eq!(parsed.path(), b"APRS,WIDE1-1*");
+}
+
+#[test]
 fn invalid_utf8_payload_preserves_raw_bytes_and_does_not_panic() {
     let input = b"N0CALL>APRS:\xff\xfe\xfd";
 

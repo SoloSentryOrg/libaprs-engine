@@ -11,7 +11,9 @@ minimal packet primitives and a conservative codec boundary:
 - Avoid network, async, serialization, and transport dependencies in v1.
 
 The initial parser intentionally validates only the minimal
-`source>path:payload` shape plus conservative source/path address bytes. It is
+`source>path:payload` shape plus conservative source/path address components:
+uppercase ASCII callsigns of 1-6 letters or digits, optional SSID values from
+0-15, and optional trailing `*` repeated markers on path components only. It is
 not a complete APRS protocol implementation yet.
 
 ## Verification

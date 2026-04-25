@@ -30,8 +30,9 @@ packet is malformed.
   untrusted.
 - Parsed packet fields are borrowed views into preserved raw bytes.
 - Payload bytes are opaque and may be invalid UTF-8.
-- Source and path bytes must use the conservative address byte set accepted by
-  the codec.
+- Source and path bytes must use conservative address components: uppercase
+  ASCII callsigns of 1-6 letters or digits, optional SSID values from 0-15, and
+  optional trailing `*` repeated markers on path components only.
 - Any malformed packet shape is rejected before policy or engine handling.
 
 ## Current Scope

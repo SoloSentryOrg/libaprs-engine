@@ -103,7 +103,7 @@ pub fn parse_packet(input: &[u8]) -> Result<ParsedPacket, ParseError> {
         return Err(ParseError::EmptySegment);
     }
 
-    if !is_ax25_like_address(&input[..source_end]) || !is_ax25_like_path(&input[path_start..path_end]) {
+    if !is_ax25_like_source(&input[..source_end]) || !is_ax25_like_path(&input[path_start..path_end]) {
         return Err(ParseError::InvalidAddress);
     }
 
@@ -120,12 +120,48 @@ pub fn parse_packet(input: &[u8]) -> Result<ParsedPacket, ParseError> {
 
 fn is_ax25_like_path(path: &[u8]) -> bool {
     path.split(|byte| *byte == b',')
-        .all(is_ax25_like_address)
+        .all(|component| is_ax25_like_address(component, true))
 }
 
-fn is_ax25_like_address(address: &[u8]) -> bool {
-    !address.is_empty()
-        && address
+fn is_ax25_like_source(source: &[u8]) -> bool {
+    is_ax25_like_address(source, false)
+}
+
+fn is_ax25_like_address(address: &[u8], allow_repeated_marker: bool) -> bool {
+    let address = if allow_repeated_marker {
+        address.strip_suffix(b"*").unwrap_or(address)
+    } else {
+        address
+    };
+
+    if address.is_empty() || address.contains(&b'*') {
+        return false;
+    }
+
+    let (callsign, ssid) = match address.iter().position(|byte| *byte == b'-') {
+        Some(separator) => (&address[..separator], Some(&address[separator + 1..])),
+        None => (address, None),
+    };
+
+    is_ax25_like_callsign(callsign) && ssid.is_none_or(is_ax25_like_ssid)
+}
+
+fn is_ax25_like_callsign(callsign: &[u8]) -> bool {
+    (1..=6).contains(&callsign.len())
+        && callsign
             .iter()
-            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'*'))
+            .all(|byte| byte.is_ascii_uppercase() || byte.is_ascii_digit())
+}
+
+fn is_ax25_like_ssid(ssid: &[u8]) -> bool {
+    if ssid.is_empty() || ssid.len() > 2 || !ssid.iter().all(u8::is_ascii_digit) {
+        return false;
+    }
+
+    let mut value = 0u8;
+    for digit in ssid {
+        value = value * 10 + (digit - b'0');
+    }
+
+    value <= 15
 }
