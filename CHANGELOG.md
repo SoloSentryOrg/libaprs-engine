@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.2 - 2026-04-25
+
+- Added telemetry metadata semantics for `PARM.`, `UNIT.`, `EQNS.`, and
+  `BITS.` message packets.
+- Added NMEA checksum inspection that reports supplied and calculated checksum
+  values without rejecting preserved packet bytes.
+- Added Mic-E coordinate and speed/course helper decoding when destination and
+  body bytes permit safe interpretation.
+- Added explicit nested packet parsing for third-party traffic.
+- Updated documentation for the expanded APRS semantic scope and `v0.1.2`
+  dependency examples.
+
 ## 0.1.1 - 2026-04-25
 
 - Fixed Rust `1.80.0` clippy compatibility while keeping stable clippy clean.

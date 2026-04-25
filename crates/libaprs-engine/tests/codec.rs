@@ -1,8 +1,9 @@
 use libaprs_engine::{
     parse_packet, parse_packet_with_options, AprsData, Capability, CompressedPosition,
-    DataTypeIdentifier, Item, Maidenhead, Message, MessageKind, MicE, MicEStatus, Nmea, Object,
-    ParseError, ParseOptions, Position, Query, Telemetry, ThirdParty, TimestampedPosition,
-    UserDefined, Weather, WeatherFields, MAX_PACKET_LEN,
+    DataTypeIdentifier, Item, Maidenhead, Message, MessageKind, MicE, MicEStatus, Nmea,
+    NmeaChecksum, Object, ParseError, ParseOptions, Position, Query, Telemetry, TelemetryMetadata,
+    TelemetryMetadataKind, ThirdParty, TimestampedPosition, UserDefined, Weather, WeatherFields,
+    MAX_PACKET_LEN,
 };
 
 #[test]
@@ -389,6 +390,48 @@ fn telemetry_semantics_extract_numeric_values() {
 }
 
 #[test]
+fn telemetry_metadata_packets_are_modeled_by_kind_and_fields() {
+    let parameters =
+        parse_packet(b"N0CALL>APRS::PARM.    :Vbat,Temp,Pressure").expect("PARM should parse");
+    let units = parse_packet(b"N0CALL>APRS::UNIT.    :V,C,hPa").expect("UNIT should parse");
+    let equations = parse_packet(b"N0CALL>APRS::EQNS.    :0,1,0,0,1,0").expect("EQNS should parse");
+    let bits = parse_packet(b"N0CALL>APRS::BITS.    :10101010,Flags").expect("BITS should parse");
+
+    assert_eq!(
+        parameters.aprs_data(),
+        AprsData::TelemetryMetadata(TelemetryMetadata {
+            addressee: b"PARM.    ".as_slice(),
+            kind: TelemetryMetadataKind::ParameterNames,
+            body: b"Vbat,Temp,Pressure".as_slice(),
+        })
+    );
+    assert_eq!(
+        telemetry_metadata_kind(units.aprs_data()),
+        TelemetryMetadataKind::Units
+    );
+    assert_eq!(
+        telemetry_metadata_kind(equations.aprs_data()),
+        TelemetryMetadataKind::Equations
+    );
+    assert_eq!(
+        telemetry_metadata_kind(bits.aprs_data()),
+        TelemetryMetadataKind::BitSense
+    );
+
+    let AprsData::TelemetryMetadata(metadata) = parameters.aprs_data() else {
+        panic!("expected telemetry metadata");
+    };
+    assert_eq!(
+        metadata.fields(),
+        vec![
+            b"Vbat".as_slice(),
+            b"Temp".as_slice(),
+            b"Pressure".as_slice()
+        ]
+    );
+}
+
+#[test]
 fn query_and_capability_semantics_preserve_query_bytes() {
     let query = parse_packet(b"N0CALL>APRS:?APRS?").expect("query should parse");
     let capability =
@@ -458,6 +501,38 @@ fn nmea_mice_maidenhead_user_defined_and_third_party_semantics_parse() {
 }
 
 #[test]
+fn nmea_checksum_validation_reports_expected_and_calculated_values() {
+    let parsed = parse_packet(b"N0CALL>APRS:$GPGLL,4916.45,N,12311.12,W,225444,A,*1D")
+        .expect("NMEA should parse");
+    let AprsData::Nmea(nmea) = parsed.aprs_data() else {
+        panic!("expected NMEA");
+    };
+
+    assert_eq!(
+        nmea.checksum(),
+        Some(NmeaChecksum {
+            expected: 0x1d,
+            calculated: 0x1d,
+            valid: true,
+        })
+    );
+
+    let invalid = parse_packet(b"N0CALL>APRS:$GPGLL,4916.45,N,12311.12,W,225444,A,*00")
+        .expect("NMEA should parse even with invalid checksum");
+    let AprsData::Nmea(nmea) = invalid.aprs_data() else {
+        panic!("expected NMEA");
+    };
+    assert_eq!(
+        nmea.checksum(),
+        Some(NmeaChecksum {
+            expected: 0,
+            calculated: 0x1d,
+            valid: false,
+        })
+    );
+}
+
+#[test]
 fn mic_e_semantics_extract_destination_derived_status_and_latitude_digits() {
     let mic_e = parse_packet(b"N0CALL>ABC123:`abcde").expect("Mic-E should parse");
 
@@ -473,10 +548,58 @@ fn mic_e_semantics_extract_destination_derived_status_and_latitude_digits() {
     );
 }
 
+#[test]
+fn mic_e_semantics_decode_position_speed_and_course_when_available() {
+    let mic_e = parse_packet(b"N0CALL>ABC123:`a\x1d\x1dDEF").expect("Mic-E should parse");
+    let AprsData::MicE(mic_e) = mic_e.aprs_data() else {
+        panic!("expected Mic-E");
+    };
+
+    let coordinates = mic_e
+        .coordinates()
+        .expect("Mic-E coordinates should decode");
+    assert_approx_eq(coordinates.latitude, -1.3538333333);
+    assert_approx_eq(coordinates.longitude, 69.0168333333);
+    assert_eq!(
+        mic_e.speed_course(),
+        Some(libaprs_engine::MicESpeedCourse {
+            speed_knots: 404,
+            course_degrees: 142,
+        })
+    );
+}
+
+#[test]
+fn third_party_semantics_can_parse_nested_packet_explicitly() {
+    let parsed = parse_packet(b"N0CALL>APRS:}SRC>APRS:>nested").expect("third-party should parse");
+    let AprsData::ThirdParty(third_party) = parsed.aprs_data() else {
+        panic!("expected third-party");
+    };
+
+    let nested = third_party
+        .nested_packet()
+        .expect("nested packet should parse explicitly");
+    assert_eq!(nested.source(), b"SRC");
+    assert_eq!(nested.destination(), b"APRS");
+    assert_eq!(
+        nested.aprs_data(),
+        AprsData::Status {
+            text: b"nested".as_slice()
+        }
+    );
+}
+
 fn message_kind(data: AprsData<'_>) -> MessageKind {
     match data {
         AprsData::Message(message) => message.kind,
         other => panic!("expected message, got {other:?}"),
+    }
+}
+
+fn telemetry_metadata_kind(data: AprsData<'_>) -> TelemetryMetadataKind {
+    match data {
+        AprsData::TelemetryMetadata(metadata) => metadata.kind,
+        other => panic!("expected telemetry metadata, got {other:?}"),
     }
 }
 

@@ -11,7 +11,7 @@ telemetry, indexing, and diagnostics.
 
 - Early skeleton with meaningful APRS semantics, tests, examples, benchmark,
   file transport adapter, and CLI inspector.
-- Current tagged release: `v0.1.0`.
+- Current tagged release: `v0.1.2`.
 - Public API is usable, but not yet covered by semantic versioning stability
   guarantees.
 - Core runtime remains network-free and async-free. Optional `serde`
@@ -33,7 +33,7 @@ path dependency.
 
 ```toml
 [dependencies]
-libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.1.0" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.1.2" }
 ```
 
 For local development from a checkout:
@@ -140,6 +140,7 @@ The codec validates a conservative `source>path:payload` shape:
 
 Semantic parsing covers status, position, timestamped position, compressed
 position, messages, bulletins, announcements, acknowledgements, rejects,
-objects, items, weather, telemetry, queries, capabilities, NMEA, Mic-E,
-Maidenhead locator, user-defined data, third-party traffic, malformed data, and
-unsupported data.
+objects, items, weather, telemetry, telemetry metadata, queries, capabilities,
+NMEA checksum inspection, Mic-E coordinates/speed/course when decodable,
+Maidenhead locator, user-defined data, explicit third-party nested parsing,
+malformed data, and unsupported data.

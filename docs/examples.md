@@ -104,6 +104,44 @@ fn main() -> Result<(), libaprs_engine::ParseError> {
 }
 ```
 
+## Read Telemetry Metadata
+
+```rust
+use libaprs_engine::{parse_packet, AprsData};
+
+fn main() -> Result<(), libaprs_engine::ParseError> {
+    let packet = parse_packet(b"N0CALL>APRS::PARM.    :Vbat,Temp,Pressure")?;
+
+    if let AprsData::TelemetryMetadata(metadata) = packet.aprs_data() {
+        println!("kind={:?}", metadata.kind);
+        println!("fields={:?}", metadata.fields());
+    }
+
+    Ok(())
+}
+```
+
+## Inspect NMEA And Third-Party Data
+
+```rust
+use libaprs_engine::{parse_packet, AprsData};
+
+fn main() -> Result<(), libaprs_engine::ParseError> {
+    let nmea = parse_packet(b"N0CALL>APRS:$GPGLL,4916.45,N,12311.12,W,225444,A,*1D")?;
+    if let AprsData::Nmea(sentence) = nmea.aprs_data() {
+        println!("checksum={:?}", sentence.checksum());
+    }
+
+    let third_party = parse_packet(b"N0CALL>APRS:}SRC>APRS:>nested")?;
+    if let AprsData::ThirdParty(wrapper) = third_party.aprs_data() {
+        let nested = wrapper.nested_packet()?;
+        println!("nested={}", nested.aprs_data().kind_name());
+    }
+
+    Ok(())
+}
+```
+
 ## Handle Invalid UTF-8 Payloads
 
 ```rust

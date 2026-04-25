@@ -345,6 +345,8 @@ pub enum AprsData<'a> {
     Weather(Weather<'a>),
     /// Telemetry report.
     Telemetry(Telemetry<'a>),
+    /// Telemetry metadata carried as an APRS message.
+    TelemetryMetadata(TelemetryMetadata<'a>),
     /// Query packet.
     Query(Query<'a>),
     /// Station capabilities packet.
@@ -389,6 +391,7 @@ impl AprsData<'_> {
             Self::Item(_) => "item",
             Self::Weather(_) => "weather",
             Self::Telemetry(_) => "telemetry",
+            Self::TelemetryMetadata(_) => "telemetry_metadata",
             Self::Query(_) => "query",
             Self::Capability(_) => "capability",
             Self::Nmea(_) => "nmea",
@@ -648,6 +651,38 @@ impl Telemetry<'_> {
     }
 }
 
+/// APRS telemetry metadata packet carried in an APRS message.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct TelemetryMetadata<'a> {
+    /// Nine-byte telemetry metadata addressee field.
+    pub addressee: &'a [u8],
+    /// Classified telemetry metadata subtype.
+    pub kind: TelemetryMetadataKind,
+    /// Metadata body bytes after the message separator.
+    pub body: &'a [u8],
+}
+
+impl<'a> TelemetryMetadata<'a> {
+    /// Returns comma-separated metadata fields without lossy conversion.
+    #[must_use]
+    pub fn fields(&self) -> Vec<&'a [u8]> {
+        self.body.split(|byte| *byte == b',').collect()
+    }
+}
+
+/// APRS telemetry metadata subtype.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum TelemetryMetadataKind {
+    /// `PARM.` parameter-name metadata.
+    ParameterNames,
+    /// `UNIT.` unit metadata.
+    Units,
+    /// `EQNS.` calibration/equation metadata.
+    Equations,
+    /// `BITS.` bit-sense/project metadata.
+    BitSense,
+}
+
 /// APRS query packet bytes.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Query<'a> {
@@ -669,6 +704,40 @@ pub struct Nmea<'a> {
     pub sentence: &'a [u8],
 }
 
+impl Nmea<'_> {
+    /// Returns checksum validation details when the sentence has `*HH` syntax.
+    #[must_use]
+    pub fn checksum(&self) -> Option<NmeaChecksum> {
+        let separator = self.sentence.iter().rposition(|byte| *byte == b'*')?;
+        let checksum = self.sentence.get(separator + 1..separator + 3)?;
+        if checksum.len() != 2 || self.sentence.get(separator + 3).is_some() {
+            return None;
+        }
+
+        let expected = parse_hex_byte(checksum)?;
+        let calculated = self.sentence[..separator]
+            .iter()
+            .fold(0u8, |accumulator, byte| accumulator ^ byte);
+
+        Some(NmeaChecksum {
+            expected,
+            calculated,
+            valid: expected == calculated,
+        })
+    }
+}
+
+/// NMEA checksum validation details.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct NmeaChecksum {
+    /// Checksum value supplied by the packet.
+    pub expected: u8,
+    /// Checksum calculated over bytes before `*`.
+    pub calculated: u8,
+    /// Whether supplied and calculated checksums match.
+    pub valid: bool,
+}
+
 /// APRS Mic-E packet bytes.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct MicE<'a> {
@@ -684,11 +753,37 @@ pub struct MicE<'a> {
     pub latitude_digits: Option<[u8; 6]>,
 }
 
+impl MicE<'_> {
+    /// Returns decoded Mic-E coordinates when destination and body bytes permit it.
+    #[must_use]
+    pub fn coordinates(&self) -> Option<Coordinates> {
+        Some(Coordinates {
+            latitude: decode_mic_e_latitude(self.destination)?,
+            longitude: decode_mic_e_longitude(self.destination, self.body)?,
+        })
+    }
+
+    /// Returns decoded Mic-E speed and course when body bytes permit it.
+    #[must_use]
+    pub fn speed_course(&self) -> Option<MicESpeedCourse> {
+        decode_mic_e_speed_course(self.body)
+    }
+}
+
 /// Mic-E destination-derived status bits.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum MicEStatus {
     /// Standard/custom status bit tuple from the first three destination bytes.
     Custom([bool; 3]),
+}
+
+/// Mic-E speed/course extension.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct MicESpeedCourse {
+    /// Speed in knots.
+    pub speed_knots: u16,
+    /// Course in degrees as encoded by Mic-E.
+    pub course_degrees: u16,
 }
 
 /// APRS Maidenhead locator packet bytes.
@@ -716,6 +811,13 @@ pub struct UserDefined<'a> {
 pub struct ThirdParty<'a> {
     /// Encapsulated third-party traffic bytes.
     pub body: &'a [u8],
+}
+
+impl ThirdParty<'_> {
+    /// Explicitly parses the encapsulated packet through the same codec boundary.
+    pub fn nested_packet(&self) -> Result<ParsedPacket, ParseError> {
+        parse_packet(self.body)
+    }
 }
 
 /// APRS data type identifier from the first payload byte.
@@ -1052,6 +1154,14 @@ fn parse_message(information: &[u8]) -> AprsData<'_> {
 
     let addressee = &information[..9];
     let body = &information[10..];
+    if let Some(kind) = classify_telemetry_metadata_kind(addressee) {
+        return AprsData::TelemetryMetadata(TelemetryMetadata {
+            addressee,
+            kind,
+            body,
+        });
+    }
+
     let (text, id) = match body.iter().position(|byte| *byte == b'{') {
         Some(separator) => (&body[..separator], Some(&body[separator + 1..])),
         None => (body, None),
@@ -1116,6 +1226,16 @@ fn parse_user_defined(information: &[u8]) -> AprsData<'_> {
         packet_type: information[1],
         body: &information[2..],
     })
+}
+
+fn classify_telemetry_metadata_kind(addressee: &[u8]) -> Option<TelemetryMetadataKind> {
+    match addressee.get(..5)? {
+        b"PARM." => Some(TelemetryMetadataKind::ParameterNames),
+        b"UNIT." => Some(TelemetryMetadataKind::Units),
+        b"EQNS." => Some(TelemetryMetadataKind::Equations),
+        b"BITS." => Some(TelemetryMetadataKind::BitSense),
+        _ => None,
+    }
 }
 
 fn classify_message_kind(addressee: &[u8], text: &[u8]) -> MessageKind {
@@ -1269,6 +1389,23 @@ fn parse_i16(value: &[u8]) -> Option<i16> {
     i16::try_from(unsigned).ok()?.checked_mul(sign)
 }
 
+fn parse_hex_byte(value: &[u8]) -> Option<u8> {
+    if value.len() != 2 {
+        return None;
+    }
+
+    Some(hex_value(value[0])? * 16 + hex_value(value[1])?)
+}
+
+fn hex_value(value: u8) -> Option<u8> {
+    match value {
+        b'0'..=b'9' => Some(value - b'0'),
+        b'A'..=b'F' => Some(value - b'A' + 10),
+        b'a'..=b'f' => Some(value - b'a' + 10),
+        _ => None,
+    }
+}
+
 fn parse_tagged_u16(report: &[u8], tag: u8, width: usize) -> Option<u16> {
     parse_tagged(report, tag, width).and_then(parse_u16)
 }
@@ -1322,6 +1459,100 @@ fn mic_e_latitude_digit(byte: u8) -> Option<u8> {
         b'A'..=b'J' => Some(byte - b'A'),
         b'P'..=b'Y' => Some(byte - b'P'),
         b'K' | b'L' | b'Z' => Some(0),
+        _ => None,
+    }
+}
+
+fn decode_mic_e_latitude(destination: &[u8]) -> Option<f64> {
+    let digits = decode_mic_e_latitude_digits(destination)?;
+    let degrees = u16::from(digits[0]) * 10 + u16::from(digits[1]);
+    let minutes = u16::from(digits[2]) * 10 + u16::from(digits[3]);
+    let hundredths = u16::from(digits[4]) * 10 + u16::from(digits[5]);
+    if degrees > 90 || minutes > 59 {
+        return None;
+    }
+
+    let sign = if mic_e_north(destination[3])? {
+        1.0
+    } else {
+        -1.0
+    };
+    Some(sign * (f64::from(degrees) + (f64::from(minutes) + f64::from(hundredths) / 100.0) / 60.0))
+}
+
+fn decode_mic_e_longitude(destination: &[u8], body: &[u8]) -> Option<f64> {
+    if destination.len() != 6 || body.len() < 3 {
+        return None;
+    }
+
+    let mut degrees = i16::from(mic_e_body_value(body[0])?);
+    if mic_e_longitude_offset(destination[4])? {
+        degrees += 100;
+    }
+    if (180..=189).contains(&degrees) {
+        degrees -= 80;
+    } else if (190..=199).contains(&degrees) {
+        degrees -= 190;
+    }
+
+    let minutes = mic_e_body_value(body[1])?;
+    let hundredths = mic_e_body_value(body[2])?;
+    if !(0..=179).contains(&degrees) || minutes > 59 || hundredths > 99 {
+        return None;
+    }
+
+    let sign = if mic_e_west(destination[5])? {
+        -1.0
+    } else {
+        1.0
+    };
+    Some(sign * (f64::from(degrees) + (f64::from(minutes) + f64::from(hundredths) / 100.0) / 60.0))
+}
+
+fn decode_mic_e_speed_course(body: &[u8]) -> Option<MicESpeedCourse> {
+    if body.len() < 6 {
+        return None;
+    }
+
+    let speed_tens = u16::from(mic_e_body_value(body[3])?);
+    let speed_units_course_hundreds = u16::from(mic_e_body_value(body[4])?);
+    let course_remainder = u16::from(mic_e_body_value(body[5])?);
+    let mut speed_knots = speed_tens * 10 + speed_units_course_hundreds / 10;
+    if speed_knots >= 800 {
+        speed_knots -= 800;
+    }
+
+    Some(MicESpeedCourse {
+        speed_knots,
+        course_degrees: (speed_units_course_hundreds % 10) * 100 + course_remainder,
+    })
+}
+
+fn mic_e_body_value(byte: u8) -> Option<u8> {
+    let value = byte.checked_sub(28)?;
+    (value <= 99).then_some(value)
+}
+
+fn mic_e_north(byte: u8) -> Option<bool> {
+    match byte {
+        b'0'..=b'9' | b'A'..=b'L' => Some(false),
+        b'P'..=b'Z' => Some(true),
+        _ => None,
+    }
+}
+
+fn mic_e_longitude_offset(byte: u8) -> Option<bool> {
+    match byte {
+        b'0'..=b'9' | b'A'..=b'L' => Some(false),
+        b'P'..=b'Z' => Some(true),
+        _ => None,
+    }
+}
+
+fn mic_e_west(byte: u8) -> Option<bool> {
+    match byte {
+        b'0'..=b'9' | b'A'..=b'L' => Some(false),
+        b'P'..=b'Z' => Some(true),
         _ => None,
     }
 }

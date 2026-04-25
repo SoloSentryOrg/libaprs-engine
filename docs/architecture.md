@@ -55,16 +55,18 @@ The workspace keeps the core parser crate separate from adapters:
 Full APRS Protocol Reference 1.0.1 semantics are in scope. The implementation
 represents these packet families: position, timestamped position, compressed
 position, status, messages, bulletins, announcements, acknowledgements,
-rejects, objects, items, weather, telemetry, queries, capabilities, NMEA,
-Mic-E, Maidenhead locator, user-defined data, and third-party traffic.
+rejects, objects, items, weather, telemetry, telemetry metadata, queries,
+capabilities, NMEA, Mic-E, Maidenhead locator, user-defined data, and
+third-party traffic.
 
 Semantic parsing must remain byte-preserving and fail closed. Unknown,
 unsupported, and malformed data must be represented explicitly rather than
 silently coerced into another type. Typed interpretation currently covers
 decimal coordinates, compressed coordinates, telemetry sequence/value/bit
-fields, common weather fields, and Mic-E destination-derived status and latitude
-digits. Transports, policy rules, and CLI behavior remain separate layers from
-protocol semantics.
+fields, telemetry metadata fields, common weather fields, NMEA checksum
+inspection, Mic-E coordinates/speed/course when decodable, and explicit nested
+third-party parsing. Transports, policy rules, and CLI behavior remain separate
+layers from protocol semantics.
 
 ## Verification And Release
 

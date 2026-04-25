@@ -24,7 +24,8 @@ types may still change before 1.0:
 These APIs may change as APRS semantic coverage matures:
 
 - `AprsData`
-- semantic field structs such as `Position`, `Weather`, `Telemetry`, and `MicE`
+- semantic field structs such as `Position`, `Weather`, `Telemetry`,
+  `TelemetryMetadata`, `Nmea`, `MicE`, and `ThirdParty`
 - typed interpretation helper methods
 - `DataTypeIdentifier`
 

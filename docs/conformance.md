@@ -17,21 +17,20 @@ semantic coverage and known gaps for APRS101 packet families.
 | Object | Supported | Name, liveness, timestamp, body | Body preserved |
 | Item | Supported | Name, liveness, body | Body preserved |
 | Weather | Supported | Common numeric fields | Full weather grammar not exhaustive |
-| Telemetry | Supported | Sequence, analog, digital bits | Calibration/equation packets not yet modeled |
+| Telemetry | Supported | Sequence, analog, digital bits | Report values preserved and numerically decoded when safe |
+| Telemetry metadata | Supported | Parameter names, units, equations, bit sense | `PARM.`, `UNIT.`, `EQNS.`, and `BITS.` message packets |
 | Query | Supported | Query bytes | Query body preserved |
 | Capability | Supported | Body bytes | Capability fields not split |
-| NMEA | Supported | Sentence bytes | NMEA checksum not validated |
-| Mic-E | Partial | Status bits, latitude digits | Full Mic-E position decoding remains future work |
+| NMEA | Supported | Sentence bytes, checksum details | Invalid checksums are reported, not rejected |
+| Mic-E | Supported | Status bits, latitude digits, coordinates, speed/course | Values decode only when destination/body bytes permit it |
 | Maidenhead | Supported | Locator bytes | Locator syntax is minimally framed |
 | User-defined | Supported | User ID, packet type, body | Body preserved |
-| Third-party traffic | Supported | Encapsulated bytes | Nested packet not recursively parsed |
+| Third-party traffic | Supported | Encapsulated bytes, explicit nested parser | Nested parsing is caller-controlled via API |
 | Unknown identifier | Supported | Explicit unsupported variant | Not guessed |
 | Malformed semantic payload | Supported | Explicit malformed variant | Policy rejects by default |
 
 ## Future Conformance Work
 
-- Full Mic-E position, speed, course, and telemetry decoding.
-- Telemetry metadata, calibration, and unit/equation packet modeling.
-- Optional NMEA checksum validation.
 - Broader APRS101 fixture corpus with source references.
-- Recursive third-party packet parsing behind an explicit API.
+- More exhaustive weather grammar coverage.
+- Optional strict policies for semantic checksum failures.

@@ -9,7 +9,7 @@ Use the package name `libaprs-engine` in `Cargo.toml` and the crate name
 
 ```toml
 [dependencies]
-libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.1.0" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.1.2" }
 ```
 
 For a local checkout:
@@ -128,6 +128,7 @@ Current semantic families include:
 - `Item`
 - `Weather`
 - `Telemetry`
+- `TelemetryMetadata`
 - `Query`
 - `Capability`
 - `Nmea`
@@ -137,6 +138,17 @@ Current semantic families include:
 - `ThirdParty`
 - `Malformed`
 - `Unsupported`
+
+Semantic helper methods include:
+
+- `Position::coordinates()` and `CompressedPosition::coordinates()`
+- `Weather::fields()`
+- `Telemetry::sequence_number()`, `Telemetry::analog_values()`, and
+  `Telemetry::digital_bits()`
+- `TelemetryMetadata::fields()`
+- `Nmea::checksum()`
+- `MicE::coordinates()` and `MicE::speed_course()`
+- `ThirdParty::nested_packet()`
 
 ## Engine And Policy
 
@@ -224,7 +236,7 @@ raw bytes as byte arrays rather than assuming UTF-8.
 libaprs-engine = {
   git = "https://github.com/elodiejmirza/libaprs-engine",
   package = "libaprs-engine",
-  tag = "v0.1.0",
+  tag = "v0.1.2",
   features = ["serde"]
 }
 ```
@@ -247,6 +259,6 @@ bytes before handing packets to the core engine.
 
 ```toml
 [dependencies]
-aprs-transport-file = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "aprs-transport-file", tag = "v0.1.0" }
-libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.1.0" }
+aprs-transport-file = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "aprs-transport-file", tag = "v0.1.2" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.1.2" }
 ```
