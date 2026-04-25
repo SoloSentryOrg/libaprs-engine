@@ -9,13 +9,14 @@ telemetry, indexing, and diagnostics.
 
 ## Project Status
 
-- Early skeleton with meaningful APRS semantics, tests, and a CLI inspector.
+- Early skeleton with meaningful APRS semantics, tests, examples, benchmark,
+  file transport adapter, and CLI inspector.
 - Current tagged release: `v0.1.0`.
 - Public API is usable, but not yet covered by semantic versioning stability
   guarantees.
-- No network, async, serialization, or transport dependencies are included.
-- GitHub Actions workflow exists, but remote execution is currently blocked by
-  account or billing policy; rely on local verification until that is resolved.
+- Core runtime remains network-free and async-free. Optional `serde`
+  diagnostics and the separate file transport adapter are available.
+- GitHub Actions workflow is active and checks Rust `1.80.0` plus stable.
 
 ## Workspace Crates
 

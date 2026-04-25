@@ -891,7 +891,7 @@ fn parse_mic_e<'a>(
     })
 }
 
-fn parse_position<'a>(messaging: bool, identifier: u8, information: &'a [u8]) -> AprsData<'a> {
+fn parse_position(messaging: bool, identifier: u8, information: &[u8]) -> AprsData<'_> {
     if is_compressed_position(information) {
         return parse_compressed_position(messaging, identifier, information);
     }
@@ -930,11 +930,7 @@ fn parse_position<'a>(messaging: bool, identifier: u8, information: &'a [u8]) ->
     })
 }
 
-fn parse_timestamped_position<'a>(
-    messaging: bool,
-    identifier: u8,
-    information: &'a [u8],
-) -> AprsData<'a> {
+fn parse_timestamped_position(messaging: bool, identifier: u8, information: &[u8]) -> AprsData<'_> {
     if information.len() < 8 {
         return AprsData::Malformed {
             identifier,
@@ -964,11 +960,7 @@ fn parse_timestamped_position<'a>(
     }
 }
 
-fn parse_compressed_position<'a>(
-    messaging: bool,
-    identifier: u8,
-    information: &'a [u8],
-) -> AprsData<'a> {
+fn parse_compressed_position(messaging: bool, identifier: u8, information: &[u8]) -> AprsData<'_> {
     if information.len() < 13 {
         return AprsData::Malformed {
             identifier,
