@@ -2,8 +2,13 @@
 name = "libaprs-engine"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.80"
 license = "MIT"
 description = "Protocol-first APRS engine core primitives"
+readme = "../../README.md"
+repository = "https://github.com/elodiejmirza/libaprs-engine"
+keywords = ["aprs", "packet", "radio", "parser", "protocol"]
+categories = ["parser-implementations", "encoding"]
 
 [lib]
 name = "libaprs_engine"

@@ -14,7 +14,10 @@ fn valid_packet_preserves_exact_raw_bytes() {
     assert_eq!(parsed.source(), b"N0CALL");
     assert_eq!(parsed.destination(), b"APRS");
     assert_eq!(parsed.digipeaters(), vec![b"TCPIP*".as_slice()]);
-    assert_eq!(parsed.path_components(), vec![b"APRS".as_slice(), b"TCPIP*".as_slice()]);
+    assert_eq!(
+        parsed.path_components(),
+        vec![b"APRS".as_slice(), b"TCPIP*".as_slice()]
+    );
     assert_eq!(parsed.path(), b"APRS,TCPIP*");
     assert_eq!(parsed.payload(), b">hello world");
     assert_eq!(parsed.data_type_identifier(), DataTypeIdentifier::Status);
@@ -55,7 +58,8 @@ fn packet_with_non_ax25_like_source_fails_closed() {
 
 #[test]
 fn packet_with_non_ax25_like_path_fails_closed() {
-    let err = parse_packet(b"N0CALL>APRS,\nTCPIP:hello").expect_err("invalid path must be rejected");
+    let err =
+        parse_packet(b"N0CALL>APRS,\nTCPIP:hello").expect_err("invalid path must be rejected");
 
     assert_eq!(err, ParseError::InvalidAddress);
 }
@@ -83,7 +87,8 @@ fn lowercase_address_metadata_fails_closed() {
 
 #[test]
 fn repeated_marker_inside_address_fails_closed() {
-    let err = parse_packet(b"N0CALL>AP*RS:hello").expect_err("misplaced repeated marker must be rejected");
+    let err = parse_packet(b"N0CALL>AP*RS:hello")
+        .expect_err("misplaced repeated marker must be rejected");
 
     assert_eq!(err, ParseError::InvalidAddress);
 }
@@ -108,7 +113,10 @@ fn invalid_utf8_payload_preserves_raw_bytes_and_does_not_panic() {
 
     assert_eq!(parsed.raw().as_bytes(), input);
     assert_eq!(parsed.payload(), b"!\xff\xfe\xfd");
-    assert_eq!(parsed.data_type_identifier(), DataTypeIdentifier::PositionNoTimestamp);
+    assert_eq!(
+        parsed.data_type_identifier(),
+        DataTypeIdentifier::PositionNoTimestamp
+    );
     assert_eq!(parsed.information(), b"\xff\xfe\xfd");
 }
 
@@ -118,13 +126,17 @@ fn unknown_data_type_identifier_is_preserved_as_byte() {
 
     let parsed = parse_packet(input).expect("unknown data type byte is still structured");
 
-    assert_eq!(parsed.data_type_identifier(), DataTypeIdentifier::Unknown(b'~'));
+    assert_eq!(
+        parsed.data_type_identifier(),
+        DataTypeIdentifier::Unknown(b'~')
+    );
     assert_eq!(parsed.information(), b"opaque");
 }
 
 #[test]
 fn status_semantics_preserve_status_text_bytes() {
-    let parsed = parse_packet(b"N0CALL>APRS:>Running semantic parser").expect("status should parse");
+    let parsed =
+        parse_packet(b"N0CALL>APRS:>Running semantic parser").expect("status should parse");
 
     assert_eq!(
         parsed.aprs_data(),
@@ -136,8 +148,8 @@ fn status_semantics_preserve_status_text_bytes() {
 
 #[test]
 fn uncompressed_position_semantics_parse_coordinates_and_comment() {
-    let parsed =
-        parse_packet(b"N0CALL>APRS:!4903.50N/07201.75W-Test comment").expect("position should parse");
+    let parsed = parse_packet(b"N0CALL>APRS:!4903.50N/07201.75W-Test comment")
+        .expect("position should parse");
 
     assert_eq!(
         parsed.aprs_data(),
@@ -154,8 +166,8 @@ fn uncompressed_position_semantics_parse_coordinates_and_comment() {
 
 #[test]
 fn uncompressed_position_interprets_decimal_coordinates() {
-    let parsed =
-        parse_packet(b"N0CALL>APRS:!4903.50N/07201.75W-Test comment").expect("position should parse");
+    let parsed = parse_packet(b"N0CALL>APRS:!4903.50N/07201.75W-Test comment")
+        .expect("position should parse");
     let AprsData::Position(position) = parsed.aprs_data() else {
         panic!("expected position");
     };
@@ -187,12 +199,16 @@ fn message_semantics_classify_ack_reject_bulletin_and_announcement() {
     let ack = parse_packet(b"N0CALL>APRS::TARGET   :ack42").expect("ack should parse");
     let reject = parse_packet(b"N0CALL>APRS::TARGET   :rej42").expect("reject should parse");
     let bulletin = parse_packet(b"N0CALL>APRS::BLN1     :bulletin").expect("bulletin should parse");
-    let announcement = parse_packet(b"N0CALL>APRS::BLNA     :announcement").expect("announcement should parse");
+    let announcement =
+        parse_packet(b"N0CALL>APRS::BLNA     :announcement").expect("announcement should parse");
 
     assert_eq!(message_kind(ack.aprs_data()), MessageKind::Ack);
     assert_eq!(message_kind(reject.aprs_data()), MessageKind::Reject);
     assert_eq!(message_kind(bulletin.aprs_data()), MessageKind::Bulletin);
-    assert_eq!(message_kind(announcement.aprs_data()), MessageKind::Announcement);
+    assert_eq!(
+        message_kind(announcement.aprs_data()),
+        MessageKind::Announcement
+    );
 }
 
 #[test]
@@ -226,8 +242,7 @@ fn object_semantics_parse_name_liveness_timestamp_and_body() {
 
 #[test]
 fn item_semantics_parse_name_liveness_and_body() {
-    let parsed = parse_packet(b"N0CALL>APRS:)BIKE!4903.50N/07201.75W-")
-        .expect("item should parse");
+    let parsed = parse_packet(b"N0CALL>APRS:)BIKE!4903.50N/07201.75W-").expect("item should parse");
 
     assert_eq!(
         parsed.aprs_data(),
@@ -241,8 +256,8 @@ fn item_semantics_parse_name_liveness_and_body() {
 
 #[test]
 fn timestamped_position_semantics_parse_timestamp_coordinates_and_comment() {
-    let parsed =
-        parse_packet(b"N0CALL>APRS:/092345z4903.50N/07201.75W-Test comment").expect("position should parse");
+    let parsed = parse_packet(b"N0CALL>APRS:/092345z4903.50N/07201.75W-Test comment")
+        .expect("position should parse");
 
     assert_eq!(
         parsed.aprs_data(),
@@ -263,7 +278,8 @@ fn timestamped_position_semantics_parse_timestamp_coordinates_and_comment() {
 
 #[test]
 fn compressed_position_semantics_preserve_compressed_fields() {
-    let parsed = parse_packet(b"N0CALL>APRS:!/5L!!<*e7>7P[comment").expect("compressed position should parse");
+    let parsed = parse_packet(b"N0CALL>APRS:!/5L!!<*e7>7P[comment")
+        .expect("compressed position should parse");
 
     assert_eq!(
         parsed.aprs_data(),
@@ -282,12 +298,15 @@ fn compressed_position_semantics_preserve_compressed_fields() {
 
 #[test]
 fn compressed_position_interprets_decimal_coordinates() {
-    let parsed = parse_packet(b"N0CALL>APRS:!/5L!!<*e7>7P[comment").expect("compressed position should parse");
+    let parsed = parse_packet(b"N0CALL>APRS:!/5L!!<*e7>7P[comment")
+        .expect("compressed position should parse");
     let AprsData::CompressedPosition(position) = parsed.aprs_data() else {
         panic!("expected compressed position");
     };
 
-    let coordinates = position.coordinates().expect("compressed coordinates should decode");
+    let coordinates = position
+        .coordinates()
+        .expect("compressed coordinates should decode");
 
     assert_approx_eq(coordinates.latitude, 49.5);
     assert_approx_eq(coordinates.longitude, -72.75000394);
@@ -371,7 +390,8 @@ fn telemetry_semantics_extract_numeric_values() {
 #[test]
 fn query_and_capability_semantics_preserve_query_bytes() {
     let query = parse_packet(b"N0CALL>APRS:?APRS?").expect("query should parse");
-    let capability = parse_packet(b"N0CALL>APRS:<IGATE,MSG_CNT=1").expect("capability should parse");
+    let capability =
+        parse_packet(b"N0CALL>APRS:<IGATE,MSG_CNT=1").expect("capability should parse");
 
     assert_eq!(
         query.aprs_data(),
@@ -394,7 +414,8 @@ fn nmea_mice_maidenhead_user_defined_and_third_party_semantics_parse() {
     let mic_e = parse_packet(b"N0CALL>APRS:`abcde").expect("Mic-E should parse");
     let maidenhead = parse_packet(b"N0CALL>APRS:[IO91wm]").expect("Maidenhead should parse");
     let user_defined = parse_packet(b"N0CALL>APRS:{Q1payload").expect("user-defined should parse");
-    let third_party = parse_packet(b"N0CALL>APRS:}SRC>APRS:>nested").expect("third-party should parse");
+    let third_party =
+        parse_packet(b"N0CALL>APRS:}SRC>APRS:>nested").expect("third-party should parse");
 
     assert_eq!(
         nmea.aprs_data(),

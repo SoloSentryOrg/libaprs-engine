@@ -17,14 +17,15 @@ packet is malformed.
 - **Codec:** accepts `&[u8]`, validates minimal packet shape and conservative
   source/path address bytes, and returns either a structured packet view or a
   closed error. It does not partially accept malformed packets.
-- **Policy:** will apply operational constraints after codec validation. Policy
-  must not repair malformed codec input.
-- **Engine:** will orchestrate validated packets and policy decisions. It should
-  not parse raw transport bytes directly.
-- **Transports:** will supply bytes from external systems. Transport adapters are
-  untrusted input boundaries and must pass bytes to the codec unchanged.
-- **CLI:** will expose engine behavior to users without weakening parser or
-  policy failure modes.
+- **Policy:** applies operational constraints after codec validation. Policy
+  does not repair malformed codec input.
+- **Engine:** orchestrates codec, semantics, policy decisions, and counters. It
+  does not parse raw transport bytes directly.
+- **Transports:** supply bytes from external systems. Current transport support
+  is line-oriented file/stdin input that passes packet bytes to the codec
+  unchanged.
+- **CLI:** exposes engine behavior for packet inspection with text and JSON
+  diagnostics without weakening parser or policy failure modes.
 
 ## Trust Boundaries
 
@@ -56,3 +57,10 @@ decimal coordinates, compressed coordinates, telemetry sequence/value/bit
 fields, common weather fields, and Mic-E destination-derived status and latitude
 digits. Transports, policy rules, and CLI behavior remain separate layers from
 protocol semantics.
+
+## Verification And Release
+
+The repository includes conformance fixtures, malformed packet fixtures,
+deterministic byte-fuzz tests, CLI tests, release metadata, and a release
+checklist. GitHub Actions can run the same Cargo verification commands when it
+is enabled.

@@ -1,0 +1,14 @@
+[package]
+name = "aprs-cli"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.80"
+license = "MIT"
+description = "Command-line APRS packet inspector"
+readme = "../../README.md"
+repository = "https://github.com/elodiejmirza/libaprs-engine"
+keywords = ["aprs", "cli", "packet", "radio"]
+categories = ["command-line-utilities", "parser-implementations"]
+
+[dependencies]
+libaprs-engine = { path = "../libaprs-engine" }

@@ -3,5 +3,12 @@
 version = 4
 
 [[package]]
+name = "aprs-cli"
+version = "0.1.0"
+dependencies = [
+ "libaprs-engine",
+]
+
+[[package]]
 name = "libaprs-engine"
 version = "0.1.0"

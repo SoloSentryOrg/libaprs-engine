@@ -102,6 +102,205 @@ impl ParsedPacket {
             self.destination(),
         )
     }
+
+    /// Serializes the parsed packet into a compact JSON diagnostic string.
+    #[must_use]
+    pub fn to_json(&self) -> String {
+        format!(
+            "{{\"raw\":\"{}\",\"source\":\"{}\",\"destination\":\"{}\",\"path\":\"{}\",\"payload\":\"{}\",\"data_type\":\"{}\",\"semantic\":\"{}\"}}",
+            escape_json_bytes(self.raw().as_bytes()),
+            escape_json_bytes(self.source()),
+            escape_json_bytes(self.destination()),
+            escape_json_bytes(self.path()),
+            escape_json_bytes(self.payload()),
+            self.data_type_identifier().name(),
+            self.aprs_data().kind_name(),
+        )
+    }
+}
+
+/// Parser and policy orchestration engine.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Engine {
+    policy: Policy,
+    counters: Counters,
+}
+
+impl Engine {
+    /// Creates an engine with the provided policy.
+    #[must_use]
+    pub fn new(policy: Policy) -> Self {
+        Self {
+            policy,
+            counters: Counters::default(),
+        }
+    }
+
+    /// Processes one packet through codec, semantics, and policy.
+    pub fn process(&mut self, input: &[u8]) -> EngineResult {
+        match parse_packet(input) {
+            Ok(packet) => {
+                let semantic = packet.aprs_data();
+                match self.policy.evaluate(&packet, &semantic) {
+                    PolicyDecision::Accept => {
+                        self.counters.accepted += 1;
+                        EngineResult::Accepted { packet }
+                    }
+                    PolicyDecision::Reject(reason) => {
+                        self.counters.rejected += 1;
+                        EngineResult::Rejected { packet, reason }
+                    }
+                }
+            }
+            Err(error) => {
+                self.counters.malformed += 1;
+                EngineResult::ParseError(error)
+            }
+        }
+    }
+
+    /// Returns engine counters.
+    #[must_use]
+    pub fn counters(&self) -> Counters {
+        self.counters
+    }
+}
+
+impl Default for Engine {
+    fn default() -> Self {
+        Self::new(Policy::default())
+    }
+}
+
+/// Line-oriented packet source for file/stdin style transports.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct LineTransport<'a> {
+    input: &'a [u8],
+}
+
+impl<'a> LineTransport<'a> {
+    /// Creates a transport over newline-separated packet bytes.
+    #[must_use]
+    pub fn new(input: &'a [u8]) -> Self {
+        Self { input }
+    }
+
+    /// Iterates packet lines without trailing CR/LF bytes.
+    #[must_use]
+    pub fn packets(&self) -> Vec<&'a [u8]> {
+        self.input
+            .split(|byte| *byte == b'\n')
+            .map(trim_trailing_carriage_return)
+            .filter(|line| !line.is_empty())
+            .collect()
+    }
+}
+
+/// Engine processing result.
+#[derive(Clone, Debug, PartialEq)]
+pub enum EngineResult {
+    /// Packet parsed and passed policy.
+    Accepted {
+        /// Parsed packet.
+        packet: ParsedPacket,
+    },
+    /// Packet parsed but failed policy.
+    Rejected {
+        /// Parsed packet.
+        packet: ParsedPacket,
+        /// Rejection reason.
+        reason: PolicyRejection,
+    },
+    /// Packet failed the codec boundary.
+    ParseError(ParseError),
+}
+
+/// Runtime counters.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub struct Counters {
+    /// Accepted packet count.
+    pub accepted: u64,
+    /// Policy-rejected packet count.
+    pub rejected: u64,
+    /// Codec-malformed packet count.
+    pub malformed: u64,
+}
+
+/// Policy options applied after parsing.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Policy {
+    /// Allow semantic packets represented as unsupported.
+    pub allow_unsupported: bool,
+    /// Allow semantic packets represented as malformed.
+    pub allow_malformed_semantics: bool,
+    /// Maximum allowed path component count including destination.
+    pub max_path_components: usize,
+}
+
+impl Policy {
+    /// Strict policy: reject malformed semantics, unsupported formats, and long paths.
+    #[must_use]
+    pub fn strict() -> Self {
+        Self::default()
+    }
+
+    /// Permissive policy: accept unsupported and malformed semantic packets.
+    #[must_use]
+    pub fn permissive() -> Self {
+        Self {
+            allow_unsupported: true,
+            allow_malformed_semantics: true,
+            max_path_components: 9,
+        }
+    }
+
+    /// Evaluates a parsed packet and semantic view.
+    #[must_use]
+    pub fn evaluate(&self, packet: &ParsedPacket, semantic: &AprsData<'_>) -> PolicyDecision {
+        if packet.path_components.len() > self.max_path_components {
+            return PolicyDecision::Reject(PolicyRejection::PathTooLong);
+        }
+
+        match semantic {
+            AprsData::Malformed { .. } if !self.allow_malformed_semantics => {
+                PolicyDecision::Reject(PolicyRejection::MalformedSemantics)
+            }
+            AprsData::Unsupported { .. } if !self.allow_unsupported => {
+                PolicyDecision::Reject(PolicyRejection::UnsupportedSemantics)
+            }
+            _ => PolicyDecision::Accept,
+        }
+    }
+}
+
+impl Default for Policy {
+    fn default() -> Self {
+        Self {
+            allow_unsupported: false,
+            allow_malformed_semantics: false,
+            max_path_components: 9,
+        }
+    }
+}
+
+/// Policy decision.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum PolicyDecision {
+    /// Packet is accepted.
+    Accept,
+    /// Packet is rejected with a reason.
+    Reject(PolicyRejection),
+}
+
+/// Policy rejection reason.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum PolicyRejection {
+    /// Path contains too many components.
+    PathTooLong,
+    /// Semantic payload is malformed.
+    MalformedSemantics,
+    /// Semantic payload is unsupported.
+    UnsupportedSemantics,
 }
 
 /// Semantic APRS information-field data.
@@ -156,6 +355,33 @@ pub enum AprsData<'a> {
         /// Remaining information-field bytes.
         information: &'a [u8],
     },
+}
+
+impl AprsData<'_> {
+    /// Returns a stable semantic kind name for diagnostics.
+    #[must_use]
+    pub fn kind_name(&self) -> &'static str {
+        match self {
+            Self::Status { .. } => "status",
+            Self::Position(_) => "position",
+            Self::TimestampedPosition(_) => "timestamped_position",
+            Self::CompressedPosition(_) => "compressed_position",
+            Self::Message(_) => "message",
+            Self::Object(_) => "object",
+            Self::Item(_) => "item",
+            Self::Weather(_) => "weather",
+            Self::Telemetry(_) => "telemetry",
+            Self::Query(_) => "query",
+            Self::Capability(_) => "capability",
+            Self::Nmea(_) => "nmea",
+            Self::MicE(_) => "mic_e",
+            Self::Maidenhead(_) => "maidenhead",
+            Self::UserDefined(_) => "user_defined",
+            Self::ThirdParty(_) => "third_party",
+            Self::Unsupported { .. } => "unsupported",
+            Self::Malformed { .. } => "malformed",
+        }
+    }
 }
 
 /// Uncompressed APRS position fields.
@@ -305,7 +531,10 @@ impl Weather<'_> {
     #[must_use]
     pub fn fields(&self) -> WeatherFields<'_> {
         WeatherFields {
-            timestamp: self.report.get(..6).filter(|value| value.iter().all(u8::is_ascii_digit)),
+            timestamp: self
+                .report
+                .get(..6)
+                .filter(|value| value.iter().all(u8::is_ascii_digit)),
             wind_direction_degrees: parse_tagged_u16(self.report, b'c', 3),
             wind_speed_mph: parse_tagged_u16(self.report, b's', 3),
             wind_gust_mph: parse_tagged_u16(self.report, b'g', 3),
@@ -562,6 +791,32 @@ impl DataTypeIdentifier {
             Self::Unknown(value) => value,
         }
     }
+
+    /// Returns a stable data type identifier name for diagnostics.
+    #[must_use]
+    pub fn name(self) -> &'static str {
+        match self {
+            Self::PositionNoTimestamp => "position_no_timestamp",
+            Self::PositionNoTimestampMessaging => "position_no_timestamp_messaging",
+            Self::PositionWithTimestamp => "position_with_timestamp",
+            Self::PositionWithTimestampMessaging => "position_with_timestamp_messaging",
+            Self::Status => "status",
+            Self::Query => "query",
+            Self::Capability => "capability",
+            Self::Message => "message",
+            Self::Object => "object",
+            Self::Item => "item",
+            Self::Weather => "weather",
+            Self::Telemetry => "telemetry",
+            Self::Nmea => "nmea",
+            Self::MicECurrent => "mic_e_current",
+            Self::MicEOld => "mic_e_old",
+            Self::Maidenhead => "maidenhead",
+            Self::UserDefined => "user_defined",
+            Self::ThirdParty => "third_party",
+            Self::Unknown(_) => "unknown",
+        }
+    }
 }
 
 fn parse_aprs_data<'a>(
@@ -573,19 +828,27 @@ fn parse_aprs_data<'a>(
         DataTypeIdentifier::Status => AprsData::Status { text: information },
         DataTypeIdentifier::PositionNoTimestamp => parse_position(false, b'!', information),
         DataTypeIdentifier::PositionNoTimestampMessaging => parse_position(true, b'=', information),
-        DataTypeIdentifier::PositionWithTimestamp => parse_timestamped_position(false, b'/', information),
+        DataTypeIdentifier::PositionWithTimestamp => {
+            parse_timestamped_position(false, b'/', information)
+        }
         DataTypeIdentifier::PositionWithTimestampMessaging => {
             parse_timestamped_position(true, b'@', information)
         }
         DataTypeIdentifier::Message => parse_message(information),
         DataTypeIdentifier::Object => parse_object(information),
         DataTypeIdentifier::Item => parse_item(information),
-        DataTypeIdentifier::Weather => AprsData::Weather(Weather { report: information }),
+        DataTypeIdentifier::Weather => AprsData::Weather(Weather {
+            report: information,
+        }),
         DataTypeIdentifier::Telemetry => parse_telemetry(information),
         DataTypeIdentifier::Query => AprsData::Query(Query { query: information }),
         DataTypeIdentifier::Capability => AprsData::Capability(Capability { body: information }),
-        DataTypeIdentifier::Nmea => AprsData::Nmea(Nmea { sentence: information }),
-        DataTypeIdentifier::MicECurrent | DataTypeIdentifier::MicEOld => parse_mic_e(identifier, information, destination),
+        DataTypeIdentifier::Nmea => AprsData::Nmea(Nmea {
+            sentence: information,
+        }),
+        DataTypeIdentifier::MicECurrent | DataTypeIdentifier::MicEOld => {
+            parse_mic_e(identifier, information, destination)
+        }
         DataTypeIdentifier::Maidenhead => parse_maidenhead(information),
         DataTypeIdentifier::UserDefined => parse_user_defined(information),
         DataTypeIdentifier::ThirdParty => AprsData::ThirdParty(ThirdParty { body: information }),
@@ -745,7 +1008,10 @@ fn parse_object(information: &[u8]) -> AprsData<'_> {
 }
 
 fn parse_item(information: &[u8]) -> AprsData<'_> {
-    let Some(separator) = information.iter().position(|byte| matches!(*byte, b'!' | b'_')) else {
+    let Some(separator) = information
+        .iter()
+        .position(|byte| matches!(*byte, b'!' | b'_'))
+    else {
         return AprsData::Malformed {
             identifier: b')',
             information,
@@ -849,7 +1115,8 @@ fn classify_message_kind(addressee: &[u8], text: &[u8]) -> MessageKind {
         MessageKind::Reject
     } else if addressee.starts_with(b"BLN") && addressee.get(3).is_some_and(u8::is_ascii_digit) {
         MessageKind::Bulletin
-    } else if addressee.starts_with(b"BLN") && addressee.get(3).is_some_and(u8::is_ascii_uppercase) {
+    } else if addressee.starts_with(b"BLN") && addressee.get(3).is_some_and(u8::is_ascii_uppercase)
+    {
         MessageKind::Announcement
     } else {
         MessageKind::Message
@@ -1049,6 +1316,38 @@ fn mic_e_latitude_digit(byte: u8) -> Option<u8> {
     }
 }
 
+fn escape_json_bytes(bytes: &[u8]) -> String {
+    let mut escaped = String::new();
+    for byte in bytes {
+        match byte {
+            b'"' => escaped.push_str("\\\""),
+            b'\\' => escaped.push_str("\\\\"),
+            b'\n' => escaped.push_str("\\n"),
+            b'\r' => escaped.push_str("\\r"),
+            b'\t' => escaped.push_str("\\t"),
+            0x20..=0x7e => escaped.push(char::from(*byte)),
+            _ => {
+                escaped.push_str("\\u00");
+                escaped.push(hex_digit(byte >> 4));
+                escaped.push(hex_digit(byte & 0x0f));
+            }
+        }
+    }
+    escaped
+}
+
+fn hex_digit(value: u8) -> char {
+    match value {
+        0..=9 => char::from(b'0' + value),
+        10..=15 => char::from(b'a' + value - 10),
+        _ => '0',
+    }
+}
+
+fn trim_trailing_carriage_return(line: &[u8]) -> &[u8] {
+    line.strip_suffix(b"\r").unwrap_or(line)
+}
+
 /// Fail-closed packet parse errors.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ParseError {
@@ -1120,7 +1419,11 @@ pub fn parse_packet(input: &[u8]) -> Result<ParsedPacket, ParseError> {
     })
 }
 
-fn path_component_ranges(input: &[u8], path_start: usize, path_end: usize) -> Option<Vec<(usize, usize)>> {
+fn path_component_ranges(
+    input: &[u8],
+    path_start: usize,
+    path_end: usize,
+) -> Option<Vec<(usize, usize)>> {
     let mut components = Vec::new();
     let mut component_start = path_start;
 
@@ -1167,7 +1470,7 @@ fn is_ax25_like_address(address: &[u8], allow_repeated_marker: bool) -> bool {
         None => (address, None),
     };
 
-    is_ax25_like_callsign(callsign) && ssid.is_none_or(is_ax25_like_ssid)
+    is_ax25_like_callsign(callsign) && ssid.map_or(true, is_ax25_like_ssid)
 }
 
 fn is_ax25_like_callsign(callsign: &[u8]) -> bool {

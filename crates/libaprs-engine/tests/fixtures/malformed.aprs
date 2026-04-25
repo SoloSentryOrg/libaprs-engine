@@ -1,0 +1,7 @@
+
+N0CALL APRS missing separators
+N0 CALL>APRS:bad source
+N0CALL>APRS,
+TOOLONG>APRS:bad source
+N0CALL-16>APRS:bad ssid
+N0CALL>AP*RS:bad marker

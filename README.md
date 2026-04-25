@@ -19,7 +19,10 @@ primitives, semantic classification, and a conservative codec boundary:
 - Interpret typed values for coordinates, compressed coordinates, telemetry
   values and bits, common weather fields, and Mic-E destination-derived status
   and latitude digits when the raw bytes are valid.
-- Avoid network, async, serialization, and transport dependencies in v1.
+- Provide conformance fixtures, parser resilience tests, policy decisions,
+  engine orchestration, line-oriented transports, JSON diagnostics, CLI
+  inspection, counters, and release metadata.
+- Avoid network and async dependencies in v1.
 
 The parser validates the minimal
 `source>path:payload` shape plus conservative source/path address components:
@@ -39,6 +42,14 @@ byte-preserving semantic variants while preserving these invariants:
 - Unsupported, unknown, and malformed APRS data formats remain explicitly
   represented instead of being guessed.
 - Dependencies stay minimal unless a protocol feature clearly justifies one.
+
+## CLI
+
+Inspect packets from stdin:
+
+```sh
+cargo run -p aprs-cli -- --json < packets.aprs
+```
 
 ## Verification
 
