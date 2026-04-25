@@ -29,8 +29,8 @@ jobs:
       - name: Select Rust
         run: rustup default ${{ matrix.toolchain }}
 
-      - name: Install clippy
-        run: rustup component add clippy
+      - name: Install components
+        run: rustup component add clippy rustfmt
 
       - name: Format
         run: cargo fmt --all --check
