@@ -3,7 +3,7 @@ use std::fs;
 use std::io::{self, Read};
 use std::process::ExitCode;
 
-use libaprs_engine::{Engine, EngineResult, Policy};
+use libaprs_engine::{Engine, EngineResult, LineTransport, Policy};
 
 fn main() -> ExitCode {
     match run() {
@@ -26,12 +26,8 @@ fn run() -> Result<ExitCode, String> {
     let mut engine = Engine::new(Policy::default());
     let mut rejected = false;
 
-    for line in input.lines() {
-        if line.is_empty() {
-            continue;
-        }
-
-        match engine.process(line.as_bytes()) {
+    for line in LineTransport::new(&input).packets() {
+        match engine.process(line) {
             EngineResult::Accepted { packet } if json => println!("{}", packet.to_json()),
             EngineResult::Accepted { packet } => println!(
                 "accepted source={} destination={} semantic={}",
@@ -63,15 +59,13 @@ fn run() -> Result<ExitCode, String> {
     })
 }
 
-fn read_input(path: Option<&str>) -> Result<String, String> {
+fn read_input(path: Option<&str>) -> Result<Vec<u8>, String> {
     match path {
-        Some(path) => {
-            fs::read_to_string(path).map_err(|err| format!("failed to read {path}: {err}"))
-        }
+        Some(path) => fs::read(path).map_err(|err| format!("failed to read {path}: {err}")),
         None => {
-            let mut input = String::new();
+            let mut input = Vec::new();
             io::stdin()
-                .read_to_string(&mut input)
+                .read_to_end(&mut input)
                 .map_err(|err| format!("failed to read stdin: {err}"))?;
             Ok(input)
         }

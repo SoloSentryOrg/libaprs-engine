@@ -1,3 +1,5 @@
+#![forbid(unsafe_code)]
+
 //! Protocol-first APRS engine core primitives.
 //!
 //! The codec boundary accepts untrusted bytes, preserves them exactly, and
@@ -143,17 +145,17 @@ impl Engine {
                 let semantic = packet.aprs_data();
                 match self.policy.evaluate(&packet, &semantic) {
                     PolicyDecision::Accept => {
-                        self.counters.accepted += 1;
+                        self.counters.accepted = self.counters.accepted.saturating_add(1);
                         EngineResult::Accepted { packet }
                     }
                     PolicyDecision::Reject(reason) => {
-                        self.counters.rejected += 1;
+                        self.counters.rejected = self.counters.rejected.saturating_add(1);
                         EngineResult::Rejected { packet, reason }
                     }
                 }
             }
             Err(error) => {
-                self.counters.malformed += 1;
+                self.counters.malformed = self.counters.malformed.saturating_add(1);
                 EngineResult::ParseError(error)
             }
         }
