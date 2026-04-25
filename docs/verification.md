@@ -8,6 +8,9 @@ Run local verification before using a new revision or submitting a change.
 cargo test
 cargo metadata --no-deps --format-version 1
 cargo clippy --all-targets --all-features -- -D warnings
+cargo test --all-features
+cargo test --examples
+cargo bench -p libaprs-engine
 ```
 
 ## What The Checks Cover
@@ -20,6 +23,9 @@ cargo clippy --all-targets --all-features -- -D warnings
 - Engine and policy tests for accepted, rejected, and malformed counters.
 - Clippy with warnings denied.
 - Cargo metadata validation for workspace consumers.
+- Buildable examples that downstream developers can copy.
+- Optional feature coverage, including serde diagnostics.
+- A simple parser throughput benchmark.
 
 ## Current Remote CI Status
 
@@ -30,5 +36,15 @@ verification commands above as the authoritative gate.
 
 ## Compatibility
 
-The workspace declares `rust-version = "1.80"` for both crates. Verify with a
-toolchain at or above that version.
+The workspace crates declare `rust-version = "1.80"`. Verify with a toolchain
+at or above that version.
+
+## Dependency Scanning
+
+The default core path remains dependency-light. When dependency use grows, add a
+release gate for one of these tools:
+
+```sh
+cargo audit
+cargo deny check
+```

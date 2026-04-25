@@ -5,8 +5,45 @@
 //! The codec boundary accepts untrusted bytes, preserves them exactly, and
 //! fails closed when the packet shape is malformed.
 
+mod diagnostic;
+mod transport;
+
+#[cfg(feature = "serde")]
+pub mod serde_support;
+
+pub use transport::LineTransport;
+
 /// Conservative upper bound for an APRS packet handled by this skeleton.
 pub const MAX_PACKET_LEN: usize = 512;
+
+/// Default parse options used by [`parse_packet`].
+pub const DEFAULT_PARSE_OPTIONS: ParseOptions = ParseOptions {
+    max_packet_len: MAX_PACKET_LEN,
+};
+
+/// Codec configuration for consumers that need a different envelope limit.
+///
+/// The parser remains fail-closed regardless of this setting. This value only
+/// changes the maximum accepted packet length.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ParseOptions {
+    /// Maximum accepted packet length in bytes.
+    pub max_packet_len: usize,
+}
+
+impl ParseOptions {
+    /// Creates parse options with a custom maximum packet length.
+    #[must_use]
+    pub const fn new(max_packet_len: usize) -> Self {
+        Self { max_packet_len }
+    }
+}
+
+impl Default for ParseOptions {
+    fn default() -> Self {
+        DEFAULT_PARSE_OPTIONS
+    }
+}
 
 /// Original packet bytes retained without normalization or lossy conversion.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -108,16 +145,7 @@ impl ParsedPacket {
     /// Serializes the parsed packet into a compact JSON diagnostic string.
     #[must_use]
     pub fn to_json(&self) -> String {
-        format!(
-            "{{\"raw\":\"{}\",\"source\":\"{}\",\"destination\":\"{}\",\"path\":\"{}\",\"payload\":\"{}\",\"data_type\":\"{}\",\"semantic\":\"{}\"}}",
-            escape_json_bytes(self.raw().as_bytes()),
-            escape_json_bytes(self.source()),
-            escape_json_bytes(self.destination()),
-            escape_json_bytes(self.path()),
-            escape_json_bytes(self.payload()),
-            self.data_type_identifier().name(),
-            self.aprs_data().kind_name(),
-        )
+        diagnostic::packet_to_json(self)
     }
 }
 
@@ -171,30 +199,6 @@ impl Engine {
 impl Default for Engine {
     fn default() -> Self {
         Self::new(Policy::default())
-    }
-}
-
-/// Line-oriented packet source for file/stdin style transports.
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct LineTransport<'a> {
-    input: &'a [u8],
-}
-
-impl<'a> LineTransport<'a> {
-    /// Creates a transport over newline-separated packet bytes.
-    #[must_use]
-    pub fn new(input: &'a [u8]) -> Self {
-        Self { input }
-    }
-
-    /// Iterates packet lines without trailing CR/LF bytes.
-    #[must_use]
-    pub fn packets(&self) -> Vec<&'a [u8]> {
-        self.input
-            .split(|byte| *byte == b'\n')
-            .map(trim_trailing_carriage_return)
-            .filter(|line| !line.is_empty())
-            .collect()
     }
 }
 
@@ -303,6 +307,18 @@ pub enum PolicyRejection {
     MalformedSemantics,
     /// Semantic payload is unsupported.
     UnsupportedSemantics,
+}
+
+impl PolicyRejection {
+    /// Returns a stable policy rejection code for logs and external systems.
+    #[must_use]
+    pub fn code(self) -> &'static str {
+        match self {
+            Self::PathTooLong => "policy.path_too_long",
+            Self::MalformedSemantics => "policy.malformed_semantics",
+            Self::UnsupportedSemantics => "policy.unsupported_semantics",
+        }
+    }
 }
 
 /// Semantic APRS information-field data.
@@ -1318,38 +1334,6 @@ fn mic_e_latitude_digit(byte: u8) -> Option<u8> {
     }
 }
 
-fn escape_json_bytes(bytes: &[u8]) -> String {
-    let mut escaped = String::new();
-    for byte in bytes {
-        match byte {
-            b'"' => escaped.push_str("\\\""),
-            b'\\' => escaped.push_str("\\\\"),
-            b'\n' => escaped.push_str("\\n"),
-            b'\r' => escaped.push_str("\\r"),
-            b'\t' => escaped.push_str("\\t"),
-            0x20..=0x7e => escaped.push(char::from(*byte)),
-            _ => {
-                escaped.push_str("\\u00");
-                escaped.push(hex_digit(byte >> 4));
-                escaped.push(hex_digit(byte & 0x0f));
-            }
-        }
-    }
-    escaped
-}
-
-fn hex_digit(value: u8) -> char {
-    match value {
-        0..=9 => char::from(b'0' + value),
-        10..=15 => char::from(b'a' + value - 10),
-        _ => '0',
-    }
-}
-
-fn trim_trailing_carriage_return(line: &[u8]) -> &[u8] {
-    line.strip_suffix(b"\r").unwrap_or(line)
-}
-
 /// Fail-closed packet parse errors.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ParseError {
@@ -1365,17 +1349,39 @@ pub enum ParseError {
     InvalidAddress,
 }
 
+impl ParseError {
+    /// Returns a stable parse error code for logs and external systems.
+    #[must_use]
+    pub fn code(&self) -> &'static str {
+        match self {
+            Self::Empty => "parse.empty",
+            Self::Oversized => "parse.oversized",
+            Self::MissingSeparator => "parse.missing_separator",
+            Self::EmptySegment => "parse.empty_segment",
+            Self::InvalidAddress => "parse.invalid_address",
+        }
+    }
+}
+
 /// Parses an APRS packet from untrusted bytes.
 ///
 /// This parser intentionally validates only the minimal frame shape for the
 /// skeleton: `source>path:payload`. Payload bytes are opaque and may be invalid
 /// UTF-8.
 pub fn parse_packet(input: &[u8]) -> Result<ParsedPacket, ParseError> {
+    parse_packet_with_options(input, ParseOptions::default())
+}
+
+/// Parses an APRS packet from untrusted bytes with explicit codec options.
+pub fn parse_packet_with_options(
+    input: &[u8],
+    options: ParseOptions,
+) -> Result<ParsedPacket, ParseError> {
     if input.is_empty() {
         return Err(ParseError::Empty);
     }
 
-    if input.len() > MAX_PACKET_LEN {
+    if input.len() > options.max_packet_len {
         return Err(ParseError::Oversized);
     }
 

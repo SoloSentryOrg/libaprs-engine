@@ -1,3 +1,7 @@
 [workspace]
-members = ["crates/libaprs-engine", "crates/aprs-cli"]
+members = [
+    "crates/libaprs-engine",
+    "crates/aprs-cli",
+    "crates/aprs-transport-file",
+]
 resolver = "2"

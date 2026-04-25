@@ -81,9 +81,10 @@ ingestion unless they have a clear review path for unsupported data.
 
 ## Dependency Policy
 
-The current library crate uses the Rust standard library only. Add dependencies
-only when they reduce security or correctness risk more than they increase
-supply-chain and maintenance risk.
+The default library path has no third-party runtime dependency. Optional
+features may add dependencies only when they are explicitly enabled. The current
+optional `serde` feature provides owned diagnostic structures and is disabled by
+default.
 
 ## Operational Recommendations
 
@@ -94,3 +95,5 @@ supply-chain and maintenance risk.
 - Treat `to_json()` as diagnostics; define your own stable schema for external
   APIs.
 - Run tests and clippy before accepting parser or policy changes.
+- Run `cargo audit` or `cargo deny` once dependency use expands beyond the
+  optional serialization feature.

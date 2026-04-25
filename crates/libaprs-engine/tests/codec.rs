@@ -1,7 +1,8 @@
 use libaprs_engine::{
-    parse_packet, AprsData, Capability, CompressedPosition, DataTypeIdentifier, Item, Maidenhead,
-    Message, MessageKind, MicE, MicEStatus, Nmea, Object, ParseError, Position, Query, Telemetry,
-    ThirdParty, TimestampedPosition, UserDefined, Weather, WeatherFields, MAX_PACKET_LEN,
+    parse_packet, parse_packet_with_options, AprsData, Capability, CompressedPosition,
+    DataTypeIdentifier, Item, Maidenhead, Message, MessageKind, MicE, MicEStatus, Nmea, Object,
+    ParseError, ParseOptions, Position, Query, Telemetry, ThirdParty, TimestampedPosition,
+    UserDefined, Weather, WeatherFields, MAX_PACKET_LEN,
 };
 
 #[test]
@@ -493,4 +494,14 @@ fn oversized_packet_is_rejected() {
     let err = parse_packet(&input).expect_err("oversized packets must be rejected");
 
     assert_eq!(err, ParseError::Oversized);
+}
+
+#[test]
+fn custom_parse_options_can_tighten_packet_size_limit() {
+    let input = b"N0CALL>APRS:>ok";
+    let err = parse_packet_with_options(input, ParseOptions::new(input.len() - 1))
+        .expect_err("custom max length should reject packet");
+
+    assert_eq!(err, ParseError::Oversized);
+    assert_eq!(err.code(), "parse.oversized");
 }

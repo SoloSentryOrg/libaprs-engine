@@ -48,6 +48,22 @@ fn main() -> std::io::Result<()> {
 }
 ```
 
+## Use The File Transport Crate
+
+```rust
+use aprs_transport_file::read_packet_lines_from_path;
+use libaprs_engine::parse_packet;
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    for packet_bytes in read_packet_lines_from_path("packets.aprs")? {
+        let packet = parse_packet(&packet_bytes)?;
+        println!("{}", packet.aprs_data().kind_name());
+    }
+
+    Ok(())
+}
+```
+
 ## Extract Position Coordinates
 
 ```rust

@@ -21,6 +21,8 @@ telemetry, indexing, and diagnostics.
 - `libaprs-engine`: library crate with packet types, parser, semantic views,
   policy, engine orchestration, counters, JSON diagnostics, and line transport.
 - `aprs-cli`: command-line packet inspector built on the library crate.
+- `aprs-transport-file`: optional file transport helper crate that reads packet
+  files as bytes and returns newline-separated packet byte vectors.
 
 ## Install Or Depend On It
 
@@ -104,6 +106,8 @@ See [Security Model](docs/security.md) for details.
 - [Architecture](docs/architecture.md): boundaries, contracts, and pipeline.
 - [Security Model](docs/security.md): untrusted input handling and OWASP-aligned
   controls.
+- [Stability](docs/stability.md): API stability levels and feature flags.
+- [Conformance Matrix](docs/conformance.md): APRS family support and known gaps.
 - [Verification](docs/verification.md): local checks and release gates.
 - [Release Checklist](docs/release.md): pre-release steps.
 

@@ -50,6 +50,19 @@ fn permissive_policy_accepts_unsupported_semantics() {
 }
 
 #[test]
+fn policy_rejections_have_stable_codes() {
+    assert_eq!(PolicyRejection::PathTooLong.code(), "policy.path_too_long");
+    assert_eq!(
+        PolicyRejection::MalformedSemantics.code(),
+        "policy.malformed_semantics"
+    );
+    assert_eq!(
+        PolicyRejection::UnsupportedSemantics.code(),
+        "policy.unsupported_semantics"
+    );
+}
+
+#[test]
 fn json_diagnostic_escapes_raw_bytes_and_identifies_semantics() {
     let packet =
         libaprs_engine::parse_packet(b"N0CALL>APRS:>hello \"json\"").expect("packet should parse");

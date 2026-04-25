@@ -10,6 +10,19 @@ repository = "https://github.com/elodiejmirza/libaprs-engine"
 keywords = ["aprs", "packet", "radio", "parser", "protocol"]
 categories = ["parser-implementations", "encoding"]
 
+[features]
+default = ["std"]
+std = ["alloc"]
+alloc = []
+serde = ["dep:serde"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"], optional = true }
+
 [lib]
 name = "libaprs_engine"
 path = "src/lib.rs"
+
+[[bench]]
+name = "parser_throughput"
+harness = false

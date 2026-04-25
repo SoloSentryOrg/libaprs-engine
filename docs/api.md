@@ -45,6 +45,20 @@ fn main() -> Result<(), libaprs_engine::ParseError> {
 }
 ```
 
+Use `parse_packet_with_options` when a consumer needs a stricter packet length
+limit than the default `MAX_PACKET_LEN`.
+
+```rust
+use libaprs_engine::{ParseOptions, parse_packet_with_options};
+
+fn main() -> Result<(), libaprs_engine::ParseError> {
+    let options = ParseOptions::new(80);
+    let packet = parse_packet_with_options(b"N0CALL>APRS:>short", options)?;
+    println!("{}", packet.aprs_data().kind_name());
+    Ok(())
+}
+```
+
 ## Parse Errors
 
 `ParseError` is fail-closed. Malformed input never returns a partial packet.
@@ -57,6 +71,9 @@ Common error families include:
 - empty address or payload segments
 - invalid source, destination, or path components
 - non-AX.25-like source/path metadata
+
+`ParseError::code()` returns stable strings such as `parse.empty` and
+`parse.invalid_address` for external logs and metrics.
 
 ## Raw Packet Preservation
 
@@ -195,4 +212,40 @@ fn main() -> Result<(), libaprs_engine::ParseError> {
 
     Ok(())
 }
+```
+
+## Optional Serde Diagnostics
+
+Enable the `serde` feature to use an owned diagnostic structure that serializes
+raw bytes as byte arrays rather than assuming UTF-8.
+
+```toml
+[dependencies]
+libaprs-engine = {
+  git = "https://github.com/elodiejmirza/libaprs-engine",
+  package = "libaprs-engine",
+  features = ["serde"]
+}
+```
+
+```rust
+use libaprs_engine::{parse_packet, serde_support::PacketDiagnostic};
+
+fn main() -> Result<(), libaprs_engine::ParseError> {
+    let packet = parse_packet(b"N0CALL>APRS:>\xff")?;
+    let diagnostic = PacketDiagnostic::from_packet(&packet);
+    assert_eq!(diagnostic.semantic, "status");
+    Ok(())
+}
+```
+
+## File Transport Adapter
+
+Use `aprs-transport-file` if you want a separate crate to read packet files as
+bytes before handing packets to the core engine.
+
+```toml
+[dependencies]
+aprs-transport-file = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "aprs-transport-file" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine" }
 ```

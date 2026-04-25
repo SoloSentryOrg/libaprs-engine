@@ -8,6 +8,14 @@ packet is malformed.
 
 `Types -> Codec -> Policy -> Engine -> Transports -> CLI`
 
+The workspace keeps the core parser crate separate from adapters:
+
+- `libaprs-engine`: codec, APRS semantic views, diagnostics, policy, engine,
+  and the byte-oriented line splitter.
+- `aprs-transport-file`: optional file adapter crate that reads packet files as
+  bytes and delegates splitting to the core line transport.
+- `aprs-cli`: inspection binary that exercises the engine from stdin or files.
+
 ## Contracts
 
 - **Types:** own protocol data structures and preserve raw packet bytes without
@@ -22,8 +30,8 @@ packet is malformed.
 - **Engine:** orchestrates codec, semantics, policy decisions, and counters. It
   does not parse raw transport bytes directly.
 - **Transports:** supply bytes from external systems. Current transport support
-  is line-oriented file/stdin input that passes packet bytes to the codec
-  unchanged.
+  is line-oriented file/stdin input and a separate file adapter crate. Both pass
+  packet bytes to the codec unchanged.
 - **CLI:** exposes engine behavior for packet inspection with text and JSON
   diagnostics without weakening parser or policy failure modes.
 
@@ -61,6 +69,6 @@ protocol semantics.
 ## Verification And Release
 
 The repository includes conformance fixtures, malformed packet fixtures,
-deterministic byte-fuzz tests, CLI tests, release metadata, and a release
-checklist. GitHub Actions can run the same Cargo verification commands when it
-is enabled.
+deterministic byte-fuzz tests, CLI tests, examples, a benchmark target, release
+metadata, and a release checklist. GitHub Actions can run the same Cargo
+verification commands when account policy permits jobs to start.
