@@ -110,12 +110,34 @@ pub enum AprsData<'a> {
     },
     /// Uncompressed position report.
     Position(Position<'a>),
+    /// Timestamped uncompressed position report.
+    TimestampedPosition(TimestampedPosition<'a>),
+    /// Compressed position report.
+    CompressedPosition(CompressedPosition<'a>),
     /// Message, bulletin, or announcement.
     Message(Message<'a>),
     /// Object report.
     Object(Object<'a>),
     /// Item report.
     Item(Item<'a>),
+    /// Weather report without position.
+    Weather(Weather<'a>),
+    /// Telemetry report.
+    Telemetry(Telemetry<'a>),
+    /// Query packet.
+    Query(Query<'a>),
+    /// Station capabilities packet.
+    Capability(Capability<'a>),
+    /// NMEA sentence packet.
+    Nmea(Nmea<'a>),
+    /// Mic-E packet.
+    MicE(MicE<'a>),
+    /// Maidenhead locator packet.
+    Maidenhead(Maidenhead<'a>),
+    /// User-defined data packet.
+    UserDefined(UserDefined<'a>),
+    /// Third-party traffic packet.
+    ThirdParty(ThirdParty<'a>),
     /// Data format is validly framed but not implemented yet.
     Unsupported {
         /// Original data type identifier byte.
@@ -149,15 +171,64 @@ pub struct Position<'a> {
     pub comment: &'a [u8],
 }
 
+/// Timestamped uncompressed APRS position fields.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct TimestampedPosition<'a> {
+    /// Whether the data type identifier indicates APRS messaging support.
+    pub messaging: bool,
+    /// Seven-byte timestamp field.
+    pub timestamp: &'a [u8],
+    /// Position fields after the timestamp.
+    pub position: Position<'a>,
+}
+
+/// Compressed APRS position fields.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct CompressedPosition<'a> {
+    /// Whether the data type identifier indicates APRS messaging support.
+    pub messaging: bool,
+    /// Symbol table identifier byte.
+    pub symbol_table: u8,
+    /// Four-byte compressed latitude.
+    pub compressed_latitude: &'a [u8],
+    /// Four-byte compressed longitude.
+    pub compressed_longitude: &'a [u8],
+    /// Symbol code byte.
+    pub symbol_code: u8,
+    /// Two-byte compressed extension field.
+    pub extension: &'a [u8],
+    /// Compression type byte.
+    pub compression_type: u8,
+    /// Optional comment bytes after the compression type byte.
+    pub comment: &'a [u8],
+}
+
 /// APRS message fields.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Message<'a> {
     /// Nine-byte addressee field.
     pub addressee: &'a [u8],
+    /// Classified message subtype.
+    pub kind: MessageKind,
     /// Message text bytes before an optional message ID.
     pub text: &'a [u8],
     /// Optional message ID bytes after `{`.
     pub id: Option<&'a [u8]>,
+}
+
+/// APRS message subtype.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum MessageKind {
+    /// Regular addressed message.
+    Message,
+    /// Message acknowledgement.
+    Ack,
+    /// Message rejection.
+    Reject,
+    /// Bulletin.
+    Bulletin,
+    /// Announcement.
+    Announcement,
 }
 
 /// APRS object report fields.
@@ -184,6 +255,81 @@ pub struct Item<'a> {
     pub body: &'a [u8],
 }
 
+/// APRS weather report bytes.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Weather<'a> {
+    /// Weather report bytes after the `_` data type identifier.
+    pub report: &'a [u8],
+}
+
+/// APRS telemetry report fields.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Telemetry<'a> {
+    /// Telemetry sequence bytes.
+    pub sequence: &'a [u8],
+    /// Five analog telemetry value fields.
+    pub analog: [&'a [u8]; 5],
+    /// Optional eight-bit digital telemetry field.
+    pub digital: Option<&'a [u8]>,
+}
+
+/// APRS query packet bytes.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Query<'a> {
+    /// Query bytes after the `?` data type identifier.
+    pub query: &'a [u8],
+}
+
+/// APRS station capabilities packet bytes.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Capability<'a> {
+    /// Capability body bytes after the `<` data type identifier.
+    pub body: &'a [u8],
+}
+
+/// APRS NMEA packet bytes.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Nmea<'a> {
+    /// NMEA sentence bytes after the `$` data type identifier.
+    pub sentence: &'a [u8],
+}
+
+/// APRS Mic-E packet bytes.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct MicE<'a> {
+    /// Original Mic-E data type identifier byte.
+    pub identifier: u8,
+    /// Mic-E body bytes.
+    pub body: &'a [u8],
+}
+
+/// APRS Maidenhead locator packet bytes.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Maidenhead<'a> {
+    /// Six-byte Maidenhead locator.
+    pub locator: &'a [u8],
+    /// Remaining comment bytes.
+    pub comment: &'a [u8],
+}
+
+/// APRS user-defined packet fields.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct UserDefined<'a> {
+    /// One-byte user ID.
+    pub user_id: u8,
+    /// One-byte user-defined packet type.
+    pub packet_type: u8,
+    /// User-defined body bytes.
+    pub body: &'a [u8],
+}
+
+/// APRS third-party traffic packet bytes.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ThirdParty<'a> {
+    /// Encapsulated third-party traffic bytes.
+    pub body: &'a [u8],
+}
+
 /// APRS data type identifier from the first payload byte.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DataTypeIdentifier {
@@ -197,6 +343,10 @@ pub enum DataTypeIdentifier {
     PositionWithTimestampMessaging,
     /// `>`: status.
     Status,
+    /// `?`: query.
+    Query,
+    /// `<`: station capabilities.
+    Capability,
     /// `:`: message, bulletin, or announcement.
     Message,
     /// `;`: object.
@@ -205,6 +355,20 @@ pub enum DataTypeIdentifier {
     Item,
     /// `_`: weather report without position.
     Weather,
+    /// `T`: telemetry.
+    Telemetry,
+    /// `$`: NMEA sentence.
+    Nmea,
+    /// ``` ` ```: current Mic-E data.
+    MicECurrent,
+    /// `'`: old Mic-E data.
+    MicEOld,
+    /// `[`: Maidenhead locator.
+    Maidenhead,
+    /// `{`: user-defined data.
+    UserDefined,
+    /// `}`: third-party traffic.
+    ThirdParty,
     /// Any currently unclassified identifier byte.
     Unknown(u8),
 }
@@ -217,10 +381,19 @@ impl DataTypeIdentifier {
             b'/' => Self::PositionWithTimestamp,
             b'@' => Self::PositionWithTimestampMessaging,
             b'>' => Self::Status,
+            b'?' => Self::Query,
+            b'<' => Self::Capability,
             b':' => Self::Message,
             b';' => Self::Object,
             b')' => Self::Item,
             b'_' => Self::Weather,
+            b'T' => Self::Telemetry,
+            b'$' => Self::Nmea,
+            b'`' => Self::MicECurrent,
+            b'\'' => Self::MicEOld,
+            b'[' => Self::Maidenhead,
+            b'{' => Self::UserDefined,
+            b'}' => Self::ThirdParty,
             other => Self::Unknown(other),
         }
     }
@@ -232,10 +405,19 @@ impl DataTypeIdentifier {
             Self::PositionWithTimestamp => b'/',
             Self::PositionWithTimestampMessaging => b'@',
             Self::Status => b'>',
+            Self::Query => b'?',
+            Self::Capability => b'<',
             Self::Message => b':',
             Self::Object => b';',
             Self::Item => b')',
             Self::Weather => b'_',
+            Self::Telemetry => b'T',
+            Self::Nmea => b'$',
+            Self::MicECurrent => b'`',
+            Self::MicEOld => b'\'',
+            Self::Maidenhead => b'[',
+            Self::UserDefined => b'{',
+            Self::ThirdParty => b'}',
             Self::Unknown(value) => value,
         }
     }
@@ -246,9 +428,25 @@ fn parse_aprs_data(identifier: DataTypeIdentifier, information: &[u8]) -> AprsDa
         DataTypeIdentifier::Status => AprsData::Status { text: information },
         DataTypeIdentifier::PositionNoTimestamp => parse_position(false, b'!', information),
         DataTypeIdentifier::PositionNoTimestampMessaging => parse_position(true, b'=', information),
+        DataTypeIdentifier::PositionWithTimestamp => parse_timestamped_position(false, b'/', information),
+        DataTypeIdentifier::PositionWithTimestampMessaging => {
+            parse_timestamped_position(true, b'@', information)
+        }
         DataTypeIdentifier::Message => parse_message(information),
         DataTypeIdentifier::Object => parse_object(information),
         DataTypeIdentifier::Item => parse_item(information),
+        DataTypeIdentifier::Weather => AprsData::Weather(Weather { report: information }),
+        DataTypeIdentifier::Telemetry => parse_telemetry(information),
+        DataTypeIdentifier::Query => AprsData::Query(Query { query: information }),
+        DataTypeIdentifier::Capability => AprsData::Capability(Capability { body: information }),
+        DataTypeIdentifier::Nmea => AprsData::Nmea(Nmea { sentence: information }),
+        DataTypeIdentifier::MicECurrent | DataTypeIdentifier::MicEOld => AprsData::MicE(MicE {
+            identifier: identifier.as_byte(),
+            body: information,
+        }),
+        DataTypeIdentifier::Maidenhead => parse_maidenhead(information),
+        DataTypeIdentifier::UserDefined => parse_user_defined(information),
+        DataTypeIdentifier::ThirdParty => AprsData::ThirdParty(ThirdParty { body: information }),
         other => AprsData::Unsupported {
             identifier: other.as_byte(),
             information,
@@ -257,6 +455,10 @@ fn parse_aprs_data(identifier: DataTypeIdentifier, information: &[u8]) -> AprsDa
 }
 
 fn parse_position<'a>(messaging: bool, identifier: u8, information: &'a [u8]) -> AprsData<'a> {
+    if is_compressed_position(information) {
+        return parse_compressed_position(messaging, identifier, information);
+    }
+
     if information.len() < 18 {
         return AprsData::Malformed {
             identifier,
@@ -287,6 +489,85 @@ fn parse_position<'a>(messaging: bool, identifier: u8, information: &'a [u8]) ->
         symbol_table,
         longitude,
         symbol_code,
+        comment,
+    })
+}
+
+fn parse_timestamped_position<'a>(
+    messaging: bool,
+    identifier: u8,
+    information: &'a [u8],
+) -> AprsData<'a> {
+    if information.len() < 8 {
+        return AprsData::Malformed {
+            identifier,
+            information,
+        };
+    }
+
+    let timestamp = &information[..7];
+    if !is_timestamp(timestamp) {
+        return AprsData::Malformed {
+            identifier,
+            information,
+        };
+    }
+
+    match parse_position(messaging, identifier, &information[7..]) {
+        AprsData::Position(position) => AprsData::TimestampedPosition(TimestampedPosition {
+            messaging,
+            timestamp,
+            position,
+        }),
+        AprsData::CompressedPosition(position) => AprsData::CompressedPosition(position),
+        _ => AprsData::Malformed {
+            identifier,
+            information,
+        },
+    }
+}
+
+fn parse_compressed_position<'a>(
+    messaging: bool,
+    identifier: u8,
+    information: &'a [u8],
+) -> AprsData<'a> {
+    if information.len() < 13 {
+        return AprsData::Malformed {
+            identifier,
+            information,
+        };
+    }
+
+    let symbol_table = information[0];
+    let compressed_latitude = &information[1..5];
+    let compressed_longitude = &information[5..9];
+    let symbol_code = information[9];
+    let extension = &information[10..12];
+    let compression_type = information[12];
+    let comment = &information[13..];
+
+    if !is_symbol_table_identifier(symbol_table)
+        || !compressed_latitude.iter().all(|byte| is_base91(*byte))
+        || !compressed_longitude.iter().all(|byte| is_base91(*byte))
+        || !is_printable_ascii(symbol_code)
+        || !extension.iter().all(|byte| is_base91(*byte))
+        || !is_base91(compression_type)
+    {
+        return AprsData::Malformed {
+            identifier,
+            information,
+        };
+    }
+
+    AprsData::CompressedPosition(CompressedPosition {
+        messaging,
+        symbol_table,
+        compressed_latitude,
+        compressed_longitude,
+        symbol_code,
+        extension,
+        compression_type,
         comment,
     })
 }
@@ -343,12 +624,80 @@ fn parse_message(information: &[u8]) -> AprsData<'_> {
         Some(separator) => (&body[..separator], Some(&body[separator + 1..])),
         None => (body, None),
     };
+    let kind = classify_message_kind(addressee, text);
 
     AprsData::Message(Message {
         addressee,
+        kind,
         text,
         id,
     })
+}
+
+fn parse_telemetry(information: &[u8]) -> AprsData<'_> {
+    if !information.starts_with(b"#") {
+        return AprsData::Malformed {
+            identifier: b'T',
+            information,
+        };
+    }
+
+    let fields: Vec<&[u8]> = information[1..].split(|byte| *byte == b',').collect();
+    if fields.len() < 6 || fields[..6].iter().any(|field| field.is_empty()) {
+        return AprsData::Malformed {
+            identifier: b'T',
+            information,
+        };
+    }
+
+    AprsData::Telemetry(Telemetry {
+        sequence: fields[0],
+        analog: [fields[1], fields[2], fields[3], fields[4], fields[5]],
+        digital: fields.get(6).copied().filter(|field| !field.is_empty()),
+    })
+}
+
+fn parse_maidenhead(information: &[u8]) -> AprsData<'_> {
+    if information.len() < 6 {
+        return AprsData::Malformed {
+            identifier: b'[',
+            information,
+        };
+    }
+
+    AprsData::Maidenhead(Maidenhead {
+        locator: &information[..6],
+        comment: &information[6..],
+    })
+}
+
+fn parse_user_defined(information: &[u8]) -> AprsData<'_> {
+    if information.len() < 2 {
+        return AprsData::Malformed {
+            identifier: b'{',
+            information,
+        };
+    }
+
+    AprsData::UserDefined(UserDefined {
+        user_id: information[0],
+        packet_type: information[1],
+        body: &information[2..],
+    })
+}
+
+fn classify_message_kind(addressee: &[u8], text: &[u8]) -> MessageKind {
+    if text.starts_with(b"ack") {
+        MessageKind::Ack
+    } else if text.starts_with(b"rej") {
+        MessageKind::Reject
+    } else if addressee.starts_with(b"BLN") && addressee.get(3).is_some_and(u8::is_ascii_digit) {
+        MessageKind::Bulletin
+    } else if addressee.starts_with(b"BLN") && addressee.get(3).is_some_and(u8::is_ascii_uppercase) {
+        MessageKind::Announcement
+    } else {
+        MessageKind::Message
+    }
 }
 
 fn is_latitude(value: &[u8]) -> bool {
@@ -382,6 +731,25 @@ fn is_symbol_table_identifier(value: u8) -> bool {
 
 fn is_printable_ascii(value: u8) -> bool {
     (0x20..=0x7e).contains(&value)
+}
+
+fn is_base91(value: u8) -> bool {
+    (b'!'..=b'{').contains(&value)
+}
+
+fn is_compressed_position(information: &[u8]) -> bool {
+    information
+        .first()
+        .is_some_and(|byte| !byte.is_ascii_digit() && is_symbol_table_identifier(*byte))
+        && information
+            .get(1..13)
+            .is_some_and(|bytes| bytes.iter().all(|byte| is_base91(*byte)))
+}
+
+fn is_timestamp(value: &[u8]) -> bool {
+    value.len() == 7
+        && value[..6].iter().all(u8::is_ascii_digit)
+        && matches!(value[6], b'z' | b'/' | b'h')
 }
 
 /// Fail-closed packet parse errors.
