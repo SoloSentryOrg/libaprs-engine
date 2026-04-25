@@ -1,0 +1,10 @@
+[package]
+name = "libaprs-engine"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Protocol-first APRS engine core primitives"
+
+[lib]
+name = "libaprs_engine"
+path = "src/lib.rs"
