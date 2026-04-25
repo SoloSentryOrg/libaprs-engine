@@ -30,9 +30,10 @@
 ## v0.1.1 Release Evidence
 
 - Tag: `v0.1.1`
-- Commit: pending until tag creation.
-- Local gate: pending.
-- Remote GitHub Actions: pending.
+- Commit: release tag target (`git rev-list -n 1 v0.1.1`).
+- Local gate: passed on 2026-04-25.
+- Remote GitHub Actions: passed on 2026-04-25:
+  <https://github.com/elodiejmirza/libaprs-engine/actions/runs/24937390267>.
 - Notes: supersedes `v0.1.0` with MSRV clippy compatibility and Node.js
   24-compatible checkout action.
 
