@@ -27,6 +27,15 @@
 - If remote CI is intentionally skipped, tag only after the local gate passes
   and the skipped remote gate is documented.
 
+## v0.1.1 Release Evidence
+
+- Tag: `v0.1.1`
+- Commit: pending until tag creation.
+- Local gate: pending.
+- Remote GitHub Actions: pending.
+- Notes: supersedes `v0.1.0` with MSRV clippy compatibility and Node.js
+  24-compatible checkout action.
+
 ## v0.1.0 Release Evidence
 
 - Tag: `v0.1.0`
@@ -34,3 +43,4 @@
 - Local gate passed.
 - Remote GitHub Actions was skipped because startup is blocked before job
   creation by account, billing, or policy state outside this repository.
+- Superseded by `v0.1.1`.
