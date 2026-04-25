@@ -40,8 +40,14 @@ packet is malformed.
   optional trailing `*` repeated markers on path components only.
 - Any malformed packet shape is rejected before policy or engine handling.
 
-## Current Scope
+## Semantic Scope
 
-The first crate implements only the minimal `source>path:payload` codec
-boundary with conservative source/path validation. Full APRS semantics,
-transports, policy rules, and CLI behavior are out of scope for this skeleton.
+Full APRS Protocol Reference 1.0.1 semantics are in scope. The implementation
+should grow by packet family: position, status, messages, objects, items,
+weather, telemetry, queries, capabilities, NMEA, Mic-E, compressed positions,
+Maidenhead locator, user-defined data, and third-party traffic.
+
+Semantic parsing must remain byte-preserving and fail closed. Packet families
+that are not yet implemented must be represented explicitly as unsupported or
+unknown rather than silently coerced into another type. Transports, policy
+rules, and CLI behavior remain separate layers from protocol semantics.

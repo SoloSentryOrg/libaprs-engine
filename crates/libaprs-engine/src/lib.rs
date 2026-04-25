@@ -92,6 +92,68 @@ impl ParsedPacket {
     pub fn information(&self) -> &[u8] {
         &self.raw.bytes[self.payload_start + 1..]
     }
+
+    /// Returns a semantic view of the APRS information field.
+    #[must_use]
+    pub fn aprs_data(&self) -> AprsData<'_> {
+        parse_aprs_data(self.data_type_identifier(), self.information())
+    }
+}
+
+/// Semantic APRS information-field data.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum AprsData<'a> {
+    /// Status report.
+    Status {
+        /// Status text bytes.
+        text: &'a [u8],
+    },
+    /// Uncompressed position report.
+    Position(Position<'a>),
+    /// Message, bulletin, or announcement.
+    Message(Message<'a>),
+    /// Data format is validly framed but not implemented yet.
+    Unsupported {
+        /// Original data type identifier byte.
+        identifier: u8,
+        /// Remaining information-field bytes.
+        information: &'a [u8],
+    },
+    /// Data type is known, but its information bytes are malformed.
+    Malformed {
+        /// Original data type identifier byte.
+        identifier: u8,
+        /// Remaining information-field bytes.
+        information: &'a [u8],
+    },
+}
+
+/// Uncompressed APRS position fields.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Position<'a> {
+    /// Whether the data type identifier indicates APRS messaging support.
+    pub messaging: bool,
+    /// Latitude bytes in APRS `DDMM.mmN/S` form.
+    pub latitude: &'a [u8],
+    /// Symbol table identifier byte.
+    pub symbol_table: u8,
+    /// Longitude bytes in APRS `DDDMM.mmE/W` form.
+    pub longitude: &'a [u8],
+    /// Symbol code byte.
+    pub symbol_code: u8,
+    /// Optional comment bytes after the symbol code.
+    pub comment: &'a [u8],
+}
+
+/// APRS message fields.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Message<'a> {
+    /// Nine-byte addressee field.
+    pub addressee: &'a [u8],
+    /// Message text bytes before an optional message ID.
+    pub text: &'a [u8],
+    /// Optional message ID bytes after `{`.
+    pub id: Option<&'a [u8]>,
 }
 
 /// APRS data type identifier from the first payload byte.
@@ -134,6 +196,124 @@ impl DataTypeIdentifier {
             other => Self::Unknown(other),
         }
     }
+
+    fn as_byte(self) -> u8 {
+        match self {
+            Self::PositionNoTimestamp => b'!',
+            Self::PositionNoTimestampMessaging => b'=',
+            Self::PositionWithTimestamp => b'/',
+            Self::PositionWithTimestampMessaging => b'@',
+            Self::Status => b'>',
+            Self::Message => b':',
+            Self::Object => b';',
+            Self::Item => b')',
+            Self::Weather => b'_',
+            Self::Unknown(value) => value,
+        }
+    }
+}
+
+fn parse_aprs_data(identifier: DataTypeIdentifier, information: &[u8]) -> AprsData<'_> {
+    match identifier {
+        DataTypeIdentifier::Status => AprsData::Status { text: information },
+        DataTypeIdentifier::PositionNoTimestamp => parse_position(false, b'!', information),
+        DataTypeIdentifier::PositionNoTimestampMessaging => parse_position(true, b'=', information),
+        DataTypeIdentifier::Message => parse_message(information),
+        other => AprsData::Unsupported {
+            identifier: other.as_byte(),
+            information,
+        },
+    }
+}
+
+fn parse_position<'a>(messaging: bool, identifier: u8, information: &'a [u8]) -> AprsData<'a> {
+    if information.len() < 18 {
+        return AprsData::Malformed {
+            identifier,
+            information,
+        };
+    }
+
+    let latitude = &information[..8];
+    let symbol_table = information[8];
+    let longitude = &information[9..18];
+    let symbol_code = information[18];
+    let comment = &information[19..];
+
+    if !is_latitude(latitude)
+        || !is_symbol_table_identifier(symbol_table)
+        || !is_longitude(longitude)
+        || !is_printable_ascii(symbol_code)
+    {
+        return AprsData::Malformed {
+            identifier,
+            information,
+        };
+    }
+
+    AprsData::Position(Position {
+        messaging,
+        latitude,
+        symbol_table,
+        longitude,
+        symbol_code,
+        comment,
+    })
+}
+
+fn parse_message(information: &[u8]) -> AprsData<'_> {
+    if information.len() < 10 || information[9] != b':' {
+        return AprsData::Malformed {
+            identifier: b':',
+            information,
+        };
+    }
+
+    let addressee = &information[..9];
+    let body = &information[10..];
+    let (text, id) = match body.iter().position(|byte| *byte == b'{') {
+        Some(separator) => (&body[..separator], Some(&body[separator + 1..])),
+        None => (body, None),
+    };
+
+    AprsData::Message(Message {
+        addressee,
+        text,
+        id,
+    })
+}
+
+fn is_latitude(value: &[u8]) -> bool {
+    value.len() == 8
+        && value[0].is_ascii_digit()
+        && value[1].is_ascii_digit()
+        && value[2].is_ascii_digit()
+        && value[3].is_ascii_digit()
+        && value[4] == b'.'
+        && value[5].is_ascii_digit()
+        && value[6].is_ascii_digit()
+        && matches!(value[7], b'N' | b'S')
+}
+
+fn is_longitude(value: &[u8]) -> bool {
+    value.len() == 9
+        && value[0].is_ascii_digit()
+        && value[1].is_ascii_digit()
+        && value[2].is_ascii_digit()
+        && value[3].is_ascii_digit()
+        && value[4].is_ascii_digit()
+        && value[5] == b'.'
+        && value[6].is_ascii_digit()
+        && value[7].is_ascii_digit()
+        && matches!(value[8], b'E' | b'W')
+}
+
+fn is_symbol_table_identifier(value: u8) -> bool {
+    matches!(value, b'/' | b'\\') || value.is_ascii_alphanumeric()
+}
+
+fn is_printable_ascii(value: u8) -> bool {
+    (0x20..=0x7e).contains(&value)
 }
 
 /// Fail-closed packet parse errors.

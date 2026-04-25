@@ -1,4 +1,6 @@
-use libaprs_engine::{parse_packet, DataTypeIdentifier, ParseError, MAX_PACKET_LEN};
+use libaprs_engine::{
+    parse_packet, AprsData, DataTypeIdentifier, Message, ParseError, Position, MAX_PACKET_LEN,
+};
 
 #[test]
 fn valid_packet_preserves_exact_raw_bytes() {
@@ -116,6 +118,64 @@ fn unknown_data_type_identifier_is_preserved_as_byte() {
 
     assert_eq!(parsed.data_type_identifier(), DataTypeIdentifier::Unknown(b'~'));
     assert_eq!(parsed.information(), b"opaque");
+}
+
+#[test]
+fn status_semantics_preserve_status_text_bytes() {
+    let parsed = parse_packet(b"N0CALL>APRS:>Running semantic parser").expect("status should parse");
+
+    assert_eq!(
+        parsed.aprs_data(),
+        AprsData::Status {
+            text: b"Running semantic parser".as_slice()
+        }
+    );
+}
+
+#[test]
+fn uncompressed_position_semantics_parse_coordinates_and_comment() {
+    let parsed =
+        parse_packet(b"N0CALL>APRS:!4903.50N/07201.75W-Test comment").expect("position should parse");
+
+    assert_eq!(
+        parsed.aprs_data(),
+        AprsData::Position(Position {
+            messaging: false,
+            latitude: b"4903.50N".as_slice(),
+            symbol_table: b'/',
+            longitude: b"07201.75W".as_slice(),
+            symbol_code: b'-',
+            comment: b"Test comment".as_slice(),
+        })
+    );
+}
+
+#[test]
+fn message_semantics_parse_addressee_text_and_message_id() {
+    let parsed =
+        parse_packet(b"N0CALL>APRS::TARGET   :hello world{42").expect("message should parse");
+
+    assert_eq!(
+        parsed.aprs_data(),
+        AprsData::Message(Message {
+            addressee: b"TARGET   ".as_slice(),
+            text: b"hello world".as_slice(),
+            id: Some(b"42".as_slice()),
+        })
+    );
+}
+
+#[test]
+fn unknown_semantics_preserve_identifier_and_information_bytes() {
+    let parsed = parse_packet(b"N0CALL>APRS:~opaque").expect("unknown payload should parse");
+
+    assert_eq!(
+        parsed.aprs_data(),
+        AprsData::Unsupported {
+            identifier: b'~',
+            information: b"opaque".as_slice(),
+        }
+    );
 }
 
 #[test]
