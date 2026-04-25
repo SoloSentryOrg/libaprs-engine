@@ -16,6 +16,9 @@ primitives, semantic classification, and a conservative codec boundary:
   bulletin, announcement, acknowledgement, reject, object, item, weather,
   telemetry, query, capability, NMEA, Mic-E, Maidenhead locator, user-defined
   data, third-party traffic, malformed data, and unsupported data.
+- Interpret typed values for coordinates, compressed coordinates, telemetry
+  values and bits, common weather fields, and Mic-E destination-derived status
+  and latitude digits when the raw bytes are valid.
 - Avoid network, async, serialization, and transport dependencies in v1.
 
 The parser validates the minimal
@@ -31,6 +34,8 @@ byte-preserving semantic variants while preserving these invariants:
 - Raw bytes are always retained.
 - Metadata parsing fails closed.
 - Payload semantic parsers never panic on untrusted or invalid UTF-8 bytes.
+- Typed interpretation returns optional values when a field cannot be decoded
+  without weakening byte preservation.
 - Unsupported, unknown, and malformed APRS data formats remain explicitly
   represented instead of being guessed.
 - Dependencies stay minimal unless a protocol feature clearly justifies one.

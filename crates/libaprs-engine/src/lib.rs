@@ -96,7 +96,11 @@ impl ParsedPacket {
     /// Returns a semantic view of the APRS information field.
     #[must_use]
     pub fn aprs_data(&self) -> AprsData<'_> {
-        parse_aprs_data(self.data_type_identifier(), self.information())
+        parse_aprs_data(
+            self.data_type_identifier(),
+            self.information(),
+            self.destination(),
+        )
     }
 }
 
@@ -171,6 +175,26 @@ pub struct Position<'a> {
     pub comment: &'a [u8],
 }
 
+impl Position<'_> {
+    /// Returns decimal latitude and longitude if both coordinate fields decode.
+    #[must_use]
+    pub fn coordinates(&self) -> Option<Coordinates> {
+        Some(Coordinates {
+            latitude: decode_latitude(self.latitude)?,
+            longitude: decode_longitude(self.longitude)?,
+        })
+    }
+}
+
+/// Decimal coordinates in signed degrees.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Coordinates {
+    /// Latitude in signed decimal degrees.
+    pub latitude: f64,
+    /// Longitude in signed decimal degrees.
+    pub longitude: f64,
+}
+
 /// Timestamped uncompressed APRS position fields.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct TimestampedPosition<'a> {
@@ -201,6 +225,20 @@ pub struct CompressedPosition<'a> {
     pub compression_type: u8,
     /// Optional comment bytes after the compression type byte.
     pub comment: &'a [u8],
+}
+
+impl CompressedPosition<'_> {
+    /// Returns decoded compressed-position coordinates.
+    #[must_use]
+    pub fn coordinates(&self) -> Option<Coordinates> {
+        let y = decode_base91(self.compressed_latitude)?;
+        let x = decode_base91(self.compressed_longitude)?;
+
+        Some(Coordinates {
+            latitude: 90.0 - (y as f64 / 380_926.0),
+            longitude: -180.0 + (x as f64 / 190_463.0),
+        })
+    }
 }
 
 /// APRS message fields.
@@ -262,6 +300,56 @@ pub struct Weather<'a> {
     pub report: &'a [u8],
 }
 
+impl Weather<'_> {
+    /// Extracts common numeric weather fields when present.
+    #[must_use]
+    pub fn fields(&self) -> WeatherFields<'_> {
+        WeatherFields {
+            timestamp: self.report.get(..6).filter(|value| value.iter().all(u8::is_ascii_digit)),
+            wind_direction_degrees: parse_tagged_u16(self.report, b'c', 3),
+            wind_speed_mph: parse_tagged_u16(self.report, b's', 3),
+            wind_gust_mph: parse_tagged_u16(self.report, b'g', 3),
+            temperature_fahrenheit: parse_tagged_i16(self.report, b't', 3),
+            rain_last_hour_hundredths_inch: parse_tagged_u16(self.report, b'r', 3),
+            rain_last_24_hours_hundredths_inch: parse_tagged_u16(self.report, b'p', 3),
+            rain_since_midnight_hundredths_inch: parse_tagged_u16(self.report, b'P', 3),
+            humidity_percent: parse_tagged_u16(self.report, b'h', 2).map(|value| {
+                if value == 0 {
+                    100
+                } else {
+                    value
+                }
+            }),
+            pressure_tenths_hpa: parse_tagged_u16(self.report, b'b', 5),
+        }
+    }
+}
+
+/// Extracted numeric weather fields.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct WeatherFields<'a> {
+    /// Optional six-byte timestamp prefix.
+    pub timestamp: Option<&'a [u8]>,
+    /// Wind direction in degrees.
+    pub wind_direction_degrees: Option<u16>,
+    /// Sustained wind speed in miles per hour.
+    pub wind_speed_mph: Option<u16>,
+    /// Wind gust speed in miles per hour.
+    pub wind_gust_mph: Option<u16>,
+    /// Temperature in degrees Fahrenheit.
+    pub temperature_fahrenheit: Option<i16>,
+    /// Rain in the last hour, in hundredths of an inch.
+    pub rain_last_hour_hundredths_inch: Option<u16>,
+    /// Rain in the last 24 hours, in hundredths of an inch.
+    pub rain_last_24_hours_hundredths_inch: Option<u16>,
+    /// Rain since midnight, in hundredths of an inch.
+    pub rain_since_midnight_hundredths_inch: Option<u16>,
+    /// Relative humidity percent.
+    pub humidity_percent: Option<u16>,
+    /// Barometric pressure in tenths of hPa.
+    pub pressure_tenths_hpa: Option<u16>,
+}
+
 /// APRS telemetry report fields.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Telemetry<'a> {
@@ -271,6 +359,46 @@ pub struct Telemetry<'a> {
     pub analog: [&'a [u8]; 5],
     /// Optional eight-bit digital telemetry field.
     pub digital: Option<&'a [u8]>,
+}
+
+impl Telemetry<'_> {
+    /// Returns the numeric telemetry sequence number.
+    #[must_use]
+    pub fn sequence_number(&self) -> Option<u16> {
+        parse_u16(self.sequence)
+    }
+
+    /// Returns the five numeric analog telemetry values.
+    #[must_use]
+    pub fn analog_values(&self) -> Option<[u16; 5]> {
+        Some([
+            parse_u16(self.analog[0])?,
+            parse_u16(self.analog[1])?,
+            parse_u16(self.analog[2])?,
+            parse_u16(self.analog[3])?,
+            parse_u16(self.analog[4])?,
+        ])
+    }
+
+    /// Returns eight digital telemetry bits.
+    #[must_use]
+    pub fn digital_bits(&self) -> Option<[bool; 8]> {
+        let digital = self.digital?;
+        if digital.len() != 8 {
+            return None;
+        }
+
+        let mut bits = [false; 8];
+        for (index, byte) in digital.iter().enumerate() {
+            bits[index] = match byte {
+                b'0' => false,
+                b'1' => true,
+                _ => return None,
+            };
+        }
+
+        Some(bits)
+    }
 }
 
 /// APRS query packet bytes.
@@ -299,8 +427,21 @@ pub struct Nmea<'a> {
 pub struct MicE<'a> {
     /// Original Mic-E data type identifier byte.
     pub identifier: u8,
+    /// Destination address bytes that carry Mic-E latitude/status data.
+    pub destination: &'a [u8],
     /// Mic-E body bytes.
     pub body: &'a [u8],
+    /// Destination-derived Mic-E status bits when the destination permits decoding.
+    pub status: Option<MicEStatus>,
+    /// Destination-derived six latitude digit nibbles when decodable.
+    pub latitude_digits: Option<[u8; 6]>,
+}
+
+/// Mic-E destination-derived status bits.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum MicEStatus {
+    /// Standard/custom status bit tuple from the first three destination bytes.
+    Custom([bool; 3]),
 }
 
 /// APRS Maidenhead locator packet bytes.
@@ -423,7 +564,11 @@ impl DataTypeIdentifier {
     }
 }
 
-fn parse_aprs_data(identifier: DataTypeIdentifier, information: &[u8]) -> AprsData<'_> {
+fn parse_aprs_data<'a>(
+    identifier: DataTypeIdentifier,
+    information: &'a [u8],
+    destination: &'a [u8],
+) -> AprsData<'a> {
     match identifier {
         DataTypeIdentifier::Status => AprsData::Status { text: information },
         DataTypeIdentifier::PositionNoTimestamp => parse_position(false, b'!', information),
@@ -440,10 +585,7 @@ fn parse_aprs_data(identifier: DataTypeIdentifier, information: &[u8]) -> AprsDa
         DataTypeIdentifier::Query => AprsData::Query(Query { query: information }),
         DataTypeIdentifier::Capability => AprsData::Capability(Capability { body: information }),
         DataTypeIdentifier::Nmea => AprsData::Nmea(Nmea { sentence: information }),
-        DataTypeIdentifier::MicECurrent | DataTypeIdentifier::MicEOld => AprsData::MicE(MicE {
-            identifier: identifier.as_byte(),
-            body: information,
-        }),
+        DataTypeIdentifier::MicECurrent | DataTypeIdentifier::MicEOld => parse_mic_e(identifier, information, destination),
         DataTypeIdentifier::Maidenhead => parse_maidenhead(information),
         DataTypeIdentifier::UserDefined => parse_user_defined(information),
         DataTypeIdentifier::ThirdParty => AprsData::ThirdParty(ThirdParty { body: information }),
@@ -452,6 +594,20 @@ fn parse_aprs_data(identifier: DataTypeIdentifier, information: &[u8]) -> AprsDa
             information,
         },
     }
+}
+
+fn parse_mic_e<'a>(
+    identifier: DataTypeIdentifier,
+    information: &'a [u8],
+    destination: &'a [u8],
+) -> AprsData<'a> {
+    AprsData::MicE(MicE {
+        identifier: identifier.as_byte(),
+        destination,
+        body: information,
+        status: decode_mic_e_status(destination),
+        latitude_digits: decode_mic_e_latitude_digits(destination),
+    })
 }
 
 fn parse_position<'a>(messaging: bool, identifier: u8, information: &'a [u8]) -> AprsData<'a> {
@@ -750,6 +906,147 @@ fn is_timestamp(value: &[u8]) -> bool {
     value.len() == 7
         && value[..6].iter().all(u8::is_ascii_digit)
         && matches!(value[6], b'z' | b'/' | b'h')
+}
+
+fn decode_latitude(value: &[u8]) -> Option<f64> {
+    if !is_latitude(value) {
+        return None;
+    }
+
+    let degrees = parse_u16(&value[..2])? as f64;
+    let minutes = parse_fixed_minutes(&value[2..7])?;
+    let sign = match value[7] {
+        b'N' => 1.0,
+        b'S' => -1.0,
+        _ => return None,
+    };
+
+    Some(sign * (degrees + minutes / 60.0))
+}
+
+fn decode_longitude(value: &[u8]) -> Option<f64> {
+    if !is_longitude(value) {
+        return None;
+    }
+
+    let degrees = parse_u16(&value[..3])? as f64;
+    let minutes = parse_fixed_minutes(&value[3..8])?;
+    let sign = match value[8] {
+        b'E' => 1.0,
+        b'W' => -1.0,
+        _ => return None,
+    };
+
+    Some(sign * (degrees + minutes / 60.0))
+}
+
+fn parse_fixed_minutes(value: &[u8]) -> Option<f64> {
+    if value.len() != 5 || value[2] != b'.' || !value[..2].iter().all(u8::is_ascii_digit) {
+        return None;
+    }
+
+    let whole = parse_u16(&value[..2])? as f64;
+    let fraction = parse_u16(&value[3..])? as f64 / 100.0;
+    Some(whole + fraction)
+}
+
+fn decode_base91(value: &[u8]) -> Option<u32> {
+    if value.len() != 4 || !value.iter().all(|byte| is_base91(*byte)) {
+        return None;
+    }
+
+    let mut decoded = 0u32;
+    for byte in value {
+        decoded = decoded * 91 + u32::from(byte - b'!');
+    }
+
+    Some(decoded)
+}
+
+fn parse_u16(value: &[u8]) -> Option<u16> {
+    if value.is_empty() || !value.iter().all(u8::is_ascii_digit) {
+        return None;
+    }
+
+    let mut parsed = 0u16;
+    for digit in value {
+        parsed = parsed.checked_mul(10)?;
+        parsed = parsed.checked_add(u16::from(digit - b'0'))?;
+    }
+
+    Some(parsed)
+}
+
+fn parse_i16(value: &[u8]) -> Option<i16> {
+    if value.is_empty() {
+        return None;
+    }
+
+    let (sign, digits) = match value[0] {
+        b'-' => (-1, &value[1..]),
+        b'+' => (1, &value[1..]),
+        _ => (1, value),
+    };
+
+    let unsigned = parse_u16(digits)?;
+    i16::try_from(unsigned).ok()?.checked_mul(sign)
+}
+
+fn parse_tagged_u16(report: &[u8], tag: u8, width: usize) -> Option<u16> {
+    parse_tagged(report, tag, width).and_then(parse_u16)
+}
+
+fn parse_tagged_i16(report: &[u8], tag: u8, width: usize) -> Option<i16> {
+    parse_tagged(report, tag, width).and_then(parse_i16)
+}
+
+fn parse_tagged(report: &[u8], tag: u8, width: usize) -> Option<&[u8]> {
+    let start = report.iter().position(|byte| *byte == tag)? + 1;
+    report.get(start..start + width)
+}
+
+fn decode_mic_e_status(destination: &[u8]) -> Option<MicEStatus> {
+    if destination.len() != 6 {
+        return None;
+    }
+
+    let bytes = destination.get(..3)?;
+    Some(MicEStatus::Custom([
+        mic_e_status_bit(bytes[0])?,
+        mic_e_status_bit(bytes[1])?,
+        mic_e_status_bit(bytes[2])?,
+    ]))
+}
+
+fn mic_e_status_bit(byte: u8) -> Option<bool> {
+    match byte {
+        b'0'..=b'9' | b'L' => Some(false),
+        b'A'..=b'K' | b'P'..=b'Z' => Some(true),
+        _ => None,
+    }
+}
+
+fn decode_mic_e_latitude_digits(destination: &[u8]) -> Option<[u8; 6]> {
+    if destination.len() != 6 {
+        return None;
+    }
+
+    let mut digits = [0u8; 6];
+    for (index, byte) in destination.iter().copied().enumerate() {
+        digits[index] = mic_e_latitude_digit(byte)?;
+    }
+
+    Some(digits)
+}
+
+fn mic_e_latitude_digit(byte: u8) -> Option<u8> {
+    match byte {
+        b'0'..=b'9' => Some(byte - b'0'),
+        b'A'..=b'J' => Some(byte - b'A'),
+        b'P'..=b'Y' => Some(byte - b'P'),
+        b'K' | b'L' | b'Z' => Some(0),
+        _ => None,
+    }
 }
 
 /// Fail-closed packet parse errors.

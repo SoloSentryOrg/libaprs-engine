@@ -12,7 +12,8 @@ packet is malformed.
 
 - **Types:** own protocol data structures and preserve raw packet bytes without
   trimming, normalization, lowercasing, or lossy UTF-8 conversion. Structured
-  fields are byte views into the preserved packet.
+  fields are byte views into the preserved packet. Typed interpretation helpers
+  expose decoded values only when the original bytes validate.
 - **Codec:** accepts `&[u8]`, validates minimal packet shape and conservative
   source/path address bytes, and returns either a structured packet view or a
   closed error. It does not partially accept malformed packets.
@@ -50,5 +51,8 @@ Mic-E, Maidenhead locator, user-defined data, and third-party traffic.
 
 Semantic parsing must remain byte-preserving and fail closed. Unknown,
 unsupported, and malformed data must be represented explicitly rather than
-silently coerced into another type. Transports, policy rules, and CLI behavior
-remain separate layers from protocol semantics.
+silently coerced into another type. Typed interpretation currently covers
+decimal coordinates, compressed coordinates, telemetry sequence/value/bit
+fields, common weather fields, and Mic-E destination-derived status and latitude
+digits. Transports, policy rules, and CLI behavior remain separate layers from
+protocol semantics.
