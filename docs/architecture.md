@@ -47,7 +47,9 @@ should grow by packet family: position, status, messages, objects, items,
 weather, telemetry, queries, capabilities, NMEA, Mic-E, compressed positions,
 Maidenhead locator, user-defined data, and third-party traffic.
 
-Semantic parsing must remain byte-preserving and fail closed. Packet families
-that are not yet implemented must be represented explicitly as unsupported or
-unknown rather than silently coerced into another type. Transports, policy
-rules, and CLI behavior remain separate layers from protocol semantics.
+Semantic parsing must remain byte-preserving and fail closed. Initial semantic
+coverage includes status, uncompressed position, messages, objects, and items.
+Packet families that are not yet implemented must be represented explicitly as
+unsupported or unknown rather than silently coerced into another type.
+Transports, policy rules, and CLI behavior remain separate layers from protocol
+semantics.

@@ -12,6 +12,8 @@ primitives, semantic classification, and a conservative codec boundary:
   views backed by the preserved raw packet.
 - Classify the APRS data type identifier from the first payload byte while
   leaving the remaining information field opaque.
+- Parse initial APRS semantic families: status, uncompressed position, message,
+  object, item, and unsupported data.
 - Avoid network, async, serialization, and transport dependencies in v1.
 
 The parser currently validates the minimal

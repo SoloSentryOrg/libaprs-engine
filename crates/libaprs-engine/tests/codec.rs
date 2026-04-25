@@ -1,5 +1,6 @@
 use libaprs_engine::{
-    parse_packet, AprsData, DataTypeIdentifier, Message, ParseError, Position, MAX_PACKET_LEN,
+    parse_packet, AprsData, DataTypeIdentifier, Item, Message, Object, ParseError, Position,
+    MAX_PACKET_LEN,
 };
 
 #[test]
@@ -175,6 +176,37 @@ fn unknown_semantics_preserve_identifier_and_information_bytes() {
             identifier: b'~',
             information: b"opaque".as_slice(),
         }
+    );
+}
+
+#[test]
+fn object_semantics_parse_name_liveness_timestamp_and_body() {
+    let parsed = parse_packet(b"N0CALL>APRS:;LEADER   *092345z4903.50N/07201.75W-")
+        .expect("object should parse");
+
+    assert_eq!(
+        parsed.aprs_data(),
+        AprsData::Object(Object {
+            name: b"LEADER   ".as_slice(),
+            live: true,
+            timestamp: b"092345z".as_slice(),
+            body: b"4903.50N/07201.75W-".as_slice(),
+        })
+    );
+}
+
+#[test]
+fn item_semantics_parse_name_liveness_and_body() {
+    let parsed = parse_packet(b"N0CALL>APRS:)BIKE!4903.50N/07201.75W-")
+        .expect("item should parse");
+
+    assert_eq!(
+        parsed.aprs_data(),
+        AprsData::Item(Item {
+            name: b"BIKE".as_slice(),
+            live: true,
+            body: b"4903.50N/07201.75W-".as_slice(),
+        })
     );
 }
 

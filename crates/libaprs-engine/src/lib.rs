@@ -112,6 +112,10 @@ pub enum AprsData<'a> {
     Position(Position<'a>),
     /// Message, bulletin, or announcement.
     Message(Message<'a>),
+    /// Object report.
+    Object(Object<'a>),
+    /// Item report.
+    Item(Item<'a>),
     /// Data format is validly framed but not implemented yet.
     Unsupported {
         /// Original data type identifier byte.
@@ -154,6 +158,30 @@ pub struct Message<'a> {
     pub text: &'a [u8],
     /// Optional message ID bytes after `{`.
     pub id: Option<&'a [u8]>,
+}
+
+/// APRS object report fields.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Object<'a> {
+    /// Nine-byte object name.
+    pub name: &'a [u8],
+    /// Whether the object is live (`*`) rather than killed (`_`).
+    pub live: bool,
+    /// Seven-byte object timestamp.
+    pub timestamp: &'a [u8],
+    /// Remaining object body bytes.
+    pub body: &'a [u8],
+}
+
+/// APRS item report fields.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Item<'a> {
+    /// Item name bytes.
+    pub name: &'a [u8],
+    /// Whether the item is live (`!`) rather than killed (`_`).
+    pub live: bool,
+    /// Remaining item body bytes.
+    pub body: &'a [u8],
 }
 
 /// APRS data type identifier from the first payload byte.
@@ -219,6 +247,8 @@ fn parse_aprs_data(identifier: DataTypeIdentifier, information: &[u8]) -> AprsDa
         DataTypeIdentifier::PositionNoTimestamp => parse_position(false, b'!', information),
         DataTypeIdentifier::PositionNoTimestampMessaging => parse_position(true, b'=', information),
         DataTypeIdentifier::Message => parse_message(information),
+        DataTypeIdentifier::Object => parse_object(information),
+        DataTypeIdentifier::Item => parse_item(information),
         other => AprsData::Unsupported {
             identifier: other.as_byte(),
             information,
@@ -258,6 +288,44 @@ fn parse_position<'a>(messaging: bool, identifier: u8, information: &'a [u8]) ->
         longitude,
         symbol_code,
         comment,
+    })
+}
+
+fn parse_object(information: &[u8]) -> AprsData<'_> {
+    if information.len() < 17 || !matches!(information[9], b'*' | b'_') {
+        return AprsData::Malformed {
+            identifier: b';',
+            information,
+        };
+    }
+
+    AprsData::Object(Object {
+        name: &information[..9],
+        live: information[9] == b'*',
+        timestamp: &information[10..17],
+        body: &information[17..],
+    })
+}
+
+fn parse_item(information: &[u8]) -> AprsData<'_> {
+    let Some(separator) = information.iter().position(|byte| matches!(*byte, b'!' | b'_')) else {
+        return AprsData::Malformed {
+            identifier: b')',
+            information,
+        };
+    };
+
+    if separator == 0 || separator > 9 {
+        return AprsData::Malformed {
+            identifier: b')',
+            information,
+        };
+    }
+
+    AprsData::Item(Item {
+        name: &information[..separator],
+        live: information[separator] == b'!',
+        body: &information[separator + 1..],
     })
 }
 
