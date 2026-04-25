@@ -25,6 +25,8 @@ telemetry, indexing, and diagnostics.
 - `aprs-cli`: command-line packet inspector built on the library crate.
 - `aprs-transport-file`: optional file transport helper crate that reads packet
   files as bytes and returns newline-separated packet byte vectors.
+- `aprs-transport-tcp`: optional TCP transport helper crate that reads packet
+  bytes from a reader or TCP address outside the parser core.
 
 ## Install Or Depend On It
 
@@ -81,6 +83,8 @@ Run the CLI against newline-separated packets:
 ```sh
 cargo run -p aprs-cli -- --json packets.aprs
 cargo run -p aprs-cli -- packets.aprs
+cargo run -p aprs-cli -- --filter status packets.aprs
+cargo run -p aprs-cli -- --permissive packets.aprs
 cat packets.aprs | cargo run -p aprs-cli -- --json
 ```
 

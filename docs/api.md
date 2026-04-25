@@ -262,3 +262,30 @@ bytes before handing packets to the core engine.
 aprs-transport-file = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "aprs-transport-file", tag = "v0.1.2" }
 libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.1.2" }
 ```
+
+## TCP Transport Adapter
+
+Use `aprs-transport-tcp` when packet bytes come from a blocking TCP stream or
+another `Read` implementation. This keeps network I/O outside the parser core.
+
+```toml
+[dependencies]
+aprs-transport-tcp = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "aprs-transport-tcp", tag = "v0.1.2" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.1.2" }
+```
+
+```rust
+use aprs_transport_tcp::read_packet_lines_from_reader;
+use libaprs_engine::parse_packet;
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let input = std::io::Cursor::new(b"N0CALL>APRS:>hello\n");
+
+    for line in read_packet_lines_from_reader(input)? {
+        let packet = parse_packet(&line)?;
+        println!("{}", packet.aprs_data().kind_name());
+    }
+
+    Ok(())
+}
+```

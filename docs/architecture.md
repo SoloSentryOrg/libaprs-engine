@@ -74,3 +74,12 @@ The repository includes conformance fixtures, malformed packet fixtures,
 deterministic byte-fuzz tests, CLI tests, examples, a benchmark target, release
 metadata, and a release checklist. GitHub Actions can run the same Cargo
 verification commands when account policy permits jobs to start.
+
+## Optional Transports
+
+Transport adapters live outside `libaprs-engine` so the parser core remains
+network-free and focused on bytes, codec validation, policy, and semantics.
+`aprs-transport-file` handles file/stdin-style packet sources, and
+`aprs-transport-tcp` handles blocking TCP or reader-backed packet sources. Both
+adapters preserve packet bytes and hand newline-separated frames to
+`LineTransport`.

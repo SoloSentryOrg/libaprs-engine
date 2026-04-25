@@ -17,6 +17,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "aprs-transport-tcp"
+version = "0.1.2"
+dependencies = [
+ "libaprs-engine",
+]
+
+[[package]]
 name = "libaprs-engine"
 version = "0.1.2"
 dependencies = [

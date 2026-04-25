@@ -3,5 +3,6 @@ members = [
     "crates/libaprs-engine",
     "crates/aprs-cli",
     "crates/aprs-transport-file",
+    "crates/aprs-transport-tcp",
 ]
 resolver = "2"

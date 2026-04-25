@@ -1,7 +1,20 @@
 # Stability
 
-This project is pre-1.0. Public APIs are usable, but compatibility is not yet
-guaranteed under semantic versioning.
+This project is pre-1.0. Public APIs are usable, and this document defines the
+compatibility intent until a `1.0.0` release locks semantic versioning
+guarantees.
+
+## Compatibility Policy
+
+- Patch releases should not intentionally break stable-intent APIs.
+- Minor releases may add fields, variants, helper methods, crates, or feature
+  flags.
+- Breaking changes to stable-intent APIs should be reserved for minor releases
+  before `1.0.0` and called out in `CHANGELOG.md`.
+- Experimental semantic APIs may change while APRS coverage matures, but changes
+  must preserve raw-byte access and fail-closed parsing behavior.
+- Diagnostic JSON from `ParsedPacket::to_json()` remains convenience output, not
+  a compatibility-stable wire schema.
 
 ## Stable-Intent APIs
 
@@ -48,3 +61,13 @@ schema when external compatibility matters.
 
 The crate is not currently `no_std`. The `alloc` feature exists to make the
 future split explicit without promising current `no_std` compatibility.
+
+## Workspace Crates
+
+- `libaprs-engine`: stable-intent parser, engine, policy, line transport, and
+  semantic API surface.
+- `aprs-cli`: operational inspection tool; command-line flags may expand before
+  `1.0.0`.
+- `aprs-transport-file`: stable-intent file helper crate.
+- `aprs-transport-tcp`: optional TCP helper crate. Network I/O stays outside the
+  parser core.

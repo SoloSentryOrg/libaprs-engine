@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Documented pre-1.0 API compatibility policy and workspace crate stability
+  tiers.
+- Expanded conformance fixtures for telemetry metadata, checksummed NMEA, and
+  Mic-E decoding.
+- Added `aprs-transport-tcp` as an optional reader/TCP transport helper crate.
+- Added CLI `--filter` and `--permissive` inspection options.
+
 ## 0.1.2 - 2026-04-25
 
 - Added telemetry metadata semantics for `PARM.`, `UNIT.`, `EQNS.`, and

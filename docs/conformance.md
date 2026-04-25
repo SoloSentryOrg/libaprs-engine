@@ -34,3 +34,12 @@ semantic coverage and known gaps for APRS101 packet families.
 - Broader APRS101 fixture corpus with source references.
 - More exhaustive weather grammar coverage.
 - Optional strict policies for semantic checksum failures.
+
+## Fixture Coverage
+
+The checked-in fixture corpus covers representative examples for status,
+positions, compressed positions, messages, objects, items, weather, telemetry,
+telemetry metadata, query, capability, NMEA with checksum, Mic-E, Maidenhead,
+user-defined data, and third-party traffic. Fixtures are intentionally small and
+byte-preserving; future additions should include source references when they are
+derived from APRS101 examples or real packet captures.

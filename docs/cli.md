@@ -18,6 +18,19 @@ JSON diagnostic output:
 cargo run -p aprs-cli -- --json packets.aprs
 ```
 
+Filter accepted packets by semantic kind:
+
+```sh
+cargo run -p aprs-cli -- --filter status packets.aprs
+```
+
+Use permissive policy for inspection of unsupported or malformed semantic
+payloads after codec validation:
+
+```sh
+cargo run -p aprs-cli -- --permissive packets.aprs
+```
+
 Read from stdin:
 
 ```sh
@@ -32,6 +45,15 @@ cat packets.aprs | cargo run -p aprs-cli -- --json
 - Empty lines are ignored.
 - Packet bytes are passed to `LineTransport` and then `Engine`.
 - Invalid UTF-8 payload bytes are preserved and do not prevent parsing.
+
+## Options
+
+- `--json`: print compact diagnostic JSON for accepted packets.
+- `--filter SEMANTIC`: print only accepted packets whose semantic kind matches
+  `SEMANTIC`, such as `status`, `position`, or `telemetry_metadata`.
+- `--permissive`: allow unsupported and malformed semantic payloads through
+  policy for inspection.
+- `PATH`: read packet bytes from a file path instead of stdin.
 
 ## Output
 
