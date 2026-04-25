@@ -1,62 +1,137 @@
-# libaprs-engine v2
+# libaprs-engine
 
-APRS engine focused on protocol-first parsing and full APRS semantic coverage.
+Protocol-first APRS parsing and inspection for Rust.
 
-This workspace currently provides the core crate, `libaprs-engine`, with packet
-primitives, semantic classification, and a conservative codec boundary:
+`libaprs-engine` is an early, byte-preserving APRS engine. It accepts untrusted
+packet bytes, keeps the original bytes intact, rejects malformed packet shape at
+the codec boundary, and exposes structured APRS views for downstream policy,
+telemetry, indexing, and diagnostics.
 
-- Preserve raw packet bytes exactly.
-- Parse untrusted input as bytes, not strings.
-- Fail closed on empty, oversized, malformed, or non-AX.25-like packet shapes.
-- Expose source, destination, digipeater path components, and payload as byte
-  views backed by the preserved raw packet.
-- Classify the APRS data type identifier from the first payload byte.
-- Parse APRS semantic families with byte-preserving field views: status,
-  uncompressed and timestamped position, compressed position, message,
-  bulletin, announcement, acknowledgement, reject, object, item, weather,
-  telemetry, query, capability, NMEA, Mic-E, Maidenhead locator, user-defined
-  data, third-party traffic, malformed data, and unsupported data.
-- Interpret typed values for coordinates, compressed coordinates, telemetry
-  values and bits, common weather fields, and Mic-E destination-derived status
-  and latitude digits when the raw bytes are valid.
-- Provide conformance fixtures, parser resilience tests, policy decisions,
-  engine orchestration, line-oriented transports, JSON diagnostics, CLI
-  inspection, counters, and release metadata.
-- Avoid network and async dependencies in v1.
+## Project Status
 
-The parser validates the minimal
-`source>path:payload` shape plus conservative source/path address components:
-uppercase ASCII callsigns of 1-6 letters or digits, optional SSID values from
-0-15, and optional trailing `*` repeated markers on path components only.
+- Early skeleton with meaningful APRS semantics, tests, and a CLI inspector.
+- Public API is usable, but not yet covered by semantic versioning stability
+  guarantees.
+- No network, async, serialization, or transport dependencies are included.
+- GitHub Actions workflow exists, but remote execution is currently blocked by
+  account or billing policy; rely on local verification until that is resolved.
 
-## Semantic Scope
+## Workspace Crates
 
-Full APRS semantics are in scope. APRS101 packet families are represented by
-byte-preserving semantic variants while preserving these invariants:
+- `libaprs-engine`: library crate with packet types, parser, semantic views,
+  policy, engine orchestration, counters, JSON diagnostics, and line transport.
+- `aprs-cli`: command-line packet inspector built on the library crate.
 
-- Raw bytes are always retained.
-- Metadata parsing fails closed.
-- Payload semantic parsers never panic on untrusted or invalid UTF-8 bytes.
-- Typed interpretation returns optional values when a field cannot be decoded
-  without weakening byte preservation.
-- Unsupported, unknown, and malformed APRS data formats remain explicitly
-  represented instead of being guessed.
-- Dependencies stay minimal unless a protocol feature clearly justifies one.
+## Install Or Depend On It
 
-## CLI
+This repository is not published to crates.io. Use a Git dependency or a local
+path dependency.
 
-Inspect packets from stdin:
+```toml
+[dependencies]
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine" }
+```
+
+For local development from a checkout:
+
+```toml
+[dependencies]
+libaprs-engine = { path = "../libaprs-engine/crates/libaprs-engine" }
+```
+
+Rust imports use underscores:
+
+```rust
+use libaprs_engine::parse_packet;
+```
+
+## Quick Start
+
+Parse one APRS packet from bytes:
+
+```rust
+use libaprs_engine::{parse_packet, AprsData};
+
+fn main() -> Result<(), libaprs_engine::ParseError> {
+    let packet = parse_packet(b"N0CALL>APRS:>hello")?;
+
+    assert_eq!(packet.raw().as_bytes(), b"N0CALL>APRS:>hello");
+    assert_eq!(packet.source(), b"N0CALL");
+    assert_eq!(packet.destination(), b"APRS");
+
+    match packet.aprs_data() {
+        AprsData::Status(status) => {
+            assert_eq!(status.text, b"hello");
+        }
+        other => {
+            println!("semantic={}", other.kind_name());
+        }
+    }
+
+    Ok(())
+}
+```
+
+Run the CLI against newline-separated packets:
 
 ```sh
-cargo run -p aprs-cli -- --json < packets.aprs
+cargo run -p aprs-cli -- --json packets.aprs
+cargo run -p aprs-cli -- packets.aprs
+cat packets.aprs | cargo run -p aprs-cli -- --json
 ```
+
+## Security Model
+
+- Treat every packet as untrusted bytes.
+- Preserve raw input exactly for accepted packets.
+- Reject empty, oversized, malformed, or non-AX.25-like packet shape.
+- Do not trim, lowercase, normalize, or lossy-convert packet bytes before
+  calling the parser.
+- Keep payload bytes opaque; they may not be valid UTF-8.
+- Return optional typed interpretations when fields cannot be decoded safely.
+- Use `Policy` and `Engine` to apply operational rejection rules after codec
+  validation.
+
+See [Security Model](docs/security.md) for details.
+
+## Documentation
+
+- [API Guide](docs/api.md): library types, parser, engine, policy, and semantic
+  variants.
+- [CLI Guide](docs/cli.md): command-line input, output, exit behavior, and
+  examples.
+- [Examples](docs/examples.md): copyable integration patterns.
+- [Architecture](docs/architecture.md): boundaries, contracts, and pipeline.
+- [Security Model](docs/security.md): untrusted input handling and OWASP-aligned
+  controls.
+- [Verification](docs/verification.md): local checks and release gates.
+- [Release Checklist](docs/release.md): pre-release steps.
 
 ## Verification
 
-Run:
+Run the local gate before integrating changes:
 
 ```sh
 cargo test
 cargo metadata --no-deps --format-version 1
 cargo clippy --all-targets --all-features -- -D warnings
 ```
+
+## Minimal Packet Scope
+
+The codec validates a conservative `source>path:payload` shape:
+
+- `source` is an uppercase ASCII callsign of 1-6 letters or digits with optional
+  `-0` through `-15` SSID.
+- `path` contains at least one component; the first component is the
+  destination.
+- path components use the same address rules, and digipeater components may end
+  with `*`.
+- `payload` must contain at least the APRS data type identifier byte.
+- total packet length must be at most `MAX_PACKET_LEN`.
+
+Semantic parsing covers status, position, timestamped position, compressed
+position, messages, bulletins, announcements, acknowledgements, rejects,
+objects, items, weather, telemetry, queries, capabilities, NMEA, Mic-E,
+Maidenhead locator, user-defined data, third-party traffic, malformed data, and
+unsupported data.
