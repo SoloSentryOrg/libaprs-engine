@@ -27,6 +27,20 @@ fn packet_without_required_separator_fails_closed() {
 }
 
 #[test]
+fn packet_with_non_ax25_like_source_fails_closed() {
+    let err = parse_packet(b"N0 CALL>APRS:hello").expect_err("invalid source must be rejected");
+
+    assert_eq!(err, ParseError::InvalidAddress);
+}
+
+#[test]
+fn packet_with_non_ax25_like_path_fails_closed() {
+    let err = parse_packet(b"N0CALL>APRS,\nTCPIP:hello").expect_err("invalid path must be rejected");
+
+    assert_eq!(err, ParseError::InvalidAddress);
+}
+
+#[test]
 fn invalid_utf8_payload_preserves_raw_bytes_and_does_not_panic() {
     let input = b"N0CALL>APRS:\xff\xfe\xfd";
 

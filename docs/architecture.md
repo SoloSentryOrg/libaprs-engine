@@ -12,9 +12,9 @@ packet is malformed.
 
 - **Types:** own protocol data structures and preserve raw packet bytes without
   trimming, normalization, lowercasing, or lossy UTF-8 conversion.
-- **Codec:** accepts `&[u8]`, validates minimal packet shape, and returns either
-  a structured packet view or a closed error. It does not partially accept
-  malformed packets.
+- **Codec:** accepts `&[u8]`, validates minimal packet shape and conservative
+  source/path address bytes, and returns either a structured packet view or a
+  closed error. It does not partially accept malformed packets.
 - **Policy:** will apply operational constraints after codec validation. Policy
   must not repair malformed codec input.
 - **Engine:** will orchestrate validated packets and policy decisions. It should
@@ -30,10 +30,12 @@ packet is malformed.
   untrusted.
 - Parsed packet fields are borrowed views into preserved raw bytes.
 - Payload bytes are opaque and may be invalid UTF-8.
+- Source and path bytes must use the conservative address byte set accepted by
+  the codec.
 - Any malformed packet shape is rejected before policy or engine handling.
 
 ## Current Scope
 
 The first crate implements only the minimal `source>path:payload` codec
-boundary. Full APRS semantics, transports, policy rules, and CLI behavior are
-out of scope for this skeleton.
+boundary with conservative source/path validation. Full APRS semantics,
+transports, policy rules, and CLI behavior are out of scope for this skeleton.

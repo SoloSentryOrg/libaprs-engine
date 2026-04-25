@@ -67,6 +67,8 @@ pub enum ParseError {
     MissingSeparator,
     /// Packet contains an empty source, path, or payload segment.
     EmptySegment,
+    /// Packet source or path contains bytes outside the conservative address set.
+    InvalidAddress,
 }
 
 /// Parses an APRS packet from untrusted bytes.
@@ -101,6 +103,10 @@ pub fn parse_packet(input: &[u8]) -> Result<ParsedPacket, ParseError> {
         return Err(ParseError::EmptySegment);
     }
 
+    if !is_ax25_like_address(&input[..source_end]) || !is_ax25_like_path(&input[path_start..path_end]) {
+        return Err(ParseError::InvalidAddress);
+    }
+
     Ok(ParsedPacket {
         raw: RawPacket {
             bytes: input.to_vec(),
@@ -110,4 +116,16 @@ pub fn parse_packet(input: &[u8]) -> Result<ParsedPacket, ParseError> {
         path_end,
         payload_start,
     })
+}
+
+fn is_ax25_like_path(path: &[u8]) -> bool {
+    path.split(|byte| *byte == b',')
+        .all(is_ax25_like_address)
+}
+
+fn is_ax25_like_address(address: &[u8]) -> bool {
+    !address.is_empty()
+        && address
+            .iter()
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'*'))
 }

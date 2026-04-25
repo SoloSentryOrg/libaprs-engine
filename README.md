@@ -7,12 +7,12 @@ minimal packet primitives and a conservative codec boundary:
 
 - Preserve raw packet bytes exactly.
 - Parse untrusted input as bytes, not strings.
-- Fail closed on empty, oversized, or malformed packet shapes.
+- Fail closed on empty, oversized, malformed, or non-AX.25-like packet shapes.
 - Avoid network, async, serialization, and transport dependencies in v1.
 
 The initial parser intentionally validates only the minimal
-`source>path:payload` shape. It is not a complete APRS protocol
-implementation yet.
+`source>path:payload` shape plus conservative source/path address bytes. It is
+not a complete APRS protocol implementation yet.
 
 ## Verification
 
