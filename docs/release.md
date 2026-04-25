@@ -32,7 +32,7 @@
 - Tag: `v0.1.2`
 - Commit: release tag target (`git rev-list -n 1 v0.1.2`).
 - Local gate: passed on 2026-04-25.
-- Remote GitHub Actions: to be verified from the pushed release commit.
+- Remote GitHub Actions: passed on 2026-04-25 before tag creation.
 - Notes: expands APRS semantics with telemetry metadata, NMEA checksum
   inspection, Mic-E coordinate/speed/course helpers, and explicit nested
   third-party parsing.
