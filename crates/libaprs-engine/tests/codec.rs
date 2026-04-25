@@ -8,8 +8,22 @@ fn valid_packet_preserves_exact_raw_bytes() {
 
     assert_eq!(parsed.raw().as_bytes(), input);
     assert_eq!(parsed.source(), b"N0CALL");
+    assert_eq!(parsed.destination(), b"APRS");
+    assert_eq!(parsed.digipeaters(), vec![b"TCPIP*".as_slice()]);
+    assert_eq!(parsed.path_components(), vec![b"APRS".as_slice(), b"TCPIP*".as_slice()]);
     assert_eq!(parsed.path(), b"APRS,TCPIP*");
     assert_eq!(parsed.payload(), b"hello world");
+}
+
+#[test]
+fn packet_without_digipeaters_returns_empty_digipeater_list() {
+    let input = b"N0CALL>APRS:hello";
+
+    let parsed = parse_packet(input).expect("valid direct packet should parse");
+
+    assert_eq!(parsed.destination(), b"APRS");
+    assert!(parsed.digipeaters().is_empty());
+    assert_eq!(parsed.path_components(), vec![b"APRS".as_slice()]);
 }
 
 #[test]
@@ -75,6 +89,8 @@ fn valid_ssid_and_repeated_path_marker_parse() {
     let parsed = parse_packet(input).expect("valid SSID and path marker should parse");
 
     assert_eq!(parsed.source(), b"N0CALL-7");
+    assert_eq!(parsed.destination(), b"APRS");
+    assert_eq!(parsed.digipeaters(), vec![b"WIDE1-1*".as_slice()]);
     assert_eq!(parsed.path(), b"APRS,WIDE1-1*");
 }
 

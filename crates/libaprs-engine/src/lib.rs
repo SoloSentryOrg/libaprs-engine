@@ -27,6 +27,7 @@ pub struct ParsedPacket {
     source_end: usize,
     path_start: usize,
     path_end: usize,
+    path_components: Vec<(usize, usize)>,
     payload_start: usize,
 }
 
@@ -47,6 +48,31 @@ impl ParsedPacket {
     #[must_use]
     pub fn path(&self) -> &[u8] {
         &self.raw.bytes[self.path_start..self.path_end]
+    }
+
+    /// Returns the destination bytes, which are the first path component.
+    #[must_use]
+    pub fn destination(&self) -> &[u8] {
+        let (start, end) = self.path_components[0];
+        &self.raw.bytes[start..end]
+    }
+
+    /// Returns digipeater path component byte views after the destination.
+    #[must_use]
+    pub fn digipeaters(&self) -> Vec<&[u8]> {
+        self.path_components[1..]
+            .iter()
+            .map(|(start, end)| &self.raw.bytes[*start..*end])
+            .collect()
+    }
+
+    /// Returns all path component byte views, including destination first.
+    #[must_use]
+    pub fn path_components(&self) -> Vec<&[u8]> {
+        self.path_components
+            .iter()
+            .map(|(start, end)| &self.raw.bytes[*start..*end])
+            .collect()
     }
 
     /// Returns the payload bytes after the `:` separator.
@@ -103,7 +129,15 @@ pub fn parse_packet(input: &[u8]) -> Result<ParsedPacket, ParseError> {
         return Err(ParseError::EmptySegment);
     }
 
-    if !is_ax25_like_source(&input[..source_end]) || !is_ax25_like_path(&input[path_start..path_end]) {
+    let Some(path_components) = path_component_ranges(input, path_start, path_end) else {
+        return Err(ParseError::InvalidAddress);
+    };
+
+    if !is_ax25_like_source(&input[..source_end])
+        || !path_components
+            .iter()
+            .all(|(start, end)| is_ax25_like_path_component(&input[*start..*end]))
+    {
         return Err(ParseError::InvalidAddress);
     }
 
@@ -114,17 +148,40 @@ pub fn parse_packet(input: &[u8]) -> Result<ParsedPacket, ParseError> {
         source_end,
         path_start,
         path_end,
+        path_components,
         payload_start,
     })
 }
 
-fn is_ax25_like_path(path: &[u8]) -> bool {
-    path.split(|byte| *byte == b',')
-        .all(|component| is_ax25_like_address(component, true))
+fn path_component_ranges(input: &[u8], path_start: usize, path_end: usize) -> Option<Vec<(usize, usize)>> {
+    let mut components = Vec::new();
+    let mut component_start = path_start;
+
+    for (offset, byte) in input[path_start..path_end].iter().enumerate() {
+        if *byte == b',' {
+            let index = path_start + offset;
+            if component_start == index {
+                return None;
+            }
+            components.push((component_start, index));
+            component_start = index + 1;
+        }
+    }
+
+    if component_start == path_end {
+        return None;
+    }
+
+    components.push((component_start, path_end));
+    Some(components)
 }
 
 fn is_ax25_like_source(source: &[u8]) -> bool {
     is_ax25_like_address(source, false)
+}
+
+fn is_ax25_like_path_component(component: &[u8]) -> bool {
+    is_ax25_like_address(component, true)
 }
 
 fn is_ax25_like_address(address: &[u8], allow_repeated_marker: bool) -> bool {

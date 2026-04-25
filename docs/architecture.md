@@ -11,7 +11,8 @@ packet is malformed.
 ## Contracts
 
 - **Types:** own protocol data structures and preserve raw packet bytes without
-  trimming, normalization, lowercasing, or lossy UTF-8 conversion.
+  trimming, normalization, lowercasing, or lossy UTF-8 conversion. Structured
+  fields are byte views into the preserved packet.
 - **Codec:** accepts `&[u8]`, validates minimal packet shape and conservative
   source/path address bytes, and returns either a structured packet view or a
   closed error. It does not partially accept malformed packets.
@@ -29,6 +30,8 @@ packet is malformed.
 - Packet bytes crossing from transports or CLI input into the codec are
   untrusted.
 - Parsed packet fields are borrowed views into preserved raw bytes.
+- The first path component is the destination. Later path components are
+  digipeaters.
 - Payload bytes are opaque and may be invalid UTF-8.
 - Source and path bytes must use conservative address components: uppercase
   ASCII callsigns of 1-6 letters or digits, optional SSID values from 0-15, and
