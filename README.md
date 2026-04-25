@@ -2,21 +2,23 @@
 
 Protocol-first APRS parsing and inspection for Rust.
 
-`libaprs-engine` is an early, byte-preserving APRS engine. It accepts untrusted
+`libaprs-engine` is a pre-1.0, byte-preserving APRS engine. It accepts untrusted
 packet bytes, keeps the original bytes intact, rejects malformed packet shape at
 the codec boundary, and exposes structured APRS views for downstream policy,
 telemetry, indexing, and diagnostics.
 
 ## Project Status
 
-- Early skeleton with meaningful APRS semantics, tests, examples, benchmark,
-  file transport adapter, and CLI inspector.
+- Pre-1.0 APRS engine with meaningful semantics, conformance fixtures,
+  compatibility tests, examples, benchmark, optional transport adapters, and CLI
+  inspector.
 - Current tagged release: `v0.1.2`.
-- Public API is usable, but not yet covered by semantic versioning stability
-  guarantees.
+- Public API has documented pre-1.0 stability intent, but not `1.0.0`
+  semantic-versioning guarantees.
 - Core runtime remains network-free and async-free. Optional `serde`
-  diagnostics and the separate file transport adapter are available.
-- GitHub Actions workflow is active and checks Rust `1.80.0` plus stable.
+  diagnostics and separate file/TCP transport adapters are available.
+- GitHub Actions workflow is active and checks Rust `1.80.0` plus stable,
+  including formatting, tests, examples, metadata, docs, and clippy.
 
 ## Workspace Crates
 

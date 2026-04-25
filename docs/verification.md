@@ -14,12 +14,14 @@ cargo metadata --no-deps --format-version 1
 cargo doc --no-deps --all-features
 cargo bench -p libaprs-engine
 cargo +1.80.0 test --all-features
+cargo +1.80.0 clippy --all-targets --all-features -- -D warnings
 ```
 
 ## What The Checks Cover
 
 - Unit and integration tests for codec behavior.
 - Conformance fixtures for valid and malformed packets.
+- API compatibility tests for documented stable-intent API surfaces.
 - Deterministic byte-fuzz tests to catch panics and raw-byte preservation
   regressions.
 - CLI tests for stdin and invalid UTF-8 payload handling.
@@ -32,13 +34,10 @@ cargo +1.80.0 test --all-features
 
 ## Current Remote CI Status
 
-The repository contains `.github/workflows/rust-ci.yml`, but GitHub-hosted
-Actions startup is currently blocked before job creation by account, billing, or
-policy state outside this repository. Until that is resolved, use the local
-verification commands above as the authoritative gate.
-
-The `v0.1.0` tag was created from a local-only release gate with remote CI
-intentionally skipped.
+The repository contains `.github/workflows/rust-ci.yml`. It runs on pushes,
+pull requests, and manual dispatch for Rust `1.80.0` and stable. The CI gate
+checks formatting, tests, all-features tests, examples, Cargo metadata, docs,
+and clippy with warnings denied.
 
 ## Compatibility
 
@@ -47,8 +46,9 @@ at or above that version.
 
 ## Dependency Scanning
 
-The default core path remains dependency-light. When dependency use grows, add a
-release gate for one of these tools:
+The default core path remains dependency-light. The repository includes
+`deny.toml` for dependency policy. Run `cargo deny check` when `cargo-deny` is
+installed. Run `cargo audit` when `cargo-audit` is installed.
 
 ```sh
 cargo audit

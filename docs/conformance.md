@@ -43,3 +43,10 @@ telemetry metadata, query, capability, NMEA with checksum, Mic-E, Maidenhead,
 user-defined data, and third-party traffic. Fixtures are intentionally small and
 byte-preserving; future additions should include source references when they are
 derived from APRS101 examples or real packet captures.
+
+## Compatibility Coverage
+
+The conformance corpus verifies packet-family behavior. The separate
+`api_compat` test verifies documented integration APIs, including parser entry
+points, parse options, stable error codes, engine/policy flow, line transport,
+and typed helper methods.

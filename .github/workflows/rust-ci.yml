@@ -32,6 +32,9 @@ jobs:
       - name: Install clippy
         run: rustup component add clippy
 
+      - name: Format
+        run: cargo fmt --all --check
+
       - name: Test
         run: cargo test
 
@@ -40,6 +43,12 @@ jobs:
 
       - name: Test examples
         run: cargo test --examples
+
+      - name: Metadata
+        run: cargo metadata --no-deps --format-version 1
+
+      - name: Docs
+        run: cargo doc --no-deps --all-features
 
       - name: Clippy
         run: cargo clippy --all-targets --all-features -- -D warnings

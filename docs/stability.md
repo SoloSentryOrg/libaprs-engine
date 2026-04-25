@@ -11,6 +11,8 @@ guarantees.
   flags.
 - Breaking changes to stable-intent APIs should be reserved for minor releases
   before `1.0.0` and called out in `CHANGELOG.md`.
+- Stable-intent APIs are covered by `crates/libaprs-engine/tests/api_compat.rs`
+  so documented integration patterns fail in CI if they drift.
 - Experimental semantic APIs may change while APRS coverage matures, but changes
   must preserve raw-byte access and fail-closed parsing behavior.
 - Diagnostic JSON from `ParsedPacket::to_json()` remains convenience output, not

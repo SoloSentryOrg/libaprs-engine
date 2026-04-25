@@ -86,6 +86,12 @@ features may add dependencies only when they are explicitly enabled. The current
 optional `serde` feature provides owned diagnostic structures and is disabled by
 default.
 
+The repository includes `deny.toml` to make dependency expectations explicit:
+known vulnerable or yanked crates are denied, unmaintained advisories are
+warnings, wildcard dependencies are denied, and unknown registries or Git
+sources are denied. This is a local/release gate when `cargo-deny` is installed;
+it does not add runtime dependencies.
+
 ## Operational Recommendations
 
 - Log or count parse failures without echoing untrusted bytes into unsafe sinks.
@@ -95,5 +101,5 @@ default.
 - Treat `to_json()` as diagnostics; define your own stable schema for external
   APIs.
 - Run tests and clippy before accepting parser or policy changes.
-- Run `cargo audit` or `cargo deny` once dependency use expands beyond the
-  optional serialization feature.
+- Run `cargo audit` or `cargo deny check` before releases when the tools are
+  available.

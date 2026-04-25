@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Replaced early-skeleton status wording with a pre-1.0 readiness statement.
+- Added API compatibility tests for documented stable-intent parser, engine,
+  policy, transport, and helper APIs.
+- Added dependency policy configuration in `deny.toml`.
+- Expanded CI to check formatting, Cargo metadata, and documentation.
+- Updated verification and security docs to reflect active GitHub Actions and
+  dependency scanning policy.
 - Documented pre-1.0 API compatibility policy and workspace crate stability
   tiers.
 - Expanded conformance fixtures for telemetry metadata, checksummed NMEA, and
