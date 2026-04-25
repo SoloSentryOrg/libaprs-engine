@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0
+## 0.1.0 - 2026-04-25
 
 - Added byte-preserving APRS packet parsing.
 - Added APRS semantic packet family representation.

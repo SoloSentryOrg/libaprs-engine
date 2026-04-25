@@ -5,12 +5,15 @@ Run local verification before using a new revision or submitting a change.
 ## Required Local Checks
 
 ```sh
+cargo fmt --all --check
 cargo test
-cargo metadata --no-deps --format-version 1
-cargo clippy --all-targets --all-features -- -D warnings
 cargo test --all-features
 cargo test --examples
+cargo clippy --all-targets --all-features -- -D warnings
+cargo metadata --no-deps --format-version 1
+cargo doc --no-deps --all-features
 cargo bench -p libaprs-engine
+cargo +1.80.0 test --all-features
 ```
 
 ## What The Checks Cover
@@ -33,6 +36,9 @@ The repository contains `.github/workflows/rust-ci.yml`, but GitHub-hosted
 Actions startup is currently blocked before job creation by account, billing, or
 policy state outside this repository. Until that is resolved, use the local
 verification commands above as the authoritative gate.
+
+The `v0.1.0` tag was created from a local-only release gate with remote CI
+intentionally skipped.
 
 ## Compatibility
 

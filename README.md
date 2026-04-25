@@ -10,6 +10,7 @@ telemetry, indexing, and diagnostics.
 ## Project Status
 
 - Early skeleton with meaningful APRS semantics, tests, and a CLI inspector.
+- Current tagged release: `v0.1.0`.
 - Public API is usable, but not yet covered by semantic versioning stability
   guarantees.
 - No network, async, serialization, or transport dependencies are included.
@@ -31,7 +32,7 @@ path dependency.
 
 ```toml
 [dependencies]
-libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.1.0" }
 ```
 
 For local development from a checkout:
@@ -116,9 +117,11 @@ See [Security Model](docs/security.md) for details.
 Run the local gate before integrating changes:
 
 ```sh
-cargo test
-cargo metadata --no-deps --format-version 1
+cargo fmt --all --check
+cargo test --all-features
+cargo test --examples
 cargo clippy --all-targets --all-features -- -D warnings
+cargo metadata --no-deps --format-version 1
 ```
 
 ## Minimal Packet Scope
