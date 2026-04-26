@@ -19,6 +19,10 @@
 - Confirm `CHANGELOG.md` describes the release.
 - Confirm crate publish order in `docs/publishing.md` when publishing to
   crates.io.
+- In restricted environments where `~/.cargo` is not writable, use
+  `CARGO_HOME=/tmp/libaprs-cargo-home` for audit, deny, semver, package, and
+  publish commands. Copy crates.io credentials into that temporary Cargo home
+  only at runtime when publishing.
 
 ## Remote Gate
 

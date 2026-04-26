@@ -43,3 +43,31 @@ path = "fuzz_targets/mqtt_topic.rs"
 test = false
 doc = false
 bench = false
+
+[[bin]]
+name = "weather_semantics"
+path = "fuzz_targets/weather_semantics.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "telemetry_semantics"
+path = "fuzz_targets/telemetry_semantics.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "message_semantics"
+path = "fuzz_targets/message_semantics.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "third_party_semantics"
+path = "fuzz_targets/third_party_semantics.rs"
+test = false
+doc = false
+bench = false

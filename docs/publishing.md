@@ -71,6 +71,18 @@ Authenticate with crates.io outside the repository:
 cargo login
 ```
 
+In restricted environments where `~/.cargo` is not writable, keep Cargo state
+outside the repository:
+
+```sh
+mkdir -p /tmp/libaprs-cargo-home
+cp "$HOME/.cargo/credentials.toml" /tmp/libaprs-cargo-home/credentials.toml
+CARGO_HOME=/tmp/libaprs-cargo-home cargo publish -p libaprs-engine
+```
+
+Do not commit Cargo credentials, registry caches, package caches, advisory
+databases, or temporary Cargo homes.
+
 Publish in dependency order:
 
 ```sh

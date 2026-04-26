@@ -58,6 +58,8 @@ installed:
 - A simple parser throughput benchmark.
 - Optional cargo-fuzz targets for the parser, KISS decoder, AX.25 decoder, and
   MQTT topic matcher.
+- Optional semantic-family fuzz targets for weather, telemetry, messages, and
+  explicit third-party nested parsing.
 
 ## Benchmark Threshold
 
@@ -80,10 +82,37 @@ cargo fuzz run parse_packet
 cargo fuzz run kiss_decode
 cargo fuzz run ax25_decode
 cargo fuzz run mqtt_topic
+cargo fuzz run weather_semantics
+cargo fuzz run telemetry_semantics
+cargo fuzz run message_semantics
+cargo fuzz run third_party_semantics
 ```
+
+Seed corpora live under `fuzz/corpus/` and include representative parser and
+semantic-family packets. Add minimized regression inputs there only when they
+are safe to publish and do not contain private station or operator data.
 
 Fuzz findings should be reduced to deterministic regression tests before
 merging parser or transport changes.
+
+## Restricted Cargo Home
+
+Some sandboxed development environments can read `~/.cargo` but cannot write
+registry, package-cache, advisory, or lock files there. In those environments,
+use a writable temporary Cargo home outside the repository:
+
+```sh
+mkdir -p /tmp/libaprs-cargo-home
+CARGO_HOME=/tmp/libaprs-cargo-home cargo audit
+CARGO_HOME=/tmp/libaprs-cargo-home cargo deny check
+CARGO_HOME=/tmp/libaprs-cargo-home cargo semver-checks check-release -p libaprs-engine
+```
+
+For publishing from a restricted environment, copy crates.io credentials into
+that temporary Cargo home at runtime only, then run `cargo publish` with
+`CARGO_HOME=/tmp/libaprs-cargo-home`. Do not store Cargo credentials, registry
+caches, package caches, advisory databases, or temporary Cargo homes inside the
+repository.
 
 ## Current Remote CI Status
 
