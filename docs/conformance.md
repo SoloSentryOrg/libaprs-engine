@@ -16,7 +16,7 @@ semantic coverage and known gaps for APRS101 packet families.
 | Reject | Supported | Message kind | `rej` prefix |
 | Object | Supported | Name, liveness, timestamp, body | Body preserved |
 | Item | Supported | Name, liveness, body | Body preserved |
-| Weather | Supported | Common numeric fields | Full weather grammar not exhaustive |
+| Weather | Supported | Common numeric fields, luminosity, snow, raw rain counter | Invalid optional fields are ignored |
 | Telemetry | Supported | Sequence, analog, digital bits | Report values preserved and numerically decoded when safe |
 | Telemetry metadata | Supported | Parameter names, units, equations, bit sense | `PARM.`, `UNIT.`, `EQNS.`, and `BITS.` message packets |
 | Query | Supported | Query bytes | Query body preserved |
@@ -31,7 +31,6 @@ semantic coverage and known gaps for APRS101 packet families.
 
 ## Future Conformance Work
 
-- More exhaustive weather grammar coverage.
 - Optional strict policies for semantic checksum failures.
 
 ## Fixture Coverage

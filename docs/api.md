@@ -9,7 +9,7 @@ Use the package name `libaprs-engine` in `Cargo.toml` and the crate name
 
 ```toml
 [dependencies]
-libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.3.0" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.4.0" }
 ```
 
 For a local checkout:
@@ -142,7 +142,8 @@ Current semantic families include:
 Semantic helper methods include:
 
 - `Position::coordinates()` and `CompressedPosition::coordinates()`
-- `Weather::fields()`
+- `Weather::fields()` for wind, temperature, rain, humidity, pressure,
+  luminosity, snow, and raw rain counter values
 - `Telemetry::sequence_number()`, `Telemetry::analog_values()`, and
   `Telemetry::digital_bits()`
 - `TelemetryMetadata::fields()`
@@ -294,7 +295,7 @@ raw bytes as byte arrays rather than assuming UTF-8.
 libaprs-engine = {
   git = "https://github.com/elodiejmirza/libaprs-engine",
   package = "libaprs-engine",
-  tag = "v0.3.0",
+  tag = "v0.4.0",
   features = ["serde"]
 }
 ```
@@ -309,8 +310,8 @@ application-owned.
 
 ```toml
 [dependencies]
-aprs-transport-aprs-is = "0.3.0"
-libaprs-engine = "0.3.0"
+aprs-transport-aprs-is = "0.4.0"
+libaprs-engine = "0.4.0"
 ```
 
 ```rust
@@ -321,7 +322,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let login = AprsIsLogin {
         callsign: "N0CALL",
         passcode: -1,
-        software: "libaprs-engine 0.3.0",
+        software: "libaprs-engine 0.4.0",
         filter: Some("r/49/-72/50"),
     };
     assert!(login.line()?.ends_with("\r\n"));
@@ -354,8 +355,8 @@ bytes before handing packets to the core engine.
 
 ```toml
 [dependencies]
-aprs-transport-file = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "aprs-transport-file", tag = "v0.3.0" }
-libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.3.0" }
+aprs-transport-file = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "aprs-transport-file", tag = "v0.4.0" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.4.0" }
 ```
 
 ## TCP Transport Adapter
@@ -365,8 +366,8 @@ another `Read` implementation. This keeps network I/O outside the parser core.
 
 ```toml
 [dependencies]
-aprs-transport-tcp = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "aprs-transport-tcp", tag = "v0.3.0" }
-libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.3.0" }
+aprs-transport-tcp = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "aprs-transport-tcp", tag = "v0.4.0" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.4.0" }
 ```
 
 ```rust

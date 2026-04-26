@@ -36,6 +36,15 @@
 - If remote CI is intentionally skipped, tag only after the local gate passes
   and the skipped remote gate is documented.
 
+## v0.4.0 Release Evidence
+
+- Tag: `v0.4.0`
+- Commit: release tag target (`git rev-list -n 1 v0.4.0` after tagging).
+- Local gate: release verification for `0.4.0`.
+- Remote GitHub Actions: release verification for `0.4.0` after push.
+- Notes: expands APRS weather semantic extraction for luminosity, snow, raw
+  rain counters, and signed temperatures.
+
 ## v0.3.0 Release Evidence
 
 - Tag: `v0.3.0`

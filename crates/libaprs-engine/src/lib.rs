@@ -668,6 +668,11 @@ impl Weather<'_> {
                 }
             }),
             pressure_tenths_hpa: parse_tagged_u16(self.report, b'b', 5),
+            luminosity_watts_per_square_meter: parse_tagged_u16(self.report, b'L', 3),
+            luminosity_1000_plus_watts_per_square_meter: parse_tagged_u16(self.report, b'l', 3)
+                .map(|value| value + 1000),
+            snow_last_24_hours_inches: parse_tagged_u16(self.report, b'S', 3),
+            raw_rain_counter: parse_tagged_u16(self.report, b'#', 3),
         }
     }
 }
@@ -695,6 +700,14 @@ pub struct WeatherFields<'a> {
     pub humidity_percent: Option<u16>,
     /// Barometric pressure in tenths of hPa.
     pub pressure_tenths_hpa: Option<u16>,
+    /// Luminosity in watts per square meter from `Lnnn`.
+    pub luminosity_watts_per_square_meter: Option<u16>,
+    /// Luminosity in watts per square meter from `lnnn`, representing 1000+.
+    pub luminosity_1000_plus_watts_per_square_meter: Option<u16>,
+    /// Snowfall in the last 24 hours, in inches.
+    pub snow_last_24_hours_inches: Option<u16>,
+    /// Raw rain counter value from `#nnn`.
+    pub raw_rain_counter: Option<u16>,
 }
 
 /// APRS telemetry report fields.

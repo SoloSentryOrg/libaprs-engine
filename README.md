@@ -16,7 +16,7 @@ telemetry, indexing, and diagnostics.
 - Pre-1.0 APRS engine with meaningful semantics, conformance fixtures,
   compatibility tests, examples, benchmark, optional transport adapters, and CLI
   inspector.
-- Current tagged release: `v0.3.0`.
+- Current tagged release: `v0.4.0`.
 - Public API has documented pre-1.0 stability intent, but not `1.0.0`
   semantic-versioning guarantees.
 - Core runtime remains network-free and async-free. Optional `serde`
@@ -71,27 +71,27 @@ Use crates.io:
 
 ```toml
 [dependencies]
-libaprs-engine = "0.3.0"
-aprs-transport-file = "0.3.0"
-aprs-transport-tcp = "0.3.0"
-aprs-transport-aprs-is = "0.3.0"
-aprs-transport-kiss = "0.3.0"
-aprs-transport-serial = "0.3.0"
-aprs-transport-udp = "0.3.0"
-aprs-transport-http = "0.3.0"
-aprs-transport-file-watch = "0.3.0"
-aprs-transport-mqtt = "0.3.0"
-aprs-transport-ax25 = "0.3.0"
-aprs-transport-corpus = "0.3.0"
-aprs-transport-channel = "0.3.0"
-aprs-transport-async = "0.3.0"
+libaprs-engine = "0.4.0"
+aprs-transport-file = "0.4.0"
+aprs-transport-tcp = "0.4.0"
+aprs-transport-aprs-is = "0.4.0"
+aprs-transport-kiss = "0.4.0"
+aprs-transport-serial = "0.4.0"
+aprs-transport-udp = "0.4.0"
+aprs-transport-http = "0.4.0"
+aprs-transport-file-watch = "0.4.0"
+aprs-transport-mqtt = "0.4.0"
+aprs-transport-ax25 = "0.4.0"
+aprs-transport-corpus = "0.4.0"
+aprs-transport-channel = "0.4.0"
+aprs-transport-async = "0.4.0"
 ```
 
 Use a Git dependency when testing unreleased changes from this repository.
 
 ```toml
 [dependencies]
-libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.3.0" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.4.0" }
 ```
 
 For local development from a checkout:

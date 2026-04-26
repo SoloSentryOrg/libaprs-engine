@@ -70,10 +70,10 @@ Semantic parsing must remain byte-preserving and fail closed. Unknown,
 unsupported, and malformed data must be represented explicitly rather than
 silently coerced into another type. Typed interpretation currently covers
 decimal coordinates, compressed coordinates, telemetry sequence/value/bit
-fields, telemetry metadata fields, common weather fields, NMEA checksum
-inspection, Mic-E coordinates/speed/course when decodable, and explicit nested
-third-party parsing. Transports, policy rules, and CLI behavior remain separate
-layers from protocol semantics.
+fields, telemetry metadata fields, weather fields, NMEA checksum inspection,
+Mic-E coordinates/speed/course when decodable, and explicit nested third-party
+parsing. Transports, policy rules, and CLI behavior remain separate layers from
+protocol semantics.
 
 ## Verification And Release
 

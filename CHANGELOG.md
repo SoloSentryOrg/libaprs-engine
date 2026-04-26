@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.4.0 - 2026-04-26
+
+- Expanded weather field extraction to include negative temperatures,
+  luminosity, 1000-plus luminosity, 24-hour snowfall, and raw rain counters.
+- Added malformed-weather field tests so invalid optional fields are ignored
+  without rejecting or mutating preserved packet bytes.
+- Bumped all workspace crates to `0.4.0`.
+
 ## 0.3.0 - 2026-04-26
 
 - Expanded the APRS101 conformance fixture corpus with source-referenced

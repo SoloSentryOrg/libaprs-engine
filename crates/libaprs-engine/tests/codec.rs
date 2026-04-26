@@ -329,8 +329,9 @@ fn weather_semantics_preserve_weather_bytes() {
 
 #[test]
 fn weather_semantics_extract_numeric_fields() {
-    let parsed = parse_packet(b"N0CALL>APRS:_092345c220s004g010t077r001p002P003h50b10150")
-        .expect("weather should parse");
+    let parsed =
+        parse_packet(b"N0CALL>APRS:_092345c220s004g010t-05r001p002P003h50b10150L123l045S006#789")
+            .expect("weather should parse");
     let AprsData::Weather(weather) = parsed.aprs_data() else {
         panic!("expected weather");
     };
@@ -342,12 +343,45 @@ fn weather_semantics_extract_numeric_fields() {
             wind_direction_degrees: Some(220),
             wind_speed_mph: Some(4),
             wind_gust_mph: Some(10),
-            temperature_fahrenheit: Some(77),
+            temperature_fahrenheit: Some(-5),
             rain_last_hour_hundredths_inch: Some(1),
             rain_last_24_hours_hundredths_inch: Some(2),
             rain_since_midnight_hundredths_inch: Some(3),
             humidity_percent: Some(50),
             pressure_tenths_hpa: Some(10150),
+            luminosity_watts_per_square_meter: Some(123),
+            luminosity_1000_plus_watts_per_square_meter: Some(1045),
+            snow_last_24_hours_inches: Some(6),
+            raw_rain_counter: Some(789),
+        }
+    );
+}
+
+#[test]
+fn weather_semantics_ignore_malformed_optional_fields() {
+    let parsed = parse_packet(b"N0CALL>APRS:_abcdefcxxxs004g010t---r001p002P003h00b1015L12lxxS0#7")
+        .expect("weather should parse");
+    let AprsData::Weather(weather) = parsed.aprs_data() else {
+        panic!("expected weather");
+    };
+
+    assert_eq!(
+        weather.fields(),
+        WeatherFields {
+            timestamp: None,
+            wind_direction_degrees: None,
+            wind_speed_mph: Some(4),
+            wind_gust_mph: Some(10),
+            temperature_fahrenheit: None,
+            rain_last_hour_hundredths_inch: Some(1),
+            rain_last_24_hours_hundredths_inch: Some(2),
+            rain_since_midnight_hundredths_inch: Some(3),
+            humidity_percent: Some(100),
+            pressure_tenths_hpa: None,
+            luminosity_watts_per_square_meter: None,
+            luminosity_1000_plus_watts_per_square_meter: None,
+            snow_last_24_hours_inches: None,
+            raw_rain_counter: None,
         }
     );
 }
