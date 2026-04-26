@@ -1,6 +1,6 @@
 [package]
 name = "aprs-cli"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 rust-version = "1.80"
 license = "MIT"
@@ -11,4 +11,4 @@ keywords = ["aprs", "cli", "packet", "radio"]
 categories = ["command-line-utilities", "parser-implementations"]
 
 [dependencies]
-libaprs-engine = { version = "0.1.2", path = "../libaprs-engine" }
+libaprs-engine = { version = "0.1.3", path = "../libaprs-engine" }

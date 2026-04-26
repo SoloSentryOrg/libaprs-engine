@@ -16,7 +16,7 @@ telemetry, indexing, and diagnostics.
 - Pre-1.0 APRS engine with meaningful semantics, conformance fixtures,
   compatibility tests, examples, benchmark, optional transport adapters, and CLI
   inspector.
-- Current tagged release: `v0.1.2`.
+- Current tagged release: `v0.1.3`.
 - Public API has documented pre-1.0 stability intent, but not `1.0.0`
   semantic-versioning guarantees.
 - Core runtime remains network-free and async-free. Optional `serde`
@@ -50,20 +50,21 @@ telemetry, indexing, and diagnostics.
 
 ## Install Or Depend On It
 
-Use crates.io after publication:
+Use crates.io:
 
 ```toml
 [dependencies]
-libaprs-engine = "0.1.2"
-aprs-transport-file = "0.1.2"
-aprs-transport-tcp = "0.1.2"
+libaprs-engine = "0.1.3"
+aprs-transport-file = "0.1.3"
+aprs-transport-tcp = "0.1.3"
+aprs-transport-aprs-is = "0.1.3"
 ```
 
-Until crates are published, use a Git dependency or a local path dependency.
+Use a Git dependency when testing unreleased changes from this repository.
 
 ```toml
 [dependencies]
-libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.1.2" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.1.3" }
 ```
 
 For local development from a checkout:

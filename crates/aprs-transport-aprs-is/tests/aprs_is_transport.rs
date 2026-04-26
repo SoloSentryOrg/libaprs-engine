@@ -9,13 +9,13 @@ fn aprs_is_login_line_includes_filter_and_crlf() {
     let login = AprsIsLogin {
         callsign: "N0CALL",
         passcode: -1,
-        software: "libaprs-engine 0.1.2",
+        software: "libaprs-engine 0.1.3",
         filter: Some("r/49/-72/50"),
     };
 
     assert_eq!(
         login.line().expect("valid login line"),
-        "user N0CALL pass -1 vers libaprs-engine 0.1.2 filter r/49/-72/50\r\n"
+        "user N0CALL pass -1 vers libaprs-engine 0.1.3 filter r/49/-72/50\r\n"
     );
 }
 
@@ -24,7 +24,7 @@ fn aprs_is_login_line_rejects_line_injection() {
     let login = AprsIsLogin {
         callsign: "N0CALL\r\nbad",
         passcode: -1,
-        software: "libaprs-engine 0.1.2",
+        software: "libaprs-engine 0.1.3",
         filter: None,
     };
 

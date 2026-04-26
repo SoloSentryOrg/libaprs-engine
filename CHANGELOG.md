@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.1.3 - 2026-04-26
+
 - Added `aprs-transport-aprs-is` for APRS-IS login-line framing and
   reader-backed packet splitting, including CR/LF login-field rejection and
   bounded reader input.

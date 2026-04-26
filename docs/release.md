@@ -32,6 +32,16 @@
 - If remote CI is intentionally skipped, tag only after the local gate passes
   and the skipped remote gate is documented.
 
+## v0.1.3 Release Evidence
+
+- Tag: `v0.1.3`
+- Commit: release tag target (`git rev-list -n 1 v0.1.3`).
+- Local gate: release verification for `0.1.3`.
+- Remote GitHub Actions: release verification for `0.1.3`.
+- Notes: adds APRS-IS transport helpers, structured packet summaries, CLI
+  operator controls, downstream smoke checks, security workflow, and
+  documentation/readiness updates.
+
 ## v0.1.2 Release Evidence
 
 - Tag: `v0.1.2`
@@ -50,7 +60,7 @@
 - Remote GitHub Actions: passed on 2026-04-25:
   <https://github.com/elodiejmirza/libaprs-engine/actions/runs/24937390267>.
 - Notes: supersedes `v0.1.0` with MSRV clippy compatibility and Node.js
-  24-compatible checkout action. Superseded by `v0.1.2`.
+  24-compatible checkout action. Superseded by `v0.1.2` and `v0.1.3`.
 
 ## v0.1.0 Release Evidence
 
@@ -59,4 +69,4 @@
 - Local gate passed.
 - Remote GitHub Actions was skipped because startup is blocked before job
   creation by account, billing, or policy state outside this repository.
-- Superseded by `v0.1.1` and `v0.1.2`.
+- Superseded by `v0.1.1`, `v0.1.2`, and `v0.1.3`.
