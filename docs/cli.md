@@ -10,6 +10,7 @@ Text output:
 
 ```sh
 cargo run -p aprs-cli -- packets.aprs
+cargo run -p aprs-cli -- parse packets.aprs
 ```
 
 JSON diagnostic output:
@@ -37,6 +38,30 @@ Read from stdin:
 cat packets.aprs | cargo run -p aprs-cli -- --json
 ```
 
+Validate input without printing each accepted packet:
+
+```sh
+cargo run -p aprs-cli -- validate packets.aprs
+```
+
+Print aggregate counters only:
+
+```sh
+cargo run -p aprs-cli -- stats packets.aprs
+```
+
+Explain rejections with stable diagnostic codes:
+
+```sh
+cargo run -p aprs-cli -- explain packets.aprs
+```
+
+Replay accepted packet bytes:
+
+```sh
+cargo run -p aprs-cli -- replay --permissive packets.aprs
+```
+
 ## Input Rules
 
 - Input is read as raw bytes.
@@ -45,9 +70,17 @@ cat packets.aprs | cargo run -p aprs-cli -- --json
 - Empty lines are ignored.
 - Packet bytes are passed to `LineTransport` and then `Engine`.
 - Invalid UTF-8 payload bytes are preserved and do not prevent parsing.
+- File and stdin input are bounded by `DEFAULT_TRANSPORT_READ_LIMIT`.
+- Oversized CLI input fails with exit code `2` and the stable diagnostic
+  `transport.oversized_input`.
 
 ## Options
 
+- `parse`: default inspection command.
+- `validate`: print validity and counters without accepted packet details.
+- `stats`: print aggregate counters only.
+- `explain`: print parse or policy diagnostic codes for non-accepted packets.
+- `replay`: emit accepted raw packet bytes with LF separators.
 - `--json`: print compact diagnostic JSON for accepted packets.
 - `--explain`: include stable parse or policy codes with malformed/rejected
   output.

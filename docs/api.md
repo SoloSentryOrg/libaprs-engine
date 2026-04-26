@@ -9,7 +9,7 @@ Use the package name `libaprs-engine` in `Cargo.toml` and the crate name
 
 ```toml
 [dependencies]
-libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.1.5" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.2.0" }
 ```
 
 For a local checkout:
@@ -179,6 +179,21 @@ println!(
 );
 ```
 
+An engine can also process a packet source directly:
+
+```rust
+use libaprs_engine::{Engine, LineTransport, Policy};
+
+fn main() -> std::io::Result<()> {
+    let mut engine = Engine::new(Policy::permissive());
+    let mut source = LineTransport::new(b"N0CALL>APRS:>one\n");
+    let results = engine.process_source(&mut source)?;
+
+    assert_eq!(results.len(), 1);
+    Ok(())
+}
+```
+
 Strict policy rejects unsupported semantics, malformed semantics, and excessive
 path component counts. Permissive policy allows unsupported and malformed
 semantic variants while keeping codec validation fail-closed.
@@ -211,6 +226,29 @@ fn main() -> Result<(), libaprs_engine::ParseError> {
     Ok(())
 }
 ```
+
+`LineTransport` also implements the shared `PacketSource` trait. `Vec<Vec<u8>>`
+implements `PacketSink` for tests, examples, and in-process adapters.
+
+```rust
+use libaprs_engine::{LineTransport, PacketSink, PacketSource};
+
+fn main() -> std::io::Result<()> {
+    let mut source = LineTransport::new(b"N0CALL>APRS:>one\n");
+    let mut sink = Vec::new();
+
+    for packet in source.recv_packets()? {
+        sink.send_packet(&packet)?;
+    }
+
+    Ok(())
+}
+```
+
+Transport helpers use byte limits rather than unbounded reads. The shared
+default is `DEFAULT_TRANSPORT_READ_LIMIT`, and oversized transport input returns
+an `InvalidData` I/O error whose message is the stable code
+`transport.oversized_input`.
 
 ## JSON Diagnostics
 
@@ -256,7 +294,7 @@ raw bytes as byte arrays rather than assuming UTF-8.
 libaprs-engine = {
   git = "https://github.com/elodiejmirza/libaprs-engine",
   package = "libaprs-engine",
-  tag = "v0.1.5",
+  tag = "v0.2.0",
   features = ["serde"]
 }
 ```
@@ -271,8 +309,8 @@ application-owned.
 
 ```toml
 [dependencies]
-aprs-transport-aprs-is = "0.1.5"
-libaprs-engine = "0.1.5"
+aprs-transport-aprs-is = "0.2.0"
+libaprs-engine = "0.2.0"
 ```
 
 ```rust
@@ -283,7 +321,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let login = AprsIsLogin {
         callsign: "N0CALL",
         passcode: -1,
-        software: "libaprs-engine 0.1.5",
+        software: "libaprs-engine 0.2.0",
         filter: Some("r/49/-72/50"),
     };
     assert!(login.line()?.ends_with("\r\n"));
@@ -316,8 +354,8 @@ bytes before handing packets to the core engine.
 
 ```toml
 [dependencies]
-aprs-transport-file = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "aprs-transport-file", tag = "v0.1.5" }
-libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.1.5" }
+aprs-transport-file = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "aprs-transport-file", tag = "v0.2.0" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.2.0" }
 ```
 
 ## TCP Transport Adapter
@@ -327,8 +365,8 @@ another `Read` implementation. This keeps network I/O outside the parser core.
 
 ```toml
 [dependencies]
-aprs-transport-tcp = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "aprs-transport-tcp", tag = "v0.1.5" }
-libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.1.5" }
+aprs-transport-tcp = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "aprs-transport-tcp", tag = "v0.2.0" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.2.0" }
 ```
 
 ```rust

@@ -11,7 +11,10 @@ mod transport;
 #[cfg(feature = "serde")]
 pub mod serde_support;
 
-pub use transport::LineTransport;
+pub use transport::{
+    oversized_input_error, read_all_with_limit, LineTransport, PacketSink, PacketSource,
+    TransportErrorCode, DEFAULT_TRANSPORT_READ_LIMIT,
+};
 
 /// Conservative upper bound for an APRS packet handled by this skeleton.
 pub const MAX_PACKET_LEN: usize = 512;
@@ -230,6 +233,26 @@ impl Engine {
                 EngineResult::ParseError(error)
             }
         }
+    }
+
+    /// Processes a caller-provided packet batch in order.
+    pub fn process_packets<I, P>(&mut self, packets: I) -> Vec<EngineResult>
+    where
+        I: IntoIterator<Item = P>,
+        P: AsRef<[u8]>,
+    {
+        packets
+            .into_iter()
+            .map(|packet| self.process(packet.as_ref()))
+            .collect()
+    }
+
+    /// Reads one bounded batch from a packet source and processes it in order.
+    pub fn process_source<S>(&mut self, source: &mut S) -> Result<Vec<EngineResult>, S::Error>
+    where
+        S: PacketSource,
+    {
+        Ok(self.process_packets(source.recv_packets()?))
     }
 
     /// Returns engine counters.

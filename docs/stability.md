@@ -13,6 +13,9 @@ guarantees.
   before `1.0.0` and called out in `CHANGELOG.md`.
 - Stable-intent APIs are covered by `crates/libaprs-engine/tests/api_compat.rs`
   so documented integration patterns fail in CI if they drift.
+- Release checks should run `cargo-semver-checks` when installed. Pre-1.0
+  semver still allows breaking changes in minor releases, but semver output
+  must be reviewed before publishing.
 - Experimental semantic APIs may change while APRS coverage matures, but changes
   must preserve raw-byte access and fail-closed parsing behavior.
 - Diagnostic JSON from `ParsedPacket::to_json()` remains convenience output, not
@@ -33,6 +36,11 @@ types may still change before 1.0:
 - `Engine`
 - `Policy`
 - `LineTransport`
+- `PacketSource`
+- `PacketSink`
+- `TransportErrorCode::code`
+- `DEFAULT_TRANSPORT_READ_LIMIT`
+- `read_all_with_limit`
 
 ## Experimental APIs
 

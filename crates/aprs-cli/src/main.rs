@@ -1,9 +1,9 @@
 use std::env;
-use std::fs;
-use std::io::{self, Read};
+use std::fs::File;
+use std::io::{self, Write};
 use std::process::ExitCode;
 
-use libaprs_engine::{Engine, EngineResult, LineTransport, Policy};
+use libaprs_engine::{read_all_with_limit, Engine, EngineResult, LineTransport, Policy};
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 struct CliOptions {
@@ -11,9 +11,20 @@ struct CliOptions {
     permissive: bool,
     explain: bool,
     summary: bool,
+    command: CommandMode,
     fail_on: FailOn,
     filter: Option<String>,
     input_path: Option<String>,
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+enum CommandMode {
+    #[default]
+    Parse,
+    Validate,
+    Stats,
+    Explain,
+    Replay,
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -50,26 +61,45 @@ fn run() -> Result<ExitCode, String> {
         match engine.process(line) {
             EngineResult::Accepted { packet }
                 if !matches_filter(&options, packet.aprs_data().kind_name()) => {}
-            EngineResult::Accepted { packet } if options.json => println!("{}", packet.to_json()),
-            EngineResult::Accepted { packet } => println!(
-                "accepted source={} destination={} semantic={}",
-                lossy(packet.source()),
-                lossy(packet.destination()),
-                packet.aprs_data().kind_name()
-            ),
+            EngineResult::Accepted { packet } => match options.command {
+                CommandMode::Validate | CommandMode::Stats => {}
+                CommandMode::Replay => {
+                    io::stdout()
+                        .write_all(packet.raw().as_bytes())
+                        .map_err(|err| format!("failed to write packet: {err}"))?;
+                    io::stdout()
+                        .write_all(b"\n")
+                        .map_err(|err| format!("failed to write newline: {err}"))?;
+                }
+                CommandMode::Parse | CommandMode::Explain if options.json => {
+                    println!("{}", packet.to_json());
+                }
+                CommandMode::Parse | CommandMode::Explain => println!(
+                    "accepted source={} destination={} semantic={}",
+                    lossy(packet.source()),
+                    lossy(packet.destination()),
+                    packet.aprs_data().kind_name()
+                ),
+            },
             EngineResult::Rejected { reason, .. } => {
                 rejected = true;
-                if options.explain {
+                if options.command == CommandMode::Explain || options.explain {
                     println!("rejected reason={reason:?} code={}", reason.code());
-                } else {
+                } else if options.command != CommandMode::Validate
+                    && options.command != CommandMode::Stats
+                    && options.command != CommandMode::Replay
+                {
                     println!("rejected reason={reason:?}");
                 }
             }
             EngineResult::ParseError(error) => {
                 malformed = true;
-                if options.explain {
+                if options.command == CommandMode::Explain || options.explain {
                     println!("malformed error={error:?} code={}", error.code());
-                } else {
+                } else if options.command != CommandMode::Validate
+                    && options.command != CommandMode::Stats
+                    && options.command != CommandMode::Replay
+                {
                     println!("malformed error={error:?}");
                 }
             }
@@ -77,7 +107,20 @@ fn run() -> Result<ExitCode, String> {
     }
 
     let counters = engine.counters();
-    if options.summary {
+    if options.command == CommandMode::Validate {
+        if rejected || malformed {
+            println!(
+                "invalid accepted={} rejected={} malformed={}",
+                counters.accepted, counters.rejected, counters.malformed
+            );
+        } else {
+            println!(
+                "valid accepted={} rejected={} malformed={}",
+                counters.accepted, counters.rejected, counters.malformed
+            );
+        }
+    }
+    if options.summary || options.command == CommandMode::Stats {
         println!(
             "summary accepted={} rejected={} malformed={}",
             counters.accepted, counters.rejected, counters.malformed
@@ -101,6 +144,14 @@ fn parse_args(args: impl IntoIterator<Item = String>) -> Result<CliOptions, Stri
 
     while let Some(arg) = args.next() {
         match arg.as_str() {
+            "parse" => options.command = CommandMode::Parse,
+            "validate" => options.command = CommandMode::Validate,
+            "stats" => options.command = CommandMode::Stats,
+            "explain" => {
+                options.command = CommandMode::Explain;
+                options.explain = true;
+            }
+            "replay" => options.command = CommandMode::Replay,
             "--json" => options.json = true,
             "--permissive" => options.permissive = true,
             "--explain" => options.explain = true,
@@ -156,14 +207,13 @@ fn matches_filter(options: &CliOptions, semantic: &str) -> bool {
 
 fn read_input(path: Option<&str>) -> Result<Vec<u8>, String> {
     match path {
-        Some(path) => fs::read(path).map_err(|err| format!("failed to read {path}: {err}")),
-        None => {
-            let mut input = Vec::new();
-            io::stdin()
-                .read_to_end(&mut input)
-                .map_err(|err| format!("failed to read stdin: {err}"))?;
-            Ok(input)
-        }
+        Some(path) => read_all_with_limit(
+            File::open(path).map_err(|err| format!("failed to open {path}: {err}"))?,
+            libaprs_engine::DEFAULT_TRANSPORT_READ_LIMIT,
+        )
+        .map_err(|err| format!("failed to read {path}: {err}")),
+        None => read_all_with_limit(io::stdin(), libaprs_engine::DEFAULT_TRANSPORT_READ_LIMIT)
+            .map_err(|err| format!("failed to read stdin: {err}")),
     }
 }
 
@@ -172,5 +222,5 @@ fn lossy(bytes: &[u8]) -> String {
 }
 
 fn usage() -> String {
-    "usage: aprs-cli [--json] [--permissive] [--explain] [--summary] [--filter SEMANTIC] [--fail-on none|malformed|rejected] [PATH]".to_string()
+    "usage: aprs-cli [parse|validate|stats|explain|replay] [--json] [--permissive] [--explain] [--summary] [--filter SEMANTIC] [--fail-on none|malformed|rejected] [PATH]".to_string()
 }

@@ -1,3 +1,75 @@
+use std::io::{self, Read};
+
+/// Default maximum byte batch accepted by transport helper readers.
+pub const DEFAULT_TRANSPORT_READ_LIMIT: usize = 1024 * 1024;
+
+/// Stable transport diagnostic categories for logs and external systems.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum TransportErrorCode {
+    /// Input exceeded the configured byte limit.
+    OversizedInput,
+    /// Input framing was invalid for the transport.
+    InvalidFrame,
+    /// Transport reached EOF before a complete packet/frame was available.
+    UnexpectedEof,
+    /// Transport operation timed out.
+    Timeout,
+    /// Underlying I/O failed.
+    Io,
+}
+
+impl TransportErrorCode {
+    /// Returns a stable machine-readable diagnostic code.
+    #[must_use]
+    pub const fn code(self) -> &'static str {
+        match self {
+            Self::OversizedInput => "transport.oversized_input",
+            Self::InvalidFrame => "transport.invalid_frame",
+            Self::UnexpectedEof => "transport.unexpected_eof",
+            Self::Timeout => "transport.timeout",
+            Self::Io => "transport.io",
+        }
+    }
+}
+
+/// Common packet-source contract for transport adapters.
+pub trait PacketSource {
+    /// Source-specific error type.
+    type Error;
+
+    /// Reads a bounded batch of packet byte vectors.
+    fn recv_packets(&mut self) -> Result<Vec<Vec<u8>>, Self::Error>;
+}
+
+/// Common packet-sink contract for transport adapters.
+pub trait PacketSink {
+    /// Sink-specific error type.
+    type Error;
+
+    /// Sends one packet byte slice without mutating or normalizing it.
+    fn send_packet(&mut self, packet: &[u8]) -> Result<(), Self::Error>;
+}
+
+/// Reads all available bytes from a reader while enforcing a hard limit.
+pub fn read_all_with_limit(mut reader: impl Read, max_bytes: usize) -> io::Result<Vec<u8>> {
+    let mut input = Vec::new();
+    let mut limited = (&mut reader).take(max_bytes.saturating_add(1) as u64);
+    limited.read_to_end(&mut input)?;
+    if input.len() > max_bytes {
+        return Err(oversized_input_error());
+    }
+    Ok(input)
+}
+
+/// Creates the standard oversized-input transport error.
+#[must_use]
+pub fn oversized_input_error() -> io::Error {
+    io::Error::new(
+        io::ErrorKind::InvalidData,
+        TransportErrorCode::OversizedInput.code(),
+    )
+}
+
 /// Line-oriented packet source for file/stdin style transports.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LineTransport<'a> {
@@ -19,6 +91,23 @@ impl<'a> LineTransport<'a> {
             .map(trim_trailing_carriage_return)
             .filter(|line| !line.is_empty())
             .collect()
+    }
+}
+
+impl PacketSource for LineTransport<'_> {
+    type Error = io::Error;
+
+    fn recv_packets(&mut self) -> Result<Vec<Vec<u8>>, Self::Error> {
+        Ok(self.packets().into_iter().map(<[u8]>::to_vec).collect())
+    }
+}
+
+impl PacketSink for Vec<Vec<u8>> {
+    type Error = io::Error;
+
+    fn send_packet(&mut self, packet: &[u8]) -> Result<(), Self::Error> {
+        self.push(packet.to_vec());
+        Ok(())
     }
 }
 

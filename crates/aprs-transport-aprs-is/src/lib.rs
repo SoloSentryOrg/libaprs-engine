@@ -8,7 +8,7 @@
 
 use std::io::{self, Read};
 
-use libaprs_engine::LineTransport;
+use libaprs_engine::{read_all_with_limit, LineTransport};
 
 /// Default maximum APRS-IS reader batch size.
 pub const DEFAULT_MAX_APRS_IS_READ_BYTES: usize = 1024 * 1024;
@@ -106,16 +106,7 @@ pub fn read_packet_lines(input: &[u8]) -> Vec<Vec<u8>> {
 }
 
 fn read_all(reader: impl Read, max_bytes: usize) -> io::Result<Vec<u8>> {
-    let mut input = Vec::new();
-    let mut reader = reader.take(max_bytes.saturating_add(1) as u64);
-    reader.read_to_end(&mut input)?;
-    if input.len() > max_bytes {
-        return Err(io::Error::new(
-            io::ErrorKind::InvalidData,
-            "APRS-IS reader input exceeds configured byte limit",
-        ));
-    }
-    Ok(input)
+    read_all_with_limit(reader, max_bytes)
 }
 
 fn validate_login_field(field: &'static str, value: &str) -> Result<(), AprsIsLoginError> {

@@ -24,10 +24,15 @@ fn main() -> Result<(), libaprs_engine::ParseError> {
 ## Process A Packet File
 
 ```rust
-use libaprs_engine::{Engine, EngineResult, LineTransport, Policy};
+use std::fs::File;
+
+use libaprs_engine::{
+    read_all_with_limit, Engine, EngineResult, LineTransport, Policy,
+    DEFAULT_TRANSPORT_READ_LIMIT,
+};
 
 fn main() -> std::io::Result<()> {
-    let input = std::fs::read("packets.aprs")?;
+    let input = read_all_with_limit(File::open("packets.aprs")?, DEFAULT_TRANSPORT_READ_LIMIT)?;
     let mut engine = Engine::new(Policy::strict());
 
     for packet_bytes in LineTransport::new(&input).packets() {
@@ -51,13 +56,30 @@ fn main() -> std::io::Result<()> {
 ## Use The File Transport Crate
 
 ```rust
-use aprs_transport_file::read_packet_lines_from_path;
+use aprs_transport_file::read_packet_lines_from_path_with_limit;
 use libaprs_engine::parse_packet;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    for packet_bytes in read_packet_lines_from_path("packets.aprs")? {
+    for packet_bytes in read_packet_lines_from_path_with_limit("packets.aprs", 256 * 1024)? {
         let packet = parse_packet(&packet_bytes).map_err(|error| error.code())?;
         println!("{}", packet.aprs_data().kind_name());
+    }
+
+    Ok(())
+}
+```
+
+## Use The Shared Transport Contract
+
+```rust
+use libaprs_engine::{LineTransport, PacketSink, PacketSource};
+
+fn main() -> std::io::Result<()> {
+    let mut source = LineTransport::new(b"N0CALL>APRS:>one\nN1CALL>APRS:>two\n");
+    let mut packets = Vec::new();
+
+    for packet in source.recv_packets()? {
+        packets.send_packet(&packet)?;
     }
 
     Ok(())

@@ -1,4 +1,8 @@
-use libaprs_engine::{Engine, EngineResult, LineTransport, Policy};
+use std::fs::File;
+
+use libaprs_engine::{
+    read_all_with_limit, Engine, EngineResult, LineTransport, Policy, DEFAULT_TRANSPORT_READ_LIMIT,
+};
 
 fn main() -> std::io::Result<()> {
     let Some(path) = std::env::args().nth(1) else {
@@ -6,7 +10,7 @@ fn main() -> std::io::Result<()> {
         std::process::exit(2);
     };
 
-    let input = std::fs::read(path)?;
+    let input = read_all_with_limit(File::open(path)?, DEFAULT_TRANSPORT_READ_LIMIT)?;
     let mut engine = Engine::new(Policy::strict());
 
     for packet_bytes in LineTransport::new(&input).packets() {

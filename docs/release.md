@@ -32,6 +32,16 @@
 - If remote CI is intentionally skipped, tag only after the local gate passes
   and the skipped remote gate is documented.
 
+## v0.2.0 Release Evidence
+
+- Tag: `v0.2.0`
+- Commit: release tag target (`git rev-list -n 1 v0.2.0` after tagging).
+- Local gate: release verification for `0.2.0`.
+- Remote GitHub Actions: release verification for `0.2.0` after push.
+- Notes: adds shared transport contracts, bounded transport I/O hardening,
+  engine source processing, CLI subcommands, fuzz scaffolding, semver/fuzz
+  release gates, and benchmark threshold support.
+
 ## v0.1.5 Release Evidence
 
 - Tag: `v0.1.5`

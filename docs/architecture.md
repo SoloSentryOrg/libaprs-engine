@@ -35,7 +35,10 @@ The workspace keeps the core parser crate separate from adapters:
   does not parse raw transport bytes directly.
 - **Transports:** supply bytes from external systems. Transport crates may
   frame, split, or copy bytes for their source protocol, but they do not parse
-  APRS semantics or lossy-convert payloads before the codec boundary.
+  APRS semantics or lossy-convert payloads before the codec boundary. Shared
+  `PacketSource` and `PacketSink` traits define the minimal adapter contract,
+  and helper readers enforce explicit byte limits before allocating full
+  batches.
 - **CLI:** exposes engine behavior for packet inspection with text and JSON
   diagnostics without weakening parser or policy failure modes.
 
@@ -90,4 +93,6 @@ filtering, `aprs-transport-kiss` handles KISS byte stuffing, and the remaining
 transport crates cover serial-like readers, UDP datagrams, HTTP bodies,
 append-only packet files, MQTT payloads, AX.25 UI frames, corpus replay,
 in-process channels, and runtime-neutral async splitting. These adapters
-preserve packet bytes and hand APRS packet bytes to the codec unchanged.
+preserve packet bytes and hand APRS packet bytes to the codec unchanged. File,
+TCP, serial-like, APRS-IS, corpus, and file-watch helpers expose bounded default
+reads plus explicit `*_with_limit` variants for application-specific limits.

@@ -1,6 +1,7 @@
 use libaprs_engine::{
     parse_packet, parse_packet_with_options, AprsData, Engine, EngineResult, LineTransport,
-    ParseError, ParseOptions, Policy, PolicyRejection,
+    PacketSink, PacketSource, ParseError, ParseOptions, Policy, PolicyRejection,
+    TransportErrorCode,
 };
 
 #[test]
@@ -88,4 +89,32 @@ fn structured_packet_summary_exposes_decoded_details() {
     let summary = position.summary();
     assert_eq!(summary.semantic, "position");
     assert!(summary.coordinates.is_some());
+}
+
+#[test]
+fn transport_contracts_and_codes_remain_usable() {
+    let mut source = LineTransport::new(b"N0CALL>APRS:>one\nN1CALL>APRS:>two\n");
+    let packets = source.recv_packets().expect("line transport source");
+
+    let mut sink = Vec::new();
+    for packet in &packets {
+        sink.send_packet(packet).expect("vec sink");
+    }
+
+    assert_eq!(sink, packets);
+    assert_eq!(
+        TransportErrorCode::OversizedInput.code(),
+        "transport.oversized_input"
+    );
+}
+
+#[test]
+fn engine_can_process_packet_sources() {
+    let mut engine = Engine::new(Policy::permissive());
+    let mut source = LineTransport::new(b"N0CALL>APRS:>one\nN1CALL>APRS:~two\n");
+
+    let results = engine.process_source(&mut source).expect("source batch");
+
+    assert_eq!(results.len(), 2);
+    assert_eq!(engine.counters().accepted, 2);
 }

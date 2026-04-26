@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+## 0.2.0 - 2026-04-26
+
+- Added shared transport contracts with `PacketSource`, `PacketSink`,
+  `TransportErrorCode`, `DEFAULT_TRANSPORT_READ_LIMIT`, and
+  `read_all_with_limit`.
+- Added `Engine::process_packets` and `Engine::process_source` for direct
+  engine integration with packet sources.
+- Hardened CLI, file, TCP, APRS-IS, serial-like, HTTP, corpus, and file-watch
+  input paths with bounded reads and stable `transport.oversized_input`
+  diagnostics.
+- Added CLI subcommands for `parse`, `validate`, `stats`, `explain`, and
+  `replay` while keeping existing flag-oriented usage compatible.
+- Added cargo-fuzz target scaffolding for parser, KISS, AX.25, and MQTT topic
+  handling.
+- Added release verification script, optional semver/fuzz gates, benchmark
+  threshold support, and updated integration documentation.
+- Bumped all workspace crates to `0.2.0`.
+
 ## 0.1.5 - 2026-04-26
 
 - Changed UDP datagram reads to fail closed when a datagram exceeds the

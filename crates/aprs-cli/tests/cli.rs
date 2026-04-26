@@ -1,5 +1,7 @@
 use std::process::Command;
 
+use libaprs_engine::DEFAULT_TRANSPORT_READ_LIMIT;
+
 #[test]
 fn cli_reads_json_packets_from_stdin() {
     let binary = env!("CARGO_BIN_EXE_aprs-cli");
@@ -88,6 +90,90 @@ fn cli_fail_on_none_allows_observability_without_failure_exit() {
         .expect("CLI should run");
 
     assert!(output.status.success());
+}
+
+#[test]
+fn cli_rejects_oversized_file_input() {
+    let binary = env!("CARGO_BIN_EXE_aprs-cli");
+    let path = std::env::temp_dir().join(format!("libaprs-cli-limit-{}", std::process::id()));
+    std::fs::write(&path, vec![b'A'; DEFAULT_TRANSPORT_READ_LIMIT + 1]).expect("write");
+
+    let output = Command::new(binary)
+        .arg(&path)
+        .output()
+        .expect("CLI should run");
+
+    assert_eq!(output.status.code(), Some(2));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("transport.oversized_input"));
+    let _ = std::fs::remove_file(path);
+}
+
+#[test]
+fn cli_validate_command_reports_validity() {
+    let binary = env!("CARGO_BIN_EXE_aprs-cli");
+    let output = Command::new(binary)
+        .arg("validate")
+        .output_with_stdin(b"N0CALL>APRS:>hello\n")
+        .expect("CLI should run");
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8(output.stdout).expect("stdout should be utf8");
+    assert!(stdout.contains("valid accepted=1 rejected=0 malformed=0"));
+}
+
+#[test]
+fn cli_stats_command_prints_only_summary_to_stdout() {
+    let binary = env!("CARGO_BIN_EXE_aprs-cli");
+    let output = Command::new(binary)
+        .arg("stats")
+        .output_with_stdin(b"N0CALL>APRS:>hello\n")
+        .expect("CLI should run");
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8(output.stdout).expect("stdout should be utf8");
+    assert_eq!(stdout.trim(), "summary accepted=1 rejected=0 malformed=0");
+}
+
+#[test]
+fn cli_explain_command_prints_stable_codes() {
+    let binary = env!("CARGO_BIN_EXE_aprs-cli");
+    let output = Command::new(binary)
+        .arg("explain")
+        .output_with_stdin(b"N0CALL>APRS:~opaque\n")
+        .expect("CLI should run");
+
+    assert!(!output.status.success());
+    let stdout = String::from_utf8(output.stdout).expect("stdout should be utf8");
+    assert!(stdout.contains("code=policy.unsupported_semantics"));
+}
+
+#[test]
+fn cli_replay_command_preserves_accepted_packet_bytes() {
+    let binary = env!("CARGO_BIN_EXE_aprs-cli");
+    let output = Command::new(binary)
+        .arg("replay")
+        .arg("--permissive")
+        .output_with_stdin(b"N0CALL>APRS:>\xff\nN1CALL>APRS:~opaque\n")
+        .expect("CLI should run");
+
+    assert!(output.status.success());
+    assert_eq!(
+        output.stdout,
+        b"N0CALL>APRS:>\xff\nN1CALL>APRS:~opaque\n".to_vec()
+    );
+}
+
+#[test]
+fn cli_replay_command_does_not_mix_rejections_into_packet_stream() {
+    let binary = env!("CARGO_BIN_EXE_aprs-cli");
+    let output = Command::new(binary)
+        .arg("replay")
+        .output_with_stdin(b"N0CALL>APRS:>ok\nN1CALL>APRS:~opaque\n")
+        .expect("CLI should run");
+
+    assert!(!output.status.success());
+    assert_eq!(output.stdout, b"N0CALL>APRS:>ok\n".to_vec());
 }
 
 trait CommandStdinExt {

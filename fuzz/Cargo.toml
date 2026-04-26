@@ -1,0 +1,45 @@
+[package]
+name = "libaprs-engine-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[workspace]
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+aprs-transport-ax25 = { path = "../crates/aprs-transport-ax25" }
+aprs-transport-kiss = { path = "../crates/aprs-transport-kiss" }
+aprs-transport-mqtt = { path = "../crates/aprs-transport-mqtt" }
+libaprs-engine = { path = "../crates/libaprs-engine" }
+libfuzzer-sys = "0.4"
+
+[[bin]]
+name = "parse_packet"
+path = "fuzz_targets/parse_packet.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "kiss_decode"
+path = "fuzz_targets/kiss_decode.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "ax25_decode"
+path = "fuzz_targets/ax25_decode.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "mqtt_topic"
+path = "fuzz_targets/mqtt_topic.rs"
+test = false
+doc = false
+bench = false

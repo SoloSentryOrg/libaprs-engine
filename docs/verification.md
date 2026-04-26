@@ -14,10 +14,30 @@ cargo metadata --no-deps --format-version 1
 cargo doc --no-deps --all-features
 cargo package -p libaprs-engine
 cargo bench -p libaprs-engine
+cargo fmt --manifest-path fuzz/Cargo.toml --all --check
 cargo +1.80.0 test --all-features
 cargo +1.80.0 clippy --all-targets --all-features -- -D warnings
 cargo check --manifest-path examples/downstream-smoke/Cargo.toml
 ```
+
+The repository also provides a local release gate script:
+
+```sh
+scripts/verify-release.sh
+```
+
+Before crates are published, the script skips the crates.io downstream smoke
+project by default. After publishing, run:
+
+```sh
+LIBAPRS_RUN_DOWNSTREAM_SMOKE=1 scripts/verify-release.sh
+```
+
+The script runs the core checks and uses optional gates when the tools are
+installed:
+
+- `cargo-semver-checks` for public API compatibility.
+- `cargo-fuzz` for fuzz target compile checks.
 
 ## What The Checks Cover
 
@@ -36,6 +56,34 @@ cargo check --manifest-path examples/downstream-smoke/Cargo.toml
 - A downstream smoke project that consumes the published crates from crates.io.
 - Optional feature coverage, including serde diagnostics.
 - A simple parser throughput benchmark.
+- Optional cargo-fuzz targets for the parser, KISS decoder, AX.25 decoder, and
+  MQTT topic matcher.
+
+## Benchmark Threshold
+
+`parser_throughput` can enforce a local threshold when
+`LIBAPRS_MAX_NS_PER_PACKET` is set:
+
+```sh
+LIBAPRS_MAX_NS_PER_PACKET=5000 cargo bench -p libaprs-engine
+```
+
+Leave the variable unset for informational benchmark runs.
+
+## Fuzzing
+
+Install `cargo-fuzz` and run targets from the repository root:
+
+```sh
+cargo install cargo-fuzz
+cargo fuzz run parse_packet
+cargo fuzz run kiss_decode
+cargo fuzz run ax25_decode
+cargo fuzz run mqtt_topic
+```
+
+Fuzz findings should be reduced to deterministic regression tests before
+merging parser or transport changes.
 
 ## Current Remote CI Status
 

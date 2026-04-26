@@ -16,7 +16,7 @@ telemetry, indexing, and diagnostics.
 - Pre-1.0 APRS engine with meaningful semantics, conformance fixtures,
   compatibility tests, examples, benchmark, optional transport adapters, and CLI
   inspector.
-- Current tagged release: `v0.1.5`.
+- Current tagged release: `v0.2.0`.
 - Public API has documented pre-1.0 stability intent, but not `1.0.0`
   semantic-versioning guarantees.
 - Core runtime remains network-free and async-free. Optional `serde`
@@ -27,7 +27,8 @@ telemetry, indexing, and diagnostics.
 ## Workspace Crates
 
 - `libaprs-engine`: library crate with packet types, parser, semantic views,
-  policy, engine orchestration, counters, JSON diagnostics, and line transport.
+  policy, engine orchestration, counters, JSON diagnostics, shared transport
+  contracts, bounded-read helpers, and line transport.
 - `aprs-cli`: command-line packet inspector built on the library crate.
 - `aprs-transport-file`: optional file transport helper crate that reads packet
   files as bytes and returns newline-separated packet byte vectors.
@@ -70,27 +71,27 @@ Use crates.io:
 
 ```toml
 [dependencies]
-libaprs-engine = "0.1.5"
-aprs-transport-file = "0.1.5"
-aprs-transport-tcp = "0.1.5"
-aprs-transport-aprs-is = "0.1.5"
-aprs-transport-kiss = "0.1.5"
-aprs-transport-serial = "0.1.5"
-aprs-transport-udp = "0.1.5"
-aprs-transport-http = "0.1.5"
-aprs-transport-file-watch = "0.1.5"
-aprs-transport-mqtt = "0.1.5"
-aprs-transport-ax25 = "0.1.5"
-aprs-transport-corpus = "0.1.5"
-aprs-transport-channel = "0.1.5"
-aprs-transport-async = "0.1.5"
+libaprs-engine = "0.2.0"
+aprs-transport-file = "0.2.0"
+aprs-transport-tcp = "0.2.0"
+aprs-transport-aprs-is = "0.2.0"
+aprs-transport-kiss = "0.2.0"
+aprs-transport-serial = "0.2.0"
+aprs-transport-udp = "0.2.0"
+aprs-transport-http = "0.2.0"
+aprs-transport-file-watch = "0.2.0"
+aprs-transport-mqtt = "0.2.0"
+aprs-transport-ax25 = "0.2.0"
+aprs-transport-corpus = "0.2.0"
+aprs-transport-channel = "0.2.0"
+aprs-transport-async = "0.2.0"
 ```
 
 Use a Git dependency when testing unreleased changes from this repository.
 
 ```toml
 [dependencies]
-libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.1.5" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.2.0" }
 ```
 
 For local development from a checkout:
@@ -151,6 +152,9 @@ cat packets.aprs | cargo run -p aprs-cli -- --json
 - Do not trim, lowercase, normalize, or lossy-convert packet bytes before
   calling the parser.
 - Keep payload bytes opaque; they may not be valid UTF-8.
+- Use bounded transport reads. The default helper limit is
+  `DEFAULT_TRANSPORT_READ_LIMIT`, and oversized transport input reports
+  `transport.oversized_input`.
 - Return optional typed interpretations when fields cannot be decoded safely.
 - Use `Policy` and `Engine` to apply operational rejection rules after codec
   validation.
@@ -183,6 +187,12 @@ cargo test --all-features
 cargo test --examples
 cargo clippy --all-targets --all-features -- -D warnings
 cargo metadata --no-deps --format-version 1
+```
+
+For the fuller local release gate, run:
+
+```sh
+scripts/verify-release.sh
 ```
 
 ## Minimal Packet Scope

@@ -29,6 +29,13 @@ The current trusted boundary is:
 untrusted bytes -> LineTransport -> parse_packet -> ParsedPacket -> AprsData -> Policy -> EngineResult
 ```
 
+Transport helper crates must also enforce bounded reads before splitting or
+framing packets. The shared default limit is
+`libaprs_engine::DEFAULT_TRANSPORT_READ_LIMIT`. Callers that need a different
+limit should use the explicit `*_with_limit` APIs and select the smallest value
+that fits their source. Oversized batches fail closed with
+`transport.oversized_input`.
+
 ## Address Validation
 
 The codec accepts a conservative `source>path:payload` packet envelope:
@@ -54,7 +61,11 @@ bytes. Use `Vec<u8>`, `&[u8]`, and `LineTransport`.
 Safe:
 
 ```rust
-let bytes = std::fs::read("packets.aprs")?;
+let file = std::fs::File::open("packets.aprs")?;
+let bytes = libaprs_engine::read_all_with_limit(
+    file,
+    libaprs_engine::DEFAULT_TRANSPORT_READ_LIMIT,
+)?;
 for packet in libaprs_engine::LineTransport::new(&bytes).packets() {
     let result = libaprs_engine::parse_packet(packet);
 }
@@ -98,6 +109,8 @@ it does not add runtime dependencies.
 - Keep raw packet bytes for audit and replay.
 - Enforce an upper bound on transport buffers before calling the engine in
   long-running services.
+- Prefer shared `PacketSource` and `PacketSink` adapters when composing
+  transports, so packet batches and sink behavior remain byte-oriented.
 - Treat `to_json()` as diagnostics; define your own stable schema for external
   APIs.
 - Run tests and clippy before accepting parser or policy changes.
