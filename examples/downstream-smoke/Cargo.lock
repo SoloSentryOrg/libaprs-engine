@@ -4,43 +4,143 @@ version = 4
 
 [[package]]
 name = "aprs-transport-aprs-is"
-version = "0.1.3"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e9e9c7e6c7580aa7cb566ecd738c7b17f83a6125c00aac6bf23400edfcfa39f9"
+checksum = "a9cef17870a5f6474ef2fb532823f73fe34123f78b501c16ecb6b4f9d16106a1"
+dependencies = [
+ "libaprs-engine",
+]
+
+[[package]]
+name = "aprs-transport-async"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e69a314882fbb74d6642ff581458693726e1b9ca651fa66336f267e293bd6a01"
+dependencies = [
+ "libaprs-engine",
+]
+
+[[package]]
+name = "aprs-transport-ax25"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bd1d37295422314b490484b6f04f55525218dc59708cb432f4029a52baf33624"
+dependencies = [
+ "libaprs-engine",
+]
+
+[[package]]
+name = "aprs-transport-channel"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a7742bcf0c3abfe753aab186356649689fc237aff4fc2e20576dde3a0e5f1125"
+dependencies = [
+ "libaprs-engine",
+]
+
+[[package]]
+name = "aprs-transport-corpus"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "58cf15636e27f93fb62d945cb2dcec69b6171fd4cf50f191dd67fb3dc0e685b5"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-file"
-version = "0.1.3"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a189e06ce6ad4d34a91f811c095c6ec98ee05f0e4c8824a262c9123cd22ebf54"
+checksum = "2c0a95d719207e452e50ef66356e2ba9ddf3b2cb64489911d15d8d59c485b705"
+dependencies = [
+ "libaprs-engine",
+]
+
+[[package]]
+name = "aprs-transport-file-watch"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eeea2b327d02ed773915cfc2bb425693e526bef5ea528bf728725d227f4bda52"
+dependencies = [
+ "libaprs-engine",
+]
+
+[[package]]
+name = "aprs-transport-http"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ade747979e9a63a2ed186fb22231fe8094a9dc9c5e4c967b8617aea19cb0dca1"
+dependencies = [
+ "libaprs-engine",
+]
+
+[[package]]
+name = "aprs-transport-kiss"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f458c4de0ca5967f7711d4180e5c58b6e32974e800bc8e3d039f5ba5287e6aaf"
+dependencies = [
+ "libaprs-engine",
+]
+
+[[package]]
+name = "aprs-transport-mqtt"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "51658396fd2fd16153adbf885def5f95c59febb996035d9b305f3021ea80be49"
+dependencies = [
+ "libaprs-engine",
+]
+
+[[package]]
+name = "aprs-transport-serial"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ff1ead82dee6bd5b62eeff1d62a147aa9d2c7e829e1b7ceefaf8e124603a674e"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-tcp"
-version = "0.1.3"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8d0ef122ea8021f01c9693736fc3ce5e7ec1768e33dfceb0737ecdeb6e0c440b"
+checksum = "1f1d51955cbd2d6a1270c77d2fb6c768a27086efd2e2369e25f216209326a69c"
+dependencies = [
+ "libaprs-engine",
+]
+
+[[package]]
+name = "aprs-transport-udp"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f3acb55f94213ee8835e1ef9481f4018eb9eecfcda97154c216e53158d42e603"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "libaprs-engine"
-version = "0.1.3"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "580cdafde3c5f42a9bb7659c084ebd480721c56f9b6b67480cca8b51ab0be4dd"
+checksum = "314b84815739a1581db8679a10c3bf2c38cec6fe20454053deec3a942443cf94"
 
 [[package]]
 name = "libaprs-engine-downstream-smoke"
 version = "0.1.0"
 dependencies = [
  "aprs-transport-aprs-is",
+ "aprs-transport-async",
+ "aprs-transport-ax25",
+ "aprs-transport-channel",
+ "aprs-transport-corpus",
  "aprs-transport-file",
+ "aprs-transport-file-watch",
+ "aprs-transport-http",
+ "aprs-transport-kiss",
+ "aprs-transport-mqtt",
+ "aprs-transport-serial",
  "aprs-transport-tcp",
+ "aprs-transport-udp",
  "libaprs-engine",
 ]

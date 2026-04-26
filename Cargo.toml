@@ -3,7 +3,17 @@ members = [
     "crates/libaprs-engine",
     "crates/aprs-cli",
     "crates/aprs-transport-aprs-is",
+    "crates/aprs-transport-async",
+    "crates/aprs-transport-ax25",
+    "crates/aprs-transport-channel",
+    "crates/aprs-transport-corpus",
     "crates/aprs-transport-file",
+    "crates/aprs-transport-file-watch",
+    "crates/aprs-transport-http",
+    "crates/aprs-transport-kiss",
+    "crates/aprs-transport-mqtt",
+    "crates/aprs-transport-serial",
     "crates/aprs-transport-tcp",
+    "crates/aprs-transport-udp",
 ]
 resolver = "2"

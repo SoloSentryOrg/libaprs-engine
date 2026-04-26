@@ -1,0 +1,14 @@
+[package]
+name = "aprs-transport-mqtt"
+version = "0.1.5"
+edition = "2021"
+rust-version = "1.80"
+license = "MIT"
+description = "MQTT payload helpers for libaprs-engine"
+repository = "https://github.com/elodiejmirza/libaprs-engine"
+readme = "../../README.md"
+keywords = ["aprs", "mqtt", "packet", "transport"]
+categories = ["parser-implementations", "encoding"]
+
+[dependencies]
+libaprs-engine = { version = "0.1.5", path = "../libaprs-engine" }

@@ -73,3 +73,10 @@ future split explicit without promising current `no_std` compatibility.
 - `aprs-transport-file`: stable-intent file helper crate.
 - `aprs-transport-tcp`: optional TCP helper crate. Network I/O stays outside the
   parser core.
+- `aprs-transport-aprs-is`, `aprs-transport-kiss`, `aprs-transport-serial`,
+  `aprs-transport-udp`, `aprs-transport-http`,
+  `aprs-transport-file-watch`, `aprs-transport-mqtt`,
+  `aprs-transport-ax25`, `aprs-transport-corpus`,
+  `aprs-transport-channel`, and `aprs-transport-async`: optional transport
+  helper crates. APIs may expand before `1.0.0`, but byte preservation remains
+  a stable design constraint.

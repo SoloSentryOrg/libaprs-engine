@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+## 0.1.5 - 2026-04-26
+
+- Changed UDP datagram reads to fail closed when a datagram exceeds the
+  configured byte limit instead of risking silent truncation.
+- Bumped all workspace crates to `0.1.5`.
+
+## 0.1.4 - 2026-04-26
+
+- Added transport helper crates for KISS, serial/readers, UDP datagrams, HTTP
+  bodies, append-only file watching, MQTT payloads, AX.25 UI frames, corpus
+  replay, in-process channels, and runtime-neutral async splitting.
+- Bumped all workspace crates to `0.1.4`.
+- Expanded downstream smoke coverage to include every published transport crate.
+
 ## 0.1.3 - 2026-04-26
 
 - Added `aprs-transport-aprs-is` for APRS-IS login-line framing and

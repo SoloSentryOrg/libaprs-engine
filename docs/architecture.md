@@ -14,6 +14,10 @@ The workspace keeps the core parser crate separate from adapters:
   and the byte-oriented line splitter.
 - `aprs-transport-file`: optional file adapter crate that reads packet files as
   bytes and delegates splitting to the core line transport.
+- transport adapter crates: optional boundaries for TCP, APRS-IS, KISS,
+  serial-like readers, UDP datagrams, HTTP bodies, append-only files, MQTT
+  payloads, AX.25 UI frames, corpus replay, in-process channels, and
+  runtime-neutral async splitting.
 - `aprs-cli`: inspection binary that exercises the engine from stdin or files.
 
 ## Contracts
@@ -29,9 +33,9 @@ The workspace keeps the core parser crate separate from adapters:
   does not repair malformed codec input.
 - **Engine:** orchestrates codec, semantics, policy decisions, and counters. It
   does not parse raw transport bytes directly.
-- **Transports:** supply bytes from external systems. Current transport support
-  is line-oriented file/stdin input and a separate file adapter crate. Both pass
-  packet bytes to the codec unchanged.
+- **Transports:** supply bytes from external systems. Transport crates may
+  frame, split, or copy bytes for their source protocol, but they do not parse
+  APRS semantics or lossy-convert payloads before the codec boundary.
 - **CLI:** exposes engine behavior for packet inspection with text and JSON
   diagnostics without weakening parser or policy failure modes.
 
@@ -80,7 +84,10 @@ verification commands when account policy permits jobs to start.
 Transport adapters live outside `libaprs-engine` so the parser core remains
 network-free and focused on bytes, codec validation, policy, and semantics.
 `aprs-transport-file` handles file/stdin-style packet sources,
-`aprs-transport-tcp` handles blocking TCP or reader-backed packet sources, and
+`aprs-transport-tcp` handles blocking TCP or reader-backed packet sources,
 `aprs-transport-aprs-is` handles APRS-IS login framing plus APRS-IS comment
-filtering. These adapters preserve packet bytes and hand newline-separated
-frames to `LineTransport`.
+filtering, `aprs-transport-kiss` handles KISS byte stuffing, and the remaining
+transport crates cover serial-like readers, UDP datagrams, HTTP bodies,
+append-only packet files, MQTT payloads, AX.25 UI frames, corpus replay,
+in-process channels, and runtime-neutral async splitting. These adapters
+preserve packet bytes and hand APRS packet bytes to the codec unchanged.

@@ -1,0 +1,14 @@
+[package]
+name = "aprs-transport-kiss"
+version = "0.1.5"
+edition = "2021"
+rust-version = "1.80"
+license = "MIT"
+description = "KISS frame helpers for libaprs-engine"
+repository = "https://github.com/elodiejmirza/libaprs-engine"
+readme = "../../README.md"
+keywords = ["aprs", "kiss", "packet", "tnc"]
+categories = ["parser-implementations", "encoding"]
+
+[dependencies]
+libaprs-engine = { version = "0.1.5", path = "../libaprs-engine" }

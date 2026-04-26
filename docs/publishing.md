@@ -12,12 +12,22 @@ Publish crates in dependency order:
 2. `aprs-transport-file`
 3. `aprs-transport-tcp`
 4. `aprs-transport-aprs-is`
-5. `aprs-cli`
+5. `aprs-transport-async`
+6. `aprs-transport-ax25`
+7. `aprs-transport-channel`
+8. `aprs-transport-corpus`
+9. `aprs-transport-file-watch`
+10. `aprs-transport-http`
+11. `aprs-transport-kiss`
+12. `aprs-transport-mqtt`
+13. `aprs-transport-serial`
+14. `aprs-transport-udp`
+15. `aprs-cli`
 
 The adapter and CLI crates use versioned path dependencies:
 
 ```toml
-libaprs-engine = { version = "0.1.3", path = "../libaprs-engine" }
+libaprs-engine = { version = "0.1.5", path = "../libaprs-engine" }
 ```
 
 Cargo uses the local path in this workspace and the version requirement when
@@ -40,6 +50,16 @@ dependent crates:
 cargo package -p aprs-transport-file
 cargo package -p aprs-transport-tcp
 cargo package -p aprs-transport-aprs-is
+cargo package -p aprs-transport-async
+cargo package -p aprs-transport-ax25
+cargo package -p aprs-transport-channel
+cargo package -p aprs-transport-corpus
+cargo package -p aprs-transport-file-watch
+cargo package -p aprs-transport-http
+cargo package -p aprs-transport-kiss
+cargo package -p aprs-transport-mqtt
+cargo package -p aprs-transport-serial
+cargo package -p aprs-transport-udp
 cargo package -p aprs-cli
 ```
 
@@ -58,6 +78,16 @@ cargo publish -p libaprs-engine
 cargo publish -p aprs-transport-file
 cargo publish -p aprs-transport-tcp
 cargo publish -p aprs-transport-aprs-is
+cargo publish -p aprs-transport-async
+cargo publish -p aprs-transport-ax25
+cargo publish -p aprs-transport-channel
+cargo publish -p aprs-transport-corpus
+cargo publish -p aprs-transport-file-watch
+cargo publish -p aprs-transport-http
+cargo publish -p aprs-transport-kiss
+cargo publish -p aprs-transport-mqtt
+cargo publish -p aprs-transport-serial
+cargo publish -p aprs-transport-udp
 cargo publish -p aprs-cli
 ```
 

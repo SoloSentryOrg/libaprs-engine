@@ -16,11 +16,11 @@ telemetry, indexing, and diagnostics.
 - Pre-1.0 APRS engine with meaningful semantics, conformance fixtures,
   compatibility tests, examples, benchmark, optional transport adapters, and CLI
   inspector.
-- Current tagged release: `v0.1.3`.
+- Current tagged release: `v0.1.5`.
 - Public API has documented pre-1.0 stability intent, but not `1.0.0`
   semantic-versioning guarantees.
 - Core runtime remains network-free and async-free. Optional `serde`
-  diagnostics and separate file/TCP/APRS-IS transport adapters are available.
+  diagnostics and separate transport adapter crates are available.
 - GitHub Actions workflow is active and checks Rust `1.80.0` plus stable,
   including formatting, tests, examples, metadata, docs, and clippy.
 
@@ -35,6 +35,16 @@ telemetry, indexing, and diagnostics.
   bytes from a reader or TCP address outside the parser core.
 - `aprs-transport-aprs-is`: optional APRS-IS helper crate for login line
   framing and reader-backed packet splitting.
+- `aprs-transport-kiss`: optional KISS frame encode/decode helper crate.
+- `aprs-transport-serial`: optional serial-like reader helper crate.
+- `aprs-transport-udp`: optional UDP datagram helper crate.
+- `aprs-transport-http`: optional HTTP body ingestion helper crate.
+- `aprs-transport-file-watch`: optional append-only packet log helper crate.
+- `aprs-transport-mqtt`: optional MQTT payload helper crate.
+- `aprs-transport-ax25`: optional AX.25 UI frame helper crate.
+- `aprs-transport-corpus`: optional corpus replay helper crate.
+- `aprs-transport-channel`: optional in-process channel helper crate.
+- `aprs-transport-async`: optional runtime-neutral async splitting helper crate.
 
 ## Which Crate Should I Use?
 
@@ -47,6 +57,12 @@ telemetry, indexing, and diagnostics.
   `Read` implementation.
 - Use `aprs-transport-aprs-is` when connecting to APRS-IS and you need login
   line framing plus APRS-IS comment filtering.
+- Use `aprs-transport-kiss` for KISS TNC/TCP/serial frame encode/decode.
+- Use `aprs-transport-serial`, `aprs-transport-udp`, `aprs-transport-http`,
+  `aprs-transport-file-watch`, `aprs-transport-mqtt`,
+  `aprs-transport-ax25`, `aprs-transport-corpus`,
+  `aprs-transport-channel`, or `aprs-transport-async` when those source
+  boundaries match your application.
 
 ## Install Or Depend On It
 
@@ -54,17 +70,27 @@ Use crates.io:
 
 ```toml
 [dependencies]
-libaprs-engine = "0.1.3"
-aprs-transport-file = "0.1.3"
-aprs-transport-tcp = "0.1.3"
-aprs-transport-aprs-is = "0.1.3"
+libaprs-engine = "0.1.5"
+aprs-transport-file = "0.1.5"
+aprs-transport-tcp = "0.1.5"
+aprs-transport-aprs-is = "0.1.5"
+aprs-transport-kiss = "0.1.5"
+aprs-transport-serial = "0.1.5"
+aprs-transport-udp = "0.1.5"
+aprs-transport-http = "0.1.5"
+aprs-transport-file-watch = "0.1.5"
+aprs-transport-mqtt = "0.1.5"
+aprs-transport-ax25 = "0.1.5"
+aprs-transport-corpus = "0.1.5"
+aprs-transport-channel = "0.1.5"
+aprs-transport-async = "0.1.5"
 ```
 
 Use a Git dependency when testing unreleased changes from this repository.
 
 ```toml
 [dependencies]
-libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.1.3" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.1.5" }
 ```
 
 For local development from a checkout:

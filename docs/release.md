@@ -32,6 +32,25 @@
 - If remote CI is intentionally skipped, tag only after the local gate passes
   and the skipped remote gate is documented.
 
+## v0.1.5 Release Evidence
+
+- Tag: `v0.1.5`
+- Commit: release tag target (`git rev-list -n 1 v0.1.5`).
+- Local gate: release verification for `0.1.5`.
+- Remote GitHub Actions: release verification for `0.1.5`.
+- Notes: hardens UDP datagram ingestion so oversized datagrams fail closed.
+
+## v0.1.4 Release Evidence
+
+- Tag: not created.
+- Commit: not retained as a repository release point.
+- Local gate: package dry-runs and local verification were performed before
+  crates.io publication.
+- Remote GitHub Actions: superseded before tagging by `v0.1.5`.
+- Notes: adds KISS, serial, UDP, HTTP, file-watch, MQTT, AX.25, corpus,
+  channel, and async transport helper crates. Superseded immediately by
+  `v0.1.5` after secure review tightened UDP oversized-datagram handling.
+
 ## v0.1.3 Release Evidence
 
 - Tag: `v0.1.3`
@@ -60,7 +79,8 @@
 - Remote GitHub Actions: passed on 2026-04-25:
   <https://github.com/elodiejmirza/libaprs-engine/actions/runs/24937390267>.
 - Notes: supersedes `v0.1.0` with MSRV clippy compatibility and Node.js
-  24-compatible checkout action. Superseded by `v0.1.2` and `v0.1.3`.
+  24-compatible checkout action. Superseded by `v0.1.2`, `v0.1.3`,
+  `v0.1.4`, and `v0.1.5`.
 
 ## v0.1.0 Release Evidence
 
@@ -69,4 +89,4 @@
 - Local gate passed.
 - Remote GitHub Actions was skipped because startup is blocked before job
   creation by account, billing, or policy state outside this repository.
-- Superseded by `v0.1.1`, `v0.1.2`, and `v0.1.3`.
+- Superseded by `v0.1.1`, `v0.1.2`, `v0.1.3`, `v0.1.4`, and `v0.1.5`.
