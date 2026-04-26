@@ -1,0 +1,12 @@
+[package]
+name = "libaprs-engine-downstream-smoke"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+libaprs-engine = "0.1.2"
+aprs-transport-file = "0.1.2"
+aprs-transport-tcp = "0.1.2"

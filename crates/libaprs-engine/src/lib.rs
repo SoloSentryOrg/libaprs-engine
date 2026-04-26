@@ -142,10 +142,53 @@ impl ParsedPacket {
         )
     }
 
+    /// Returns a structured diagnostic summary for observability.
+    #[must_use]
+    pub fn summary(&self) -> PacketSummary<'_> {
+        PacketSummary::from_packet(self)
+    }
+
     /// Serializes the parsed packet into a compact JSON diagnostic string.
     #[must_use]
     pub fn to_json(&self) -> String {
         diagnostic::packet_to_json(self)
+    }
+}
+
+/// Structured packet diagnostic summary.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct PacketSummary<'a> {
+    /// Source address bytes.
+    pub source: &'a [u8],
+    /// Destination address bytes.
+    pub destination: &'a [u8],
+    /// APRS data type identifier name.
+    pub data_type: &'static str,
+    /// APRS semantic kind name.
+    pub semantic: &'static str,
+    /// Decoded coordinates when the semantic family supports them.
+    pub coordinates: Option<Coordinates>,
+    /// NMEA checksum details when present.
+    pub nmea_checksum: Option<NmeaChecksum>,
+    /// Telemetry sequence number when present and numeric.
+    pub telemetry_sequence: Option<u16>,
+    /// Mic-E speed/course details when present and decodable.
+    pub mic_e_speed_course: Option<MicESpeedCourse>,
+}
+
+impl<'a> PacketSummary<'a> {
+    fn from_packet(packet: &'a ParsedPacket) -> Self {
+        let data = packet.aprs_data();
+        Self {
+            source: packet.source(),
+            destination: packet.destination(),
+            data_type: packet.data_type_identifier().name(),
+            semantic: data.kind_name(),
+            coordinates: summary_coordinates(data),
+            nmea_checksum: summary_nmea_checksum(data),
+            telemetry_sequence: summary_telemetry_sequence(data),
+            mic_e_speed_course: summary_mic_e_speed_course(data),
+        }
     }
 }
 
@@ -402,6 +445,37 @@ impl AprsData<'_> {
             Self::Unsupported { .. } => "unsupported",
             Self::Malformed { .. } => "malformed",
         }
+    }
+}
+
+fn summary_coordinates(data: AprsData<'_>) -> Option<Coordinates> {
+    match data {
+        AprsData::Position(position) => position.coordinates(),
+        AprsData::TimestampedPosition(position) => position.position.coordinates(),
+        AprsData::CompressedPosition(position) => position.coordinates(),
+        AprsData::MicE(mic_e) => mic_e.coordinates(),
+        _ => None,
+    }
+}
+
+fn summary_nmea_checksum(data: AprsData<'_>) -> Option<NmeaChecksum> {
+    match data {
+        AprsData::Nmea(nmea) => nmea.checksum(),
+        _ => None,
+    }
+}
+
+fn summary_telemetry_sequence(data: AprsData<'_>) -> Option<u16> {
+    match data {
+        AprsData::Telemetry(telemetry) => telemetry.sequence_number(),
+        _ => None,
+    }
+}
+
+fn summary_mic_e_speed_course(data: AprsData<'_>) -> Option<MicESpeedCourse> {
+    match data {
+        AprsData::MicE(mic_e) => mic_e.speed_course(),
+        _ => None,
     }
 }
 

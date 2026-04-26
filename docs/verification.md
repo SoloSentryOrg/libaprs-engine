@@ -16,6 +16,7 @@ cargo package -p libaprs-engine
 cargo bench -p libaprs-engine
 cargo +1.80.0 test --all-features
 cargo +1.80.0 clippy --all-targets --all-features -- -D warnings
+cargo check --manifest-path examples/downstream-smoke/Cargo.toml
 ```
 
 ## What The Checks Cover
@@ -32,6 +33,7 @@ cargo +1.80.0 clippy --all-targets --all-features -- -D warnings
 - Crates.io package validation for the core crate. Dependent crates can be fully
   packaged after `libaprs-engine` is available in the crates.io index.
 - Buildable examples that downstream developers can copy.
+- A downstream smoke project that consumes the published crates from crates.io.
 - Optional feature coverage, including serde diagnostics.
 - A simple parser throughput benchmark.
 
@@ -41,6 +43,9 @@ The repository contains `.github/workflows/rust-ci.yml`. It runs on pushes,
 pull requests, and manual dispatch for Rust `1.80.0` and stable. The CI gate
 checks formatting, tests, all-features tests, examples, Cargo metadata, docs,
 and clippy with warnings denied.
+
+The repository also has a scheduled/manual security workflow that runs
+`cargo audit` and `cargo deny check`.
 
 ## Compatibility
 

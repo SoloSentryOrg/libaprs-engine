@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- Added `aprs-transport-aprs-is` for APRS-IS login-line framing and
+  reader-backed packet splitting, including CR/LF login-field rejection and
+  bounded reader input.
+- Added `ParsedPacket::summary()` for structured diagnostics with decoded
+  helper details.
+- Added CLI `--summary`, `--explain`, and `--fail-on` operator controls.
+- Added a downstream smoke project that consumes published crates from
+  crates.io.
+- Added README badges, crate-selection guidance, and docs for APRS-IS and
+  structured diagnostics.
+- Added a scheduled/manual security workflow for `cargo audit` and
+  `cargo deny check`.
 - Enabled crates.io publishing readiness with versioned internal dependencies,
   core crate package validation in CI, and publishing documentation.
 - Replaced early-skeleton status wording with a pre-1.0 readiness statement.

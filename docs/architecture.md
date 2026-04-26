@@ -79,7 +79,8 @@ verification commands when account policy permits jobs to start.
 
 Transport adapters live outside `libaprs-engine` so the parser core remains
 network-free and focused on bytes, codec validation, policy, and semantics.
-`aprs-transport-file` handles file/stdin-style packet sources, and
-`aprs-transport-tcp` handles blocking TCP or reader-backed packet sources. Both
-adapters preserve packet bytes and hand newline-separated frames to
-`LineTransport`.
+`aprs-transport-file` handles file/stdin-style packet sources,
+`aprs-transport-tcp` handles blocking TCP or reader-backed packet sources, and
+`aprs-transport-aprs-is` handles APRS-IS login framing plus APRS-IS comment
+filtering. These adapters preserve packet bytes and hand newline-separated
+frames to `LineTransport`.

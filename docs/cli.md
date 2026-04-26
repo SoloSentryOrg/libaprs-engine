@@ -49,10 +49,16 @@ cat packets.aprs | cargo run -p aprs-cli -- --json
 ## Options
 
 - `--json`: print compact diagnostic JSON for accepted packets.
+- `--explain`: include stable parse or policy codes with malformed/rejected
+  output.
+- `--summary`: print final counters to stdout as well as stderr.
 - `--filter SEMANTIC`: print only accepted packets whose semantic kind matches
   `SEMANTIC`, such as `status`, `position`, or `telemetry_metadata`.
 - `--permissive`: allow unsupported and malformed semantic payloads through
   policy for inspection.
+- `--fail-on none|malformed|rejected`: choose whether non-accepted packets
+  produce a non-zero exit. `rejected` is the default and includes malformed
+  packets.
 - `PATH`: read packet bytes from a file path instead of stdin.
 
 ## Output

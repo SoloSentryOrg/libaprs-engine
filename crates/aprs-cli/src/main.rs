@@ -9,8 +9,19 @@ use libaprs_engine::{Engine, EngineResult, LineTransport, Policy};
 struct CliOptions {
     json: bool,
     permissive: bool,
+    explain: bool,
+    summary: bool,
+    fail_on: FailOn,
     filter: Option<String>,
     input_path: Option<String>,
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+enum FailOn {
+    None,
+    Malformed,
+    #[default]
+    Rejected,
 }
 
 fn main() -> ExitCode {
@@ -33,6 +44,7 @@ fn run() -> Result<ExitCode, String> {
     };
     let mut engine = Engine::new(policy);
     let mut rejected = false;
+    let mut malformed = false;
 
     for line in LineTransport::new(&input).packets() {
         match engine.process(line) {
@@ -47,22 +59,36 @@ fn run() -> Result<ExitCode, String> {
             ),
             EngineResult::Rejected { reason, .. } => {
                 rejected = true;
-                println!("rejected reason={reason:?}");
+                if options.explain {
+                    println!("rejected reason={reason:?} code={}", reason.code());
+                } else {
+                    println!("rejected reason={reason:?}");
+                }
             }
             EngineResult::ParseError(error) => {
-                rejected = true;
-                println!("malformed error={error:?}");
+                malformed = true;
+                if options.explain {
+                    println!("malformed error={error:?} code={}", error.code());
+                } else {
+                    println!("malformed error={error:?}");
+                }
             }
         }
     }
 
     let counters = engine.counters();
+    if options.summary {
+        println!(
+            "summary accepted={} rejected={} malformed={}",
+            counters.accepted, counters.rejected, counters.malformed
+        );
+    }
     eprintln!(
         "accepted={} rejected={} malformed={}",
         counters.accepted, counters.rejected, counters.malformed
     );
 
-    Ok(if rejected {
+    Ok(if should_fail(options.fail_on, rejected, malformed) {
         ExitCode::from(1)
     } else {
         ExitCode::SUCCESS
@@ -77,11 +103,19 @@ fn parse_args(args: impl IntoIterator<Item = String>) -> Result<CliOptions, Stri
         match arg.as_str() {
             "--json" => options.json = true,
             "--permissive" => options.permissive = true,
+            "--explain" => options.explain = true,
+            "--summary" => options.summary = true,
             "--filter" => {
                 let filter = args
                     .next()
                     .ok_or_else(|| "--filter requires a semantic kind".to_string())?;
                 options.filter = Some(filter);
+            }
+            "--fail-on" => {
+                let value = args
+                    .next()
+                    .ok_or_else(|| "--fail-on requires none, malformed, or rejected".to_string())?;
+                options.fail_on = parse_fail_on(&value)?;
             }
             "--help" | "-h" => return Err(usage()),
             _ if arg.starts_with('-') => return Err(format!("unknown option: {arg}\n{}", usage())),
@@ -94,6 +128,23 @@ fn parse_args(args: impl IntoIterator<Item = String>) -> Result<CliOptions, Stri
     }
 
     Ok(options)
+}
+
+fn parse_fail_on(value: &str) -> Result<FailOn, String> {
+    match value {
+        "none" => Ok(FailOn::None),
+        "malformed" => Ok(FailOn::Malformed),
+        "rejected" => Ok(FailOn::Rejected),
+        _ => Err(format!("invalid --fail-on value: {value}\n{}", usage())),
+    }
+}
+
+fn should_fail(fail_on: FailOn, rejected: bool, malformed: bool) -> bool {
+    match fail_on {
+        FailOn::None => false,
+        FailOn::Malformed => malformed,
+        FailOn::Rejected => rejected || malformed,
+    }
 }
 
 fn matches_filter(options: &CliOptions, semantic: &str) -> bool {
@@ -121,5 +172,5 @@ fn lossy(bytes: &[u8]) -> String {
 }
 
 fn usage() -> String {
-    "usage: aprs-cli [--json] [--permissive] [--filter SEMANTIC] [PATH]".to_string()
+    "usage: aprs-cli [--json] [--permissive] [--explain] [--summary] [--filter SEMANTIC] [--fail-on none|malformed|rejected] [PATH]".to_string()
 }

@@ -226,6 +226,26 @@ fn main() -> Result<(), libaprs_engine::ParseError> {
 }
 ```
 
+## Structured Diagnostics
+
+`ParsedPacket::summary()` returns a stable structured summary for observability.
+It includes address bytes, semantic names, and decoded helper values when they
+are available.
+
+```rust
+fn main() -> Result<(), libaprs_engine::ParseError> {
+    let packet = libaprs_engine::parse_packet(
+        b"N0CALL>APRS:$GPGLL,4916.45,N,12311.12,W,225444,A,*1D",
+    )?;
+    let summary = packet.summary();
+
+    assert_eq!(summary.semantic, "nmea");
+    assert!(summary.nmea_checksum.expect("checksum").valid);
+
+    Ok(())
+}
+```
+
 ## Optional Serde Diagnostics
 
 Enable the `serde` feature to use an owned diagnostic structure that serializes
@@ -238,6 +258,43 @@ libaprs-engine = {
   package = "libaprs-engine",
   tag = "v0.1.2",
   features = ["serde"]
+}
+```
+
+## APRS-IS Transport Adapter
+
+Use `aprs-transport-aprs-is` for APRS-IS login framing and reader-backed packet
+splitting. APRS-IS server comment lines beginning with `#` are ignored, packet
+bytes are preserved exactly, and reader-backed input is capped by default to
+avoid unbounded memory growth. Network connection management remains
+application-owned.
+
+```toml
+[dependencies]
+aprs-transport-aprs-is = "0.1.2"
+libaprs-engine = "0.1.2"
+```
+
+```rust
+use aprs_transport_aprs_is::{read_packet_lines_from_reader, AprsIsLogin};
+use libaprs_engine::parse_packet;
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let login = AprsIsLogin {
+        callsign: "N0CALL",
+        passcode: -1,
+        software: "libaprs-engine 0.1.2",
+        filter: Some("r/49/-72/50"),
+    };
+    assert!(login.line()?.ends_with("\r\n"));
+
+    let input = std::io::Cursor::new(b"# banner\r\nN0CALL>APRS:>hello\n");
+    for line in read_packet_lines_from_reader(input)? {
+        let packet = parse_packet(&line).map_err(|error| error.code())?;
+        println!("{}", packet.aprs_data().kind_name());
+    }
+
+    Ok(())
 }
 ```
 
@@ -282,7 +339,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let input = std::io::Cursor::new(b"N0CALL>APRS:>hello\n");
 
     for line in read_packet_lines_from_reader(input)? {
-        let packet = parse_packet(&line)?;
+        let packet = parse_packet(&line).map_err(|error| error.code())?;
         println!("{}", packet.aprs_data().kind_name());
     }
 

@@ -1,5 +1,9 @@
 # libaprs-engine
 
+[![Crates.io](https://img.shields.io/crates/v/libaprs-engine.svg)](https://crates.io/crates/libaprs-engine)
+[![Docs.rs](https://docs.rs/libaprs-engine/badge.svg)](https://docs.rs/libaprs-engine)
+[![Rust CI](https://github.com/elodiejmirza/libaprs-engine/actions/workflows/rust-ci.yml/badge.svg)](https://github.com/elodiejmirza/libaprs-engine/actions/workflows/rust-ci.yml)
+
 Protocol-first APRS parsing and inspection for Rust.
 
 `libaprs-engine` is a pre-1.0, byte-preserving APRS engine. It accepts untrusted
@@ -16,7 +20,7 @@ telemetry, indexing, and diagnostics.
 - Public API has documented pre-1.0 stability intent, but not `1.0.0`
   semantic-versioning guarantees.
 - Core runtime remains network-free and async-free. Optional `serde`
-  diagnostics and separate file/TCP transport adapters are available.
+  diagnostics and separate file/TCP/APRS-IS transport adapters are available.
 - GitHub Actions workflow is active and checks Rust `1.80.0` plus stable,
   including formatting, tests, examples, metadata, docs, and clippy.
 
@@ -29,6 +33,20 @@ telemetry, indexing, and diagnostics.
   files as bytes and returns newline-separated packet byte vectors.
 - `aprs-transport-tcp`: optional TCP transport helper crate that reads packet
   bytes from a reader or TCP address outside the parser core.
+- `aprs-transport-aprs-is`: optional APRS-IS helper crate for login line
+  framing and reader-backed packet splitting.
+
+## Which Crate Should I Use?
+
+- Use `libaprs-engine` for parsing, semantic inspection, policy, counters, and
+  diagnostics.
+- Use `aprs-cli` for command-line inspection and corpus triage.
+- Use `aprs-transport-file` when packet bytes come from files or stdin-style
+  buffers.
+- Use `aprs-transport-tcp` when packet bytes come from blocking TCP or another
+  `Read` implementation.
+- Use `aprs-transport-aprs-is` when connecting to APRS-IS and you need login
+  line framing plus APRS-IS comment filtering.
 
 ## Install Or Depend On It
 
@@ -37,6 +55,8 @@ Use crates.io after publication:
 ```toml
 [dependencies]
 libaprs-engine = "0.1.2"
+aprs-transport-file = "0.1.2"
+aprs-transport-tcp = "0.1.2"
 ```
 
 Until crates are published, use a Git dependency or a local path dependency.

@@ -11,7 +11,8 @@ Publish crates in dependency order:
 1. `libaprs-engine`
 2. `aprs-transport-file`
 3. `aprs-transport-tcp`
-4. `aprs-cli`
+4. `aprs-transport-aprs-is`
+5. `aprs-cli`
 
 The adapter and CLI crates use versioned path dependencies:
 
@@ -38,6 +39,7 @@ dependent crates:
 ```sh
 cargo package -p aprs-transport-file
 cargo package -p aprs-transport-tcp
+cargo package -p aprs-transport-aprs-is
 cargo package -p aprs-cli
 ```
 
@@ -55,6 +57,7 @@ Publish in dependency order:
 cargo publish -p libaprs-engine
 cargo publish -p aprs-transport-file
 cargo publish -p aprs-transport-tcp
+cargo publish -p aprs-transport-aprs-is
 cargo publish -p aprs-cli
 ```
 

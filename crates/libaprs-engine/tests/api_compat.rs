@@ -70,3 +70,22 @@ fn documented_semantic_helpers_remain_usable() {
     };
     assert!(nmea.checksum().expect("checksum").valid);
 }
+
+#[test]
+fn structured_packet_summary_exposes_decoded_details() {
+    let nmea = parse_packet(b"N0CALL>APRS:$GPGLL,4916.45,N,12311.12,W,225444,A,*1D")
+        .expect("NMEA should parse");
+    let summary = nmea.summary();
+
+    assert_eq!(summary.source, b"N0CALL");
+    assert_eq!(summary.destination, b"APRS");
+    assert_eq!(summary.semantic, "nmea");
+    assert!(summary.nmea_checksum.expect("checksum").valid);
+    assert!(summary.coordinates.is_none());
+
+    let position =
+        parse_packet(b"N0CALL>APRS:!4903.50N/07201.75W-Test").expect("position should parse");
+    let summary = position.summary();
+    assert_eq!(summary.semantic, "position");
+    assert!(summary.coordinates.is_some());
+}

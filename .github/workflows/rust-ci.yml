@@ -53,5 +53,8 @@ jobs:
       - name: Package
         run: cargo package -p libaprs-engine
 
+      - name: Downstream smoke
+        run: cargo check --manifest-path examples/downstream-smoke/Cargo.toml
+
       - name: Clippy
         run: cargo clippy --all-targets --all-features -- -D warnings

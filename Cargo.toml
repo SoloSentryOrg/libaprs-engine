@@ -2,6 +2,7 @@
 members = [
     "crates/libaprs-engine",
     "crates/aprs-cli",
+    "crates/aprs-transport-aprs-is",
     "crates/aprs-transport-file",
     "crates/aprs-transport-tcp",
 ]
