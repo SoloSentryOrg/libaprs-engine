@@ -32,8 +32,14 @@ telemetry, indexing, and diagnostics.
 
 ## Install Or Depend On It
 
-This repository is not published to crates.io. Use a Git dependency or a local
-path dependency.
+Use crates.io after publication:
+
+```toml
+[dependencies]
+libaprs-engine = "0.1.2"
+```
+
+Until crates are published, use a Git dependency or a local path dependency.
 
 ```toml
 [dependencies]
@@ -118,6 +124,7 @@ See [Security Model](docs/security.md) for details.
 - [Conformance Matrix](docs/conformance.md): APRS family support and known gaps.
 - [Verification](docs/verification.md): local checks and release gates.
 - [Release Checklist](docs/release.md): pre-release steps.
+- [Publishing](docs/publishing.md): crates.io package and publish workflow.
 
 ## Verification
 

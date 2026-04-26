@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Enabled crates.io publishing readiness with versioned internal dependencies,
+  core crate package validation in CI, and publishing documentation.
 - Replaced early-skeleton status wording with a pre-1.0 readiness statement.
 - Added API compatibility tests for documented stable-intent parser, engine,
   policy, transport, and helper APIs.

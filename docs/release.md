@@ -9,11 +9,16 @@
 - Run `cargo clippy --all-targets --all-features -- -D warnings`.
 - Run `cargo metadata --no-deps --format-version 1`.
 - Run `cargo doc --no-deps --all-features`.
+- Run `cargo package -p libaprs-engine`.
+- After `libaprs-engine` is published to crates.io, run package validation for
+  dependent crates before publishing them.
 - Run `cargo bench -p libaprs-engine` when parser performance changed.
 - Verify the declared MSRV with `cargo +1.80.0 test --all-features`.
 - Consider `cargo audit` or `cargo deny check` when dependency changes are part
   of the release.
 - Confirm `CHANGELOG.md` describes the release.
+- Confirm crate publish order in `docs/publishing.md` when publishing to
+  crates.io.
 
 ## Remote Gate
 

@@ -11,4 +11,4 @@ keywords = ["aprs", "packet", "file", "transport"]
 categories = ["parser-implementations", "encoding"]
 
 [dependencies]
-libaprs-engine = { path = "../libaprs-engine" }
+libaprs-engine = { version = "0.1.2", path = "../libaprs-engine" }

@@ -12,6 +12,7 @@ cargo test --examples
 cargo clippy --all-targets --all-features -- -D warnings
 cargo metadata --no-deps --format-version 1
 cargo doc --no-deps --all-features
+cargo package -p libaprs-engine
 cargo bench -p libaprs-engine
 cargo +1.80.0 test --all-features
 cargo +1.80.0 clippy --all-targets --all-features -- -D warnings
@@ -28,6 +29,8 @@ cargo +1.80.0 clippy --all-targets --all-features -- -D warnings
 - Engine and policy tests for accepted, rejected, and malformed counters.
 - Clippy with warnings denied.
 - Cargo metadata validation for workspace consumers.
+- Crates.io package validation for the core crate. Dependent crates can be fully
+  packaged after `libaprs-engine` is available in the crates.io index.
 - Buildable examples that downstream developers can copy.
 - Optional feature coverage, including serde diagnostics.
 - A simple parser throughput benchmark.

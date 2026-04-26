@@ -11,4 +11,4 @@ keywords = ["aprs", "cli", "packet", "radio"]
 categories = ["command-line-utilities", "parser-implementations"]
 
 [dependencies]
-libaprs-engine = { path = "../libaprs-engine" }
+libaprs-engine = { version = "0.1.2", path = "../libaprs-engine" }

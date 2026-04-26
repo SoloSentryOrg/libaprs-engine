@@ -1,0 +1,72 @@
+# Publishing
+
+This repository is ready for crates.io package validation, but publishing
+requires a crates.io account token and should be done only from a clean,
+verified release commit.
+
+## Crates
+
+Publish crates in dependency order:
+
+1. `libaprs-engine`
+2. `aprs-transport-file`
+3. `aprs-transport-tcp`
+4. `aprs-cli`
+
+The adapter and CLI crates use versioned path dependencies:
+
+```toml
+libaprs-engine = { version = "0.1.2", path = "../libaprs-engine" }
+```
+
+Cargo uses the local path in this workspace and the version requirement when
+packaging for crates.io.
+
+## Dry Run
+
+Run package validation before publishing the core crate:
+
+```sh
+cargo package -p libaprs-engine
+```
+
+Before `libaprs-engine` exists on crates.io, Cargo cannot package dependent
+crates because their registry dependency is not resolvable yet. After
+`libaprs-engine` is published and visible in the crates.io index, validate the
+dependent crates:
+
+```sh
+cargo package -p aprs-transport-file
+cargo package -p aprs-transport-tcp
+cargo package -p aprs-cli
+```
+
+## Publish
+
+Authenticate with crates.io outside the repository:
+
+```sh
+cargo login
+```
+
+Publish in dependency order:
+
+```sh
+cargo publish -p libaprs-engine
+cargo publish -p aprs-transport-file
+cargo publish -p aprs-transport-tcp
+cargo publish -p aprs-cli
+```
+
+Wait for each published dependency to become available before publishing crates
+that depend on it.
+
+## Release Requirements
+
+- Run the local verification gate in `docs/verification.md`.
+- Confirm GitHub Actions passed on the release commit.
+- Run `cargo package -p libaprs-engine`.
+- After `libaprs-engine` is published, run package validation for dependent
+  crates before publishing them.
+- Confirm `CHANGELOG.md` describes the release.
+- Tag only after package validation and CI both pass.
