@@ -1,0 +1,31 @@
+# id<TAB>source reference. References identify APRS101 packet-family coverage.
+APRS101_STATUS	APRS Protocol Reference 1.0.1: status reports
+APRS101_POSITION_NO_MSG	APRS Protocol Reference 1.0.1: position reports without timestamp
+APRS101_POSITION_MSG	APRS Protocol Reference 1.0.1: messaging-capable position reports
+APRS101_POSITION_TIMESTAMP_UTC	APRS Protocol Reference 1.0.1: position reports with UTC timestamp
+APRS101_POSITION_TIMESTAMP_LOCAL	APRS Protocol Reference 1.0.1: position reports with local timestamp
+APRS101_COMPRESSED_POSITION	APRS Protocol Reference 1.0.1: compressed position reports
+APRS101_MESSAGE	APRS Protocol Reference 1.0.1: messages
+APRS101_MESSAGE_ACK	APRS Protocol Reference 1.0.1: message acknowledgements
+APRS101_MESSAGE_REJECT	APRS Protocol Reference 1.0.1: message rejects
+APRS101_BULLETIN	APRS Protocol Reference 1.0.1: bulletins
+APRS101_ANNOUNCEMENT	APRS Protocol Reference 1.0.1: announcements
+APRS101_OBJECT_LIVE	APRS Protocol Reference 1.0.1: live objects
+APRS101_OBJECT_KILLED	APRS Protocol Reference 1.0.1: killed objects
+APRS101_ITEM_LIVE	APRS Protocol Reference 1.0.1: live items
+APRS101_ITEM_KILLED	APRS Protocol Reference 1.0.1: killed items
+APRS101_WEATHER	APRS Protocol Reference 1.0.1: weather reports
+APRS101_TELEMETRY_VALUES	APRS Protocol Reference 1.0.1: telemetry value reports
+APRS101_TELEMETRY_PARAMETER_NAMES	APRS Protocol Reference 1.0.1: telemetry parameter-name metadata
+APRS101_TELEMETRY_UNITS	APRS Protocol Reference 1.0.1: telemetry unit metadata
+APRS101_TELEMETRY_EQUATIONS	APRS Protocol Reference 1.0.1: telemetry equation metadata
+APRS101_TELEMETRY_BITS	APRS Protocol Reference 1.0.1: telemetry bit-sense metadata
+APRS101_QUERY	APRS Protocol Reference 1.0.1: queries
+APRS101_CAPABILITY	APRS Protocol Reference 1.0.1: station capabilities
+APRS101_NMEA_GPGLL	APRS Protocol Reference 1.0.1: NMEA position sentences
+APRS101_MICE_CURRENT	APRS Protocol Reference 1.0.1: current Mic-E data
+APRS101_MICE_OLD	APRS Protocol Reference 1.0.1: old Mic-E data
+APRS101_MAIDENHEAD	APRS Protocol Reference 1.0.1: Maidenhead locator data
+APRS101_USER_DEFINED	APRS Protocol Reference 1.0.1: user-defined data
+APRS101_THIRD_PARTY	APRS Protocol Reference 1.0.1: third-party traffic
+APRS101_UNSUPPORTED_IDENTIFIER	APRS Protocol Reference 1.0.1: unsupported or reserved data type handling

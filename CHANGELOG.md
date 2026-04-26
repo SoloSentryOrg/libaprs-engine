@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.3.0 - 2026-04-26
+
+- Expanded the APRS101 conformance fixture corpus with source-referenced
+  packet-family examples for status, position, messaging, objects, items,
+  weather, telemetry, NMEA, Mic-E, Maidenhead, user-defined, third-party, and
+  unsupported identifier handling.
+- Added conformance tests that require APRS101 fixture source references and
+  verify byte-for-byte raw packet preservation.
+- Bumped all workspace crates to `0.3.0`.
+
 ## 0.2.0 - 2026-04-26
 
 - Added shared transport contracts with `PacketSource`, `PacketSink`,

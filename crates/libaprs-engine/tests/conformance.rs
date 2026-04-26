@@ -1,3 +1,5 @@
+use std::collections::BTreeSet;
+
 use libaprs_engine::{parse_packet, AprsData};
 
 #[test]
@@ -10,6 +12,35 @@ fn valid_fixture_corpus_parses_without_losing_raw_bytes() {
 
         assert_eq!(parsed.raw().as_bytes(), packet);
         assert!(!matches!(parsed.aprs_data(), AprsData::Malformed { .. }));
+    }
+}
+
+#[test]
+fn aprs101_fixture_corpus_parses_without_losing_raw_bytes() {
+    for fixture in aprs101_valid_fixtures() {
+        let parsed = parse_packet(fixture.packet).unwrap_or_else(|err| {
+            panic!("APRS101 fixture {} failed: {err:?}", fixture.id);
+        });
+
+        assert_eq!(parsed.raw().as_bytes(), fixture.packet);
+        assert!(
+            !matches!(parsed.aprs_data(), AprsData::Malformed { .. }),
+            "APRS101 fixture {} produced malformed semantics",
+            fixture.id
+        );
+    }
+}
+
+#[test]
+fn aprs101_fixture_corpus_has_source_references() {
+    let referenced_ids = aprs101_source_reference_ids();
+
+    for fixture in aprs101_valid_fixtures() {
+        assert!(
+            referenced_ids.contains(fixture.id),
+            "APRS101 fixture {} is missing a source reference",
+            fixture.id
+        );
     }
 }
 
@@ -67,4 +98,47 @@ fn structured_fuzz_preserves_payload_and_never_panics() {
             assert_eq!(parsed.payload(), payload);
         }
     }
+}
+
+#[derive(Debug)]
+struct Fixture<'a> {
+    id: &'a str,
+    packet: &'a [u8],
+}
+
+fn aprs101_valid_fixtures() -> Vec<Fixture<'static>> {
+    include_bytes!("fixtures/aprs101_valid.aprs")
+        .split(|byte| *byte == b'\n')
+        .filter_map(|line| {
+            let line = line.strip_suffix(b"\r").unwrap_or(line);
+            if line.is_empty() || line.starts_with(b"#") {
+                return None;
+            }
+
+            let separator = line
+                .iter()
+                .position(|byte| *byte == b'\t')
+                .expect("APRS101 fixtures use '<id>\\t<packet>' records");
+            let (id, packet_with_separator) = line.split_at(separator);
+            let packet = &packet_with_separator[1..];
+            let id = std::str::from_utf8(id).expect("fixture IDs are ASCII");
+            Some(Fixture { id, packet })
+        })
+        .collect()
+}
+
+fn aprs101_source_reference_ids() -> BTreeSet<&'static str> {
+    include_str!("fixtures/aprs101_sources.tsv")
+        .lines()
+        .filter_map(|line| {
+            if line.is_empty() || line.starts_with('#') {
+                return None;
+            }
+
+            let (id, _reference) = line
+                .split_once('\t')
+                .expect("APRS101 source references use '<id>\\t<reference>' records");
+            Some(id)
+        })
+        .collect()
 }

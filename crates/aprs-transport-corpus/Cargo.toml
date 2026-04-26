@@ -1,6 +1,6 @@
 [package]
 name = "aprs-transport-corpus"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 rust-version = "1.80"
 license = "MIT"
@@ -11,4 +11,4 @@ keywords = ["aprs", "corpus", "fixture", "packet"]
 categories = ["parser-implementations", "encoding"]
 
 [dependencies]
-libaprs-engine = { version = "0.2.0", path = "../libaprs-engine" }
+libaprs-engine = { version = "0.3.0", path = "../libaprs-engine" }
