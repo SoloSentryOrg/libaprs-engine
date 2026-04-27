@@ -2,23 +2,17 @@
 
 ## Local Gate
 
-- Run `cargo fmt --all --check`.
-- Run `cargo test`.
-- Run `cargo test --all-features`.
-- Run `cargo test --examples`.
-- Run `cargo clippy --all-targets --all-features -- -D warnings`.
-- Run `cargo metadata --no-deps --format-version 1`.
-- Run `cargo doc --no-deps --all-features`.
-- Run `cargo package -p libaprs-engine`.
+- Run `scripts/verify-release.sh`.
 - After `libaprs-engine` is published to crates.io, run package validation for
-  dependent crates before publishing them.
+  dependent crates with `LIBAPRS_PACKAGE_ALL=1 scripts/verify-release.sh`.
 - Run `cargo bench -p libaprs-engine` when parser performance changed.
-- Verify the declared MSRV with `cargo +1.80.0 test --all-features`.
+- Verify the declared MSRV through the release script. It runs Rust `1.80.0`
+  checks when that toolchain is installed.
 - Consider `cargo audit` or `cargo deny check` when dependency changes are part
-  of the release.
+  of the release. The release script runs them when installed.
 - Confirm `CHANGELOG.md` describes the release.
-- Confirm crate publish order in `docs/publishing.md` when publishing to
-  crates.io.
+- Use `scripts/publish-release.sh` when publishing to crates.io; it encodes the
+  crate publish order from `docs/publishing.md`.
 - In restricted environments where `~/.cargo` is not writable, use
   `CARGO_HOME=/tmp/libaprs-cargo-home` for audit, deny, semver, package, and
   publish commands. Copy crates.io credentials into that temporary Cargo home

@@ -71,19 +71,28 @@ Authenticate with crates.io outside the repository:
 cargo login
 ```
 
+The repository provides a guarded publish script that refuses to run unless
+publishing is explicitly confirmed and the working tree is clean:
+
+```sh
+LIBAPRS_CONFIRM_PUBLISH=1 scripts/publish-release.sh
+```
+
 In restricted environments where `~/.cargo` is not writable, keep Cargo state
 outside the repository:
 
 ```sh
 mkdir -p /tmp/libaprs-cargo-home
-cp "$HOME/.cargo/credentials.toml" /tmp/libaprs-cargo-home/credentials.toml
-CARGO_HOME=/tmp/libaprs-cargo-home cargo publish -p libaprs-engine
+CARGO_HOME=/tmp/libaprs-cargo-home \
+  LIBAPRS_COPY_CARGO_CREDENTIALS=1 \
+  LIBAPRS_CONFIRM_PUBLISH=1 \
+  scripts/publish-release.sh
 ```
 
 Do not commit Cargo credentials, registry caches, package caches, advisory
 databases, or temporary Cargo homes.
 
-Publish in dependency order:
+If publishing manually, publish in dependency order:
 
 ```sh
 cargo publish -p libaprs-engine

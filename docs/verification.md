@@ -33,11 +33,27 @@ project by default. After publishing, run:
 LIBAPRS_RUN_DOWNSTREAM_SMOKE=1 scripts/verify-release.sh
 ```
 
+After `libaprs-engine` is published and visible in the crates.io index, validate
+all dependent packages with:
+
+```sh
+LIBAPRS_PACKAGE_ALL=1 scripts/verify-release.sh
+```
+
+Run benchmark checks only when parser performance changed:
+
+```sh
+LIBAPRS_RUN_BENCH=1 scripts/verify-release.sh
+```
+
 The script runs the core checks and uses optional gates when the tools are
 installed:
 
 - `cargo-semver-checks` for public API compatibility.
+- `cargo audit` for RustSec advisory checks.
+- `cargo deny check` for dependency policy checks.
 - `cargo-fuzz` for fuzz target compile checks.
+- Rust `1.80.0` tests and clippy when the MSRV toolchain is installed.
 
 ## What The Checks Cover
 
@@ -103,9 +119,7 @@ use a writable temporary Cargo home outside the repository:
 
 ```sh
 mkdir -p /tmp/libaprs-cargo-home
-CARGO_HOME=/tmp/libaprs-cargo-home cargo audit
-CARGO_HOME=/tmp/libaprs-cargo-home cargo deny check
-CARGO_HOME=/tmp/libaprs-cargo-home cargo semver-checks check-release -p libaprs-engine
+CARGO_HOME=/tmp/libaprs-cargo-home scripts/verify-release.sh
 ```
 
 For publishing from a restricted environment, copy crates.io credentials into
