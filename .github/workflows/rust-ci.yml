@@ -10,10 +10,18 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: rust-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
   rust:
     name: Rust ${{ matrix.toolchain }}
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -32,8 +40,22 @@ jobs:
       - name: Install components
         run: rustup component add clippy rustfmt
 
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ matrix.toolchain }}-${{ hashFiles('**/Cargo.lock', 'fuzz/Cargo.lock', 'examples/downstream-smoke/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-${{ matrix.toolchain }}-
+
       - name: Format
         run: cargo fmt --all --check
+
+      - name: Format fuzz workspace
+        run: cargo fmt --manifest-path fuzz/Cargo.toml --all --check
 
       - name: Test
         run: cargo test
@@ -58,3 +80,43 @@ jobs:
 
       - name: Clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
+
+  release-script:
+    name: Release script
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Rust
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup toolchain install 1.80.0 --profile minimal
+          rustup toolchain install nightly --profile minimal
+
+      - name: Select Rust
+        run: rustup default stable
+
+      - name: Install components
+        run: |
+          rustup component add clippy rustfmt
+          rustup component add clippy --toolchain 1.80.0
+
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-release-script-${{ hashFiles('**/Cargo.lock', 'fuzz/Cargo.lock', 'examples/downstream-smoke/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-release-script-
+
+      - name: Install release tools
+        run: cargo install cargo-audit cargo-deny cargo-fuzz cargo-semver-checks --locked
+
+      - name: Verify release script
+        run: scripts/verify-release.sh
