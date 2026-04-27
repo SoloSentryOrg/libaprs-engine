@@ -1,6 +1,9 @@
 use std::collections::BTreeSet;
 
-use libaprs_engine::{parse_packet, AprsData};
+use libaprs_engine::{
+    parse_packet, AprsData, Engine, EngineResult, MessageKind, Policy, PolicyRejection,
+    TelemetryMetadataKind,
+};
 
 #[test]
 fn valid_fixture_corpus_parses_without_losing_raw_bytes() {
@@ -100,6 +103,135 @@ fn structured_fuzz_preserves_payload_and_never_panics() {
     }
 }
 
+#[test]
+fn aprs101_fixture_semantics_match_expected_families() {
+    let expectations = [
+        ("APRS101_STATUS", "status"),
+        ("APRS101_POSITION_NO_MSG", "position"),
+        ("APRS101_POSITION_MSG", "position"),
+        ("APRS101_POSITION_TIMESTAMP_UTC", "timestamped_position"),
+        ("APRS101_POSITION_TIMESTAMP_LOCAL", "timestamped_position"),
+        ("APRS101_COMPRESSED_POSITION", "compressed_position"),
+        ("APRS101_MESSAGE", "message"),
+        ("APRS101_MESSAGE_ACK", "message"),
+        ("APRS101_MESSAGE_REJECT", "message"),
+        ("APRS101_BULLETIN", "message"),
+        ("APRS101_ANNOUNCEMENT", "message"),
+        ("APRS101_OBJECT_LIVE", "object"),
+        ("APRS101_OBJECT_KILLED", "object"),
+        ("APRS101_ITEM_LIVE", "item"),
+        ("APRS101_ITEM_KILLED", "item"),
+        ("APRS101_WEATHER", "weather"),
+        ("APRS101_TELEMETRY_VALUES", "telemetry"),
+        ("APRS101_TELEMETRY_PARAMETER_NAMES", "telemetry_metadata"),
+        ("APRS101_TELEMETRY_UNITS", "telemetry_metadata"),
+        ("APRS101_TELEMETRY_EQUATIONS", "telemetry_metadata"),
+        ("APRS101_TELEMETRY_BITS", "telemetry_metadata"),
+        ("APRS101_QUERY", "query"),
+        ("APRS101_CAPABILITY", "capability"),
+        ("APRS101_NMEA_GPGLL", "nmea"),
+        ("APRS101_MICE_CURRENT", "mic_e"),
+        ("APRS101_MICE_OLD", "mic_e"),
+        ("APRS101_MAIDENHEAD", "maidenhead"),
+        ("APRS101_USER_DEFINED", "user_defined"),
+        ("APRS101_THIRD_PARTY", "third_party"),
+        ("APRS101_UNSUPPORTED_IDENTIFIER", "unsupported"),
+    ];
+
+    for (id, semantic) in expectations {
+        let fixture = aprs101_fixture(id);
+        let parsed = parse_packet(fixture.packet).expect("fixture should parse");
+        assert_eq!(
+            parsed.aprs_data().kind_name(),
+            semantic,
+            "{id} semantic family changed"
+        );
+    }
+}
+
+#[test]
+fn aprs101_message_subtypes_are_classified() {
+    let cases = [
+        ("APRS101_MESSAGE", MessageKind::Message),
+        ("APRS101_MESSAGE_ACK", MessageKind::Ack),
+        ("APRS101_MESSAGE_REJECT", MessageKind::Reject),
+        ("APRS101_BULLETIN", MessageKind::Bulletin),
+        ("APRS101_ANNOUNCEMENT", MessageKind::Announcement),
+    ];
+
+    for (id, kind) in cases {
+        let fixture = aprs101_fixture(id);
+        let parsed = parse_packet(fixture.packet).expect("fixture should parse");
+        let AprsData::Message(message) = parsed.aprs_data() else {
+            panic!("{id} should be a message variant");
+        };
+        assert_eq!(message.kind, kind, "{id} message subtype changed");
+    }
+}
+
+#[test]
+fn aprs101_telemetry_metadata_subtypes_are_classified() {
+    let cases = [
+        (
+            "APRS101_TELEMETRY_PARAMETER_NAMES",
+            TelemetryMetadataKind::ParameterNames,
+        ),
+        ("APRS101_TELEMETRY_UNITS", TelemetryMetadataKind::Units),
+        (
+            "APRS101_TELEMETRY_EQUATIONS",
+            TelemetryMetadataKind::Equations,
+        ),
+        ("APRS101_TELEMETRY_BITS", TelemetryMetadataKind::BitSense),
+    ];
+
+    for (id, kind) in cases {
+        let fixture = aprs101_fixture(id);
+        let parsed = parse_packet(fixture.packet).expect("fixture should parse");
+        let AprsData::TelemetryMetadata(metadata) = parsed.aprs_data() else {
+            panic!("{id} should be telemetry metadata");
+        };
+        assert_eq!(metadata.kind, kind, "{id} metadata subtype changed");
+        assert!(!metadata.fields().is_empty());
+    }
+}
+
+#[test]
+fn strict_policy_rejects_invalid_nmea_checksum_when_enabled() {
+    let mut policy = Policy::strict();
+    policy.reject_invalid_nmea_checksum = true;
+    let mut engine = Engine::new(policy);
+
+    match engine.process(b"N0CALL>APRS:$GPGLL,4916.45,N,12311.12,W,225444,A,*00") {
+        EngineResult::Rejected { reason, packet } => {
+            assert_eq!(reason, PolicyRejection::InvalidNmeaChecksum);
+            assert_eq!(
+                packet.raw().as_bytes(),
+                b"N0CALL>APRS:$GPGLL,4916.45,N,12311.12,W,225444,A,*00"
+            );
+        }
+        other => panic!("expected invalid checksum rejection, got {other:?}"),
+    }
+}
+
+#[test]
+fn fuzz_seed_corpora_do_not_panic_and_preserve_accepted_raw_bytes() {
+    let seeds: &[&[u8]] = &[
+        include_bytes!("../../../fuzz/corpus/parse_packet/status"),
+        include_bytes!("../../../fuzz/corpus/parse_packet/message"),
+        include_bytes!("../../../fuzz/corpus/parse_packet/telemetry"),
+        include_bytes!("../../../fuzz/corpus/parse_packet/weather"),
+        include_bytes!("../../../fuzz/corpus/parse_packet/third_party"),
+    ];
+
+    for seed in seeds {
+        if let Ok(parsed) = parse_packet(seed) {
+            assert_eq!(parsed.raw().as_bytes(), *seed);
+            let _ = parsed.aprs_data();
+            let _ = parsed.summary();
+        }
+    }
+}
+
 #[derive(Debug)]
 struct Fixture<'a> {
     id: &'a str,
@@ -125,6 +257,13 @@ fn aprs101_valid_fixtures() -> Vec<Fixture<'static>> {
             Some(Fixture { id, packet })
         })
         .collect()
+}
+
+fn aprs101_fixture(id: &str) -> Fixture<'static> {
+    aprs101_valid_fixtures()
+        .into_iter()
+        .find(|fixture| fixture.id == id)
+        .unwrap_or_else(|| panic!("missing APRS101 fixture {id}"))
 }
 
 fn aprs101_source_reference_ids() -> BTreeSet<&'static str> {

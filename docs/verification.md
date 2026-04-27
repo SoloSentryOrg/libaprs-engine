@@ -76,6 +76,8 @@ installed:
   MQTT topic matcher.
 - Optional semantic-family fuzz targets for weather, telemetry, messages, and
   explicit third-party nested parsing.
+- CI release-script coverage installs `cargo-semver-checks` so public API
+  compatibility is checked in the normal release path.
 
 ## Benchmark Threshold
 

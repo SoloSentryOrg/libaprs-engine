@@ -168,6 +168,8 @@ See [Security Model](docs/security.md) for details.
 - [CLI Guide](docs/cli.md): command-line input, output, exit behavior, and
   examples.
 - [Examples](docs/examples.md): copyable integration patterns.
+- [Transport Adapters](docs/transports.md): byte-preserving transport crate
+  boundaries and integration examples.
 - [Architecture](docs/architecture.md): boundaries, contracts, and pipeline.
 - [Security Model](docs/security.md): untrusted input handling and OWASP-aligned
   controls.

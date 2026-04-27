@@ -32,6 +32,10 @@ semantic coverage and known gaps for APRS101 packet families.
 ## Future Conformance Work
 
 - Additional semantic consistency policies beyond NMEA checksum mismatch.
+- More malformed semantic fixtures for each supported family, especially
+  timestamped positions, compressed positions, Mic-E, and third-party nested
+  traffic.
+- More policy-rejection fixtures as semantic policies are added.
 
 ## Fixture Coverage
 
@@ -42,6 +46,8 @@ metadata, query, capability, NMEA with checksum, Mic-E, Maidenhead,
 user-defined data, third-party traffic, and unsupported identifier handling.
 The APRS101-oriented fixture set stores packet bytes separately from fixture
 IDs and requires source-reference entries for every case.
+Tests assert both raw-byte preservation and expected semantic family
+classification for every APRS101 fixture.
 
 ## Compatibility Coverage
 

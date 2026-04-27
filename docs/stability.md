@@ -21,6 +21,21 @@ guarantees.
 - Diagnostic JSON from `ParsedPacket::to_json()` remains convenience output, not
   a compatibility-stable wire schema.
 
+## 1.0 Readiness Criteria
+
+The project should remove pre-1.0 caveats only after these gates are true:
+
+- Stable-intent APIs below have at least one compatibility test and one
+  documentation example.
+- `cargo-semver-checks` runs in the release CI path and any breaking result is
+  either fixed or explicitly called out in `CHANGELOG.md` before release.
+- APRS semantic families in `docs/conformance.md` have fixture coverage for
+  accepted, malformed, and policy-rejected cases where applicable.
+- Parser and transport fuzz targets compile, and any discovered crash or
+  panic is reduced to a deterministic regression test.
+- Transport adapters document ownership of authentication, timeouts, bounding,
+  retries, and byte-preservation responsibilities.
+
 ## Stable-Intent APIs
 
 These APIs are intended to remain conceptually stable, though names and exact
