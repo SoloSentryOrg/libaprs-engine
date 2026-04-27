@@ -21,7 +21,7 @@ semantic coverage and known gaps for APRS101 packet families.
 | Telemetry metadata | Supported | Parameter names, units, equations, bit sense | `PARM.`, `UNIT.`, `EQNS.`, and `BITS.` message packets |
 | Query | Supported | Query bytes | Query body preserved |
 | Capability | Supported | Body bytes | Capability fields not split |
-| NMEA | Supported | Sentence bytes, checksum details | Invalid checksums are reported, not rejected |
+| NMEA | Supported | Sentence bytes, checksum details | Invalid checksums are reported; policy can reject checksum mismatches |
 | Mic-E | Supported | Status bits, latitude digits, coordinates, speed/course | Values decode only when destination/body bytes permit it |
 | Maidenhead | Supported | Locator bytes | Locator syntax is minimally framed |
 | User-defined | Supported | User ID, packet type, body | Body preserved |
@@ -31,7 +31,7 @@ semantic coverage and known gaps for APRS101 packet families.
 
 ## Future Conformance Work
 
-- Optional strict policies for semantic checksum failures.
+- Additional semantic consistency policies beyond NMEA checksum mismatch.
 
 ## Fixture Coverage
 

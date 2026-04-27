@@ -50,6 +50,40 @@ fn permissive_policy_accepts_unsupported_semantics() {
 }
 
 #[test]
+fn default_policy_reports_but_does_not_reject_invalid_nmea_checksum() {
+    let mut engine = Engine::default();
+
+    let EngineResult::Accepted { packet } =
+        engine.process(b"N0CALL>APRS:$GPGLL,4916.45,N,12311.12,W,225444,A,*00")
+    else {
+        panic!("invalid NMEA checksum should remain accepted unless policy enables rejection");
+    };
+
+    let checksum = packet
+        .summary()
+        .nmea_checksum
+        .expect("checksum details should be reported");
+    assert_eq!(checksum.expected, 0x00);
+    assert_eq!(checksum.calculated, 0x1d);
+    assert!(!checksum.valid);
+}
+
+#[test]
+fn policy_can_reject_invalid_nmea_checksum() {
+    let mut policy = Policy::strict();
+    policy.reject_invalid_nmea_checksum = true;
+    let mut engine = Engine::new(policy);
+
+    assert!(matches!(
+        engine.process(b"N0CALL>APRS:$GPGLL,4916.45,N,12311.12,W,225444,A,*00"),
+        EngineResult::Rejected {
+            reason: PolicyRejection::InvalidNmeaChecksum,
+            ..
+        }
+    ));
+}
+
+#[test]
 fn policy_rejections_have_stable_codes() {
     assert_eq!(PolicyRejection::PathTooLong.code(), "policy.path_too_long");
     assert_eq!(
@@ -59,6 +93,10 @@ fn policy_rejections_have_stable_codes() {
     assert_eq!(
         PolicyRejection::UnsupportedSemantics.code(),
         "policy.unsupported_semantics"
+    );
+    assert_eq!(
+        PolicyRejection::InvalidNmeaChecksum.code(),
+        "policy.nmea_checksum_mismatch"
     );
 }
 

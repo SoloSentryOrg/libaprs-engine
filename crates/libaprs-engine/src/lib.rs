@@ -305,6 +305,8 @@ pub struct Policy {
     pub allow_unsupported: bool,
     /// Allow semantic packets represented as malformed.
     pub allow_malformed_semantics: bool,
+    /// Reject NMEA sentences when a present checksum does not match.
+    pub reject_invalid_nmea_checksum: bool,
     /// Maximum allowed path component count including destination.
     pub max_path_components: usize,
 }
@@ -322,6 +324,7 @@ impl Policy {
         Self {
             allow_unsupported: true,
             allow_malformed_semantics: true,
+            reject_invalid_nmea_checksum: false,
             max_path_components: 9,
         }
     }
@@ -331,6 +334,15 @@ impl Policy {
     pub fn evaluate(&self, packet: &ParsedPacket, semantic: &AprsData<'_>) -> PolicyDecision {
         if packet.path_components.len() > self.max_path_components {
             return PolicyDecision::Reject(PolicyRejection::PathTooLong);
+        }
+
+        if self.reject_invalid_nmea_checksum
+            && matches!(
+                semantic,
+                AprsData::Nmea(nmea) if nmea.checksum().is_some_and(|checksum| !checksum.valid)
+            )
+        {
+            return PolicyDecision::Reject(PolicyRejection::InvalidNmeaChecksum);
         }
 
         match semantic {
@@ -350,6 +362,7 @@ impl Default for Policy {
         Self {
             allow_unsupported: false,
             allow_malformed_semantics: false,
+            reject_invalid_nmea_checksum: false,
             max_path_components: 9,
         }
     }
@@ -373,6 +386,8 @@ pub enum PolicyRejection {
     MalformedSemantics,
     /// Semantic payload is unsupported.
     UnsupportedSemantics,
+    /// NMEA sentence has a present checksum that does not match.
+    InvalidNmeaChecksum,
 }
 
 impl PolicyRejection {
@@ -383,6 +398,7 @@ impl PolicyRejection {
             Self::PathTooLong => "policy.path_too_long",
             Self::MalformedSemantics => "policy.malformed_semantics",
             Self::UnsupportedSemantics => "policy.unsupported_semantics",
+            Self::InvalidNmeaChecksum => "policy.nmea_checksum_mismatch",
         }
     }
 }

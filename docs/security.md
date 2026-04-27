@@ -86,9 +86,12 @@ The second example rejects or changes inputs before the codec sees them.
 
 `Policy::strict()` is the default posture. It rejects unsupported semantics,
 malformed semantic variants, and excessive path components after codec
-validation. `Policy::permissive()` is useful for exploration and corpus
-collection, but applications should prefer strict policy for production
-ingestion unless they have a clear review path for unsupported data.
+validation. NMEA checksum mismatches are reported by the codec and can be
+rejected by enabling `Policy::reject_invalid_nmea_checksum`; the codec still
+preserves raw bytes and does not repair or normalize the sentence.
+`Policy::permissive()` is useful for exploration and corpus collection, but
+applications should prefer strict policy for production ingestion unless they
+have a clear review path for unsupported data.
 
 ## Dependency Policy
 

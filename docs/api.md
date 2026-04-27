@@ -9,7 +9,7 @@ Use the package name `libaprs-engine` in `Cargo.toml` and the crate name
 
 ```toml
 [dependencies]
-libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.4.0" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.5.0" }
 ```
 
 For a local checkout:
@@ -196,14 +196,18 @@ fn main() -> std::io::Result<()> {
 ```
 
 Strict policy rejects unsupported semantics, malformed semantics, and excessive
-path component counts. Permissive policy allows unsupported and malformed
-semantic variants while keeping codec validation fail-closed.
+path component counts. It also exposes an opt-in semantic check for rejecting
+NMEA sentences when a present checksum does not match. Permissive policy allows
+unsupported and malformed semantic variants while keeping codec validation
+fail-closed.
 
 ```rust
-let strict = libaprs_engine::Policy::strict();
+let mut strict = libaprs_engine::Policy::strict();
+strict.reject_invalid_nmea_checksum = true;
 let permissive = libaprs_engine::Policy::permissive();
 
 assert!(!strict.allow_unsupported);
+assert!(strict.reject_invalid_nmea_checksum);
 assert!(permissive.allow_unsupported);
 ```
 
@@ -295,7 +299,7 @@ raw bytes as byte arrays rather than assuming UTF-8.
 libaprs-engine = {
   git = "https://github.com/elodiejmirza/libaprs-engine",
   package = "libaprs-engine",
-  tag = "v0.4.0",
+  tag = "v0.5.0",
   features = ["serde"]
 }
 ```
@@ -310,8 +314,8 @@ application-owned.
 
 ```toml
 [dependencies]
-aprs-transport-aprs-is = "0.4.0"
-libaprs-engine = "0.4.0"
+aprs-transport-aprs-is = "0.5.0"
+libaprs-engine = "0.5.0"
 ```
 
 ```rust
@@ -322,7 +326,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let login = AprsIsLogin {
         callsign: "N0CALL",
         passcode: -1,
-        software: "libaprs-engine 0.4.0",
+        software: "libaprs-engine 0.5.0",
         filter: Some("r/49/-72/50"),
     };
     assert!(login.line()?.ends_with("\r\n"));
@@ -355,8 +359,8 @@ bytes before handing packets to the core engine.
 
 ```toml
 [dependencies]
-aprs-transport-file = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "aprs-transport-file", tag = "v0.4.0" }
-libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.4.0" }
+aprs-transport-file = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "aprs-transport-file", tag = "v0.5.0" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.5.0" }
 ```
 
 ## TCP Transport Adapter
@@ -366,8 +370,8 @@ another `Read` implementation. This keeps network I/O outside the parser core.
 
 ```toml
 [dependencies]
-aprs-transport-tcp = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "aprs-transport-tcp", tag = "v0.4.0" }
-libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.4.0" }
+aprs-transport-tcp = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "aprs-transport-tcp", tag = "v0.5.0" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.5.0" }
 ```
 
 ```rust

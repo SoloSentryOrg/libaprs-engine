@@ -27,7 +27,7 @@ Publish crates in dependency order:
 The adapter and CLI crates use versioned path dependencies:
 
 ```toml
-libaprs-engine = { version = "0.4.0", path = "../libaprs-engine" }
+libaprs-engine = { version = "0.5.0", path = "../libaprs-engine" }
 ```
 
 Cargo uses the local path in this workspace and the version requirement when

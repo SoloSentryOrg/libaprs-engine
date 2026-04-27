@@ -36,6 +36,15 @@
 - If remote CI is intentionally skipped, tag only after the local gate passes
   and the skipped remote gate is documented.
 
+## v0.5.0 Release Evidence
+
+- Tag: `v0.5.0`
+- Commit: release tag target (`git rev-list -n 1 v0.5.0` after tagging).
+- Local gate: release verification for `0.5.0`.
+- Remote GitHub Actions: release verification for `0.5.0` after push.
+- Notes: adds opt-in policy rejection for NMEA checksum mismatches while
+  preserving codec raw-byte behavior and checksum reporting.
+
 ## v0.4.0 Release Evidence
 
 - Tag: `v0.4.0`

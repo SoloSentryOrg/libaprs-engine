@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.5.0 - 2026-04-27
+
+- Added opt-in policy rejection for NMEA checksum mismatches while preserving
+  codec raw-byte behavior and checksum reporting.
+- Added stable `policy.nmea_checksum_mismatch` rejection code.
+- Bumped all workspace crates to `0.5.0`.
+
 ## 0.4.0 - 2026-04-26
 
 - Expanded weather field extraction to include negative temperatures,
