@@ -95,7 +95,6 @@ jobs:
         run: |
           rustup toolchain install stable --profile minimal
           rustup toolchain install 1.80.0 --profile minimal
-          rustup toolchain install nightly --profile minimal
 
       - name: Select Rust
         run: rustup default stable
@@ -115,9 +114,6 @@ jobs:
           key: ${{ runner.os }}-cargo-release-script-${{ hashFiles('**/Cargo.lock', 'fuzz/Cargo.lock', 'examples/downstream-smoke/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-release-script-
-
-      - name: Install release tools
-        run: cargo install cargo-audit cargo-deny cargo-fuzz cargo-semver-checks --locked
 
       - name: Verify release script
         run: scripts/verify-release.sh
