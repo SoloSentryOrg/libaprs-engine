@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## 0.6.0 - 2026-04-28
+
+- Added object/item coordinate helpers, NMEA sentence field helpers, and Mic-E
+  message-code helpers while preserving existing byte-oriented APIs.
+- Added malformed semantic and mutation regression tests for fail-closed parser
+  behavior.
+- Added compile-tested transport cookbook examples for APRS-IS, KISS, UDP, and
+  corpus replay.
+- Added contributor guidance and GitHub issue templates for bugs, parser
+  fixtures, and transport requests.
+- Bumped all workspace crates to `0.6.0`.
+
 ## 0.5.0 - 2026-04-27
 
 - Added opt-in policy rejection for NMEA checksum mismatches while preserving

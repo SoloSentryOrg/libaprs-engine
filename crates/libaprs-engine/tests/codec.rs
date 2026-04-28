@@ -1,9 +1,9 @@
 use libaprs_engine::{
     parse_packet, parse_packet_with_options, AprsData, Capability, CompressedPosition,
-    DataTypeIdentifier, Item, Maidenhead, Message, MessageKind, MicE, MicEStatus, Nmea,
-    NmeaChecksum, Object, ParseError, ParseOptions, Position, Query, Telemetry, TelemetryMetadata,
-    TelemetryMetadataKind, ThirdParty, TimestampedPosition, UserDefined, Weather, WeatherFields,
-    MAX_PACKET_LEN,
+    DataTypeIdentifier, Item, Maidenhead, Message, MessageKind, MicE, MicEMessageCode,
+    MicEStandardMessage, MicEStatus, Nmea, NmeaChecksum, Object, ParseError, ParseOptions,
+    Position, Query, Telemetry, TelemetryMetadata, TelemetryMetadataKind, ThirdParty,
+    TimestampedPosition, UserDefined, Weather, WeatherFields, MAX_PACKET_LEN,
 };
 
 #[test]
@@ -49,6 +49,41 @@ fn packet_without_required_separator_fails_closed() {
     let err = parse_packet(b"N0CALL APRS hello").expect_err("missing separators must be rejected");
 
     assert_eq!(err, ParseError::MissingSeparator);
+}
+
+#[test]
+fn separator_and_path_mutations_fail_closed() {
+    let cases = [
+        (
+            b">APRS:>missing-source".as_slice(),
+            ParseError::EmptySegment,
+        ),
+        (
+            b"N0CALL>:>missing-path".as_slice(),
+            ParseError::EmptySegment,
+        ),
+        (b"N0CALL>APRS:".as_slice(), ParseError::EmptySegment),
+        (
+            b"N0CALL>APRS,,WIDE1-1:>empty-path-component".as_slice(),
+            ParseError::InvalidAddress,
+        ),
+        (
+            b"N0CALL>APRS,WIDE1-16:>bad-ssid".as_slice(),
+            ParseError::InvalidAddress,
+        ),
+        (
+            b"N0CALL>APRS,WIDE1-1**,TCPIP:>bad-repeat-marker".as_slice(),
+            ParseError::InvalidAddress,
+        ),
+    ];
+
+    for (input, expected) in cases {
+        assert_eq!(
+            parse_packet(input).expect_err("mutated packet should fail closed"),
+            expected,
+            "mutation unexpectedly changed error for {input:?}"
+        );
+    }
 }
 
 #[test]
@@ -243,6 +278,28 @@ fn object_semantics_parse_name_liveness_timestamp_and_body() {
 }
 
 #[test]
+fn object_and_item_coordinates_decode_from_position_body() {
+    let object = parse_packet(b"N0CALL>APRS:;LEADER   *092345z4903.50N/07201.75W-object")
+        .expect("object should parse");
+    let item =
+        parse_packet(b"N0CALL>APRS:)BIKE!4903.50N/07201.75W-item").expect("item should parse");
+
+    let AprsData::Object(object) = object.aprs_data() else {
+        panic!("expected object");
+    };
+    let AprsData::Item(item) = item.aprs_data() else {
+        panic!("expected item");
+    };
+
+    let object_coordinates = object.coordinates().expect("object coordinates");
+    let item_coordinates = item.coordinates().expect("item coordinates");
+
+    assert_approx_eq(object_coordinates.latitude, 49.0583333333);
+    assert_approx_eq(object_coordinates.longitude, -72.0291666667);
+    assert_eq!(object_coordinates, item_coordinates);
+}
+
+#[test]
 fn item_semantics_parse_name_liveness_and_body() {
     let parsed = parse_packet(b"N0CALL>APRS:)BIKE!4903.50N/07201.75W-").expect("item should parse");
 
@@ -312,6 +369,20 @@ fn compressed_position_interprets_decimal_coordinates() {
 
     assert_approx_eq(coordinates.latitude, 49.5);
     assert_approx_eq(coordinates.longitude, -72.75000394);
+}
+
+#[test]
+fn short_uncompressed_position_is_malformed_not_panic() {
+    let parsed = parse_packet(b"N0CALL>APRS:!4903.50N/07201.75W")
+        .expect("framed packet should parse at codec boundary");
+
+    assert_eq!(
+        parsed.aprs_data(),
+        AprsData::Malformed {
+            identifier: b'!',
+            information: b"4903.50N/07201.75W".as_slice(),
+        }
+    );
 }
 
 #[test]
@@ -567,6 +638,30 @@ fn nmea_checksum_validation_reports_expected_and_calculated_values() {
 }
 
 #[test]
+fn nmea_semantics_expose_sentence_identifiers_and_fields() {
+    let parsed = parse_packet(b"N0CALL>APRS:$GPGLL,4916.45,N,12311.12,W,225444,A,*1D")
+        .expect("NMEA should parse");
+    let AprsData::Nmea(nmea) = parsed.aprs_data() else {
+        panic!("expected NMEA");
+    };
+
+    assert_eq!(nmea.talker_id(), Some(b"GP".as_slice()));
+    assert_eq!(nmea.sentence_id(), Some(b"GLL".as_slice()));
+    assert_eq!(
+        nmea.data_fields(),
+        vec![
+            b"4916.45".as_slice(),
+            b"N".as_slice(),
+            b"12311.12".as_slice(),
+            b"W".as_slice(),
+            b"225444".as_slice(),
+            b"A".as_slice(),
+            b"".as_slice(),
+        ]
+    );
+}
+
+#[test]
 fn mic_e_semantics_extract_destination_derived_status_and_latitude_digits() {
     let mic_e = parse_packet(b"N0CALL>ABC123:`abcde").expect("Mic-E should parse");
 
@@ -580,6 +675,30 @@ fn mic_e_semantics_extract_destination_derived_status_and_latitude_digits() {
             latitude_digits: Some([0, 1, 2, 1, 2, 3]),
         })
     );
+
+    let AprsData::MicE(mic_e) = mic_e.aprs_data() else {
+        panic!("expected Mic-E");
+    };
+    assert_eq!(
+        mic_e.message_code(),
+        Some(MicEMessageCode::Standard(MicEStandardMessage::OffDuty))
+    );
+}
+
+#[test]
+fn mic_e_semantics_decode_custom_and_emergency_message_codes() {
+    let custom = parse_packet(b"N0CALL>PQR123:`abcde").expect("custom Mic-E should parse");
+    let emergency = parse_packet(b"N0CALL>123123:`abcde").expect("emergency Mic-E should parse");
+
+    let AprsData::MicE(custom) = custom.aprs_data() else {
+        panic!("expected custom Mic-E");
+    };
+    let AprsData::MicE(emergency) = emergency.aprs_data() else {
+        panic!("expected emergency Mic-E");
+    };
+
+    assert_eq!(custom.message_code(), Some(MicEMessageCode::Custom(0)));
+    assert_eq!(emergency.message_code(), Some(MicEMessageCode::Emergency));
 }
 
 #[test]
@@ -621,6 +740,28 @@ fn third_party_semantics_can_parse_nested_packet_explicitly() {
             text: b"nested".as_slice()
         }
     );
+}
+
+#[test]
+fn malformed_semantic_payloads_remain_policy_visible_without_partial_success() {
+    let cases = [
+        (b"N0CALL>APRS:/badtime4903.50N/07201.75W-".as_slice(), b'/'),
+        (b"N0CALL>APRS:!/5L!!<*e7>7P\x7fcomment".as_slice(), b'!'),
+        (b"N0CALL>APRS::TOOSHORT".as_slice(), b':'),
+        (b"N0CALL>APRS:T#001,111".as_slice(), b'T'),
+        (b"N0CALL>APRS:[IO91".as_slice(), b'['),
+        (b"N0CALL>APRS:{Q".as_slice(), b'{'),
+    ];
+
+    for (input, identifier) in cases {
+        let parsed = parse_packet(input).expect("codec framing should parse");
+        assert!(
+            matches!(parsed.aprs_data(), AprsData::Malformed { identifier: actual, .. } if actual == identifier),
+            "expected malformed semantic identifier {identifier:?} for {input:?}, got {:?}",
+            parsed.aprs_data()
+        );
+        assert_eq!(parsed.raw().as_bytes(), input);
+    }
 }
 
 fn message_kind(data: AprsData<'_>) -> MessageKind {

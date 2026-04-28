@@ -1,7 +1,7 @@
 use libaprs_engine::{
     parse_packet, parse_packet_with_options, AprsData, Engine, EngineResult, LineTransport,
-    PacketSink, PacketSource, ParseError, ParseOptions, Policy, PolicyRejection,
-    TransportErrorCode,
+    MicEMessageCode, MicEStandardMessage, PacketSink, PacketSource, ParseError, ParseOptions,
+    Policy, PolicyRejection, TransportErrorCode,
 };
 
 #[test]
@@ -70,6 +70,24 @@ fn documented_semantic_helpers_remain_usable() {
         panic!("expected NMEA");
     };
     assert!(nmea.checksum().expect("checksum").valid);
+    assert_eq!(nmea.talker_id(), Some(b"GP".as_slice()));
+    assert_eq!(nmea.sentence_id(), Some(b"GLL".as_slice()));
+
+    let object = parse_packet(b"N0CALL>APRS:;LEADER   *092345z4903.50N/07201.75W-object")
+        .expect("object should parse");
+    let AprsData::Object(object) = object.aprs_data() else {
+        panic!("expected object");
+    };
+    assert!(object.coordinates().is_some());
+
+    let mic_e = parse_packet(b"N0CALL>ABC123:`abcde").expect("Mic-E should parse");
+    let AprsData::MicE(mic_e) = mic_e.aprs_data() else {
+        panic!("expected Mic-E");
+    };
+    assert_eq!(
+        mic_e.message_code(),
+        Some(MicEMessageCode::Standard(MicEStandardMessage::OffDuty))
+    );
 }
 
 #[test]

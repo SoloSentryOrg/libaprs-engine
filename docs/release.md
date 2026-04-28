@@ -30,6 +30,16 @@
 - If remote CI is intentionally skipped, tag only after the local gate passes
   and the skipped remote gate is documented.
 
+## v0.6.0 Release Evidence
+
+- Tag: `v0.6.0`
+- Commit: release tag target (`git rev-list -n 1 v0.6.0` after tagging).
+- Local gate: release verification for `0.6.0`.
+- Remote GitHub Actions: release verification for `0.6.0` after push.
+- Notes: adds object/item coordinate helpers, NMEA sentence field helpers,
+  Mic-E message-code helpers, stronger parser assurance tests, transport
+  cookbook examples, and contributor workflow templates.
+
 ## v0.5.0 Release Evidence
 
 - Tag: `v0.5.0`

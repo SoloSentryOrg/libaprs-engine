@@ -14,15 +14,15 @@ semantic coverage and known gaps for APRS101 packet families.
 | Announcement | Supported | Message kind | Classified via addressee |
 | Acknowledgement | Supported | Message kind | `ack` prefix |
 | Reject | Supported | Message kind | `rej` prefix |
-| Object | Supported | Name, liveness, timestamp, body | Body preserved |
-| Item | Supported | Name, liveness, body | Body preserved |
+| Object | Supported | Name, liveness, timestamp, body, coordinates when body starts with a supported position | Body preserved |
+| Item | Supported | Name, liveness, body, coordinates when body starts with a supported position | Body preserved |
 | Weather | Supported | Common numeric fields, luminosity, snow, raw rain counter | Invalid optional fields are ignored |
 | Telemetry | Supported | Sequence, analog, digital bits | Report values preserved and numerically decoded when safe |
 | Telemetry metadata | Supported | Parameter names, units, equations, bit sense | `PARM.`, `UNIT.`, `EQNS.`, and `BITS.` message packets |
 | Query | Supported | Query bytes | Query body preserved |
 | Capability | Supported | Body bytes | Capability fields not split |
-| NMEA | Supported | Sentence bytes, checksum details | Invalid checksums are reported; policy can reject checksum mismatches |
-| Mic-E | Supported | Status bits, latitude digits, coordinates, speed/course | Values decode only when destination/body bytes permit it |
+| NMEA | Supported | Sentence bytes, talker ID, sentence ID, data fields, checksum details | Invalid checksums are reported; policy can reject checksum mismatches |
+| Mic-E | Supported | Status bits, message code, latitude digits, coordinates, speed/course | Values decode only when destination/body bytes permit it |
 | Maidenhead | Supported | Locator bytes | Locator syntax is minimally framed |
 | User-defined | Supported | User ID, packet type, body | Body preserved |
 | Third-party traffic | Supported | Encapsulated bytes, explicit nested parser | Nested parsing is caller-controlled via API |
@@ -32,9 +32,8 @@ semantic coverage and known gaps for APRS101 packet families.
 ## Future Conformance Work
 
 - Additional semantic consistency policies beyond NMEA checksum mismatch.
-- More malformed semantic fixtures for each supported family, especially
-  timestamped positions, compressed positions, Mic-E, and third-party nested
-  traffic.
+- More real-world corpus fixtures for Mic-E, NMEA, object/item positions, and
+  third-party nested traffic.
 - More policy-rejection fixtures as semantic policies are added.
 
 ## Fixture Coverage
@@ -46,8 +45,9 @@ metadata, query, capability, NMEA with checksum, Mic-E, Maidenhead,
 user-defined data, third-party traffic, and unsupported identifier handling.
 The APRS101-oriented fixture set stores packet bytes separately from fixture
 IDs and requires source-reference entries for every case.
-Tests assert both raw-byte preservation and expected semantic family
-classification for every APRS101 fixture.
+Tests assert raw-byte preservation, source-reference coverage, minimum semantic
+family coverage, expected semantic family classification, selected subtype
+classification, and malformed semantic visibility.
 
 ## Compatibility Coverage
 

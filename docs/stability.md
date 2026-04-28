@@ -29,6 +29,8 @@ The project should remove pre-1.0 caveats only after these gates are true:
   documentation example.
 - `cargo-semver-checks` runs in the release CI path and any breaking result is
   either fixed or explicitly called out in `CHANGELOG.md` before release.
+- Public API changes are reviewed against `docs/api.md`,
+  `crates/libaprs-engine/tests/api_compat.rs`, and the semver-check output.
 - APRS semantic families in `docs/conformance.md` have fixture coverage for
   accepted, malformed, and policy-rejected cases where applicable.
 - Parser and transport fuzz targets compile, and any discovered crash or
@@ -62,8 +64,8 @@ types may still change before 1.0:
 These APIs may change as APRS semantic coverage matures:
 
 - `AprsData`
-- semantic field structs such as `Position`, `Weather`, `Telemetry`,
-  `TelemetryMetadata`, `Nmea`, `MicE`, and `ThirdParty`
+- semantic field structs such as `Position`, `Object`, `Item`, `Weather`,
+  `Telemetry`, `TelemetryMetadata`, `Nmea`, `MicE`, and `ThirdParty`
 - typed interpretation helper methods
 - `DataTypeIdentifier`
 

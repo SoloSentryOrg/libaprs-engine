@@ -55,7 +55,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let login = AprsIsLogin {
         callsign: "N0CALL",
         passcode: -1,
-        software: "libaprs-engine 0.5.0",
+        software: "libaprs-engine 0.6.0",
         filter: Some("r/49/-72/50"),
     };
     assert!(login.line()?.ends_with("\r\n"));
@@ -133,3 +133,13 @@ fn encode_ax25_addr(callsign: &str, last: bool) -> [u8; 7] {
   production before adding new parser behavior.
 - Keep private callsigns, precise locations, and operator data out of checked-in
   corpora unless they are already public and safe to redistribute.
+
+## Compile-Tested Examples
+
+The repository includes transport cookbook examples that compile under
+`cargo test --examples`:
+
+- `crates/aprs-transport-aprs-is/examples/reader.rs`
+- `crates/aprs-transport-kiss/examples/frame_pipeline.rs`
+- `crates/aprs-transport-udp/examples/datagram_ingest.rs`
+- `crates/aprs-transport-corpus/examples/replay.rs`

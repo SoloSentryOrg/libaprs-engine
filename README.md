@@ -16,7 +16,7 @@ telemetry, indexing, and diagnostics.
 - Pre-1.0 APRS engine with meaningful semantics, conformance fixtures,
   compatibility tests, examples, benchmark, optional transport adapters, and CLI
   inspector.
-- Current tagged release: `v0.5.0`.
+- Current tagged release: `v0.6.0`.
 - Public API has documented pre-1.0 stability intent, but not `1.0.0`
   semantic-versioning guarantees.
 - Core runtime remains network-free and async-free. Optional `serde`
@@ -71,27 +71,27 @@ Use crates.io:
 
 ```toml
 [dependencies]
-libaprs-engine = "0.5.0"
-aprs-transport-file = "0.5.0"
-aprs-transport-tcp = "0.5.0"
-aprs-transport-aprs-is = "0.5.0"
-aprs-transport-kiss = "0.5.0"
-aprs-transport-serial = "0.5.0"
-aprs-transport-udp = "0.5.0"
-aprs-transport-http = "0.5.0"
-aprs-transport-file-watch = "0.5.0"
-aprs-transport-mqtt = "0.5.0"
-aprs-transport-ax25 = "0.5.0"
-aprs-transport-corpus = "0.5.0"
-aprs-transport-channel = "0.5.0"
-aprs-transport-async = "0.5.0"
+libaprs-engine = "0.6.0"
+aprs-transport-file = "0.6.0"
+aprs-transport-tcp = "0.6.0"
+aprs-transport-aprs-is = "0.6.0"
+aprs-transport-kiss = "0.6.0"
+aprs-transport-serial = "0.6.0"
+aprs-transport-udp = "0.6.0"
+aprs-transport-http = "0.6.0"
+aprs-transport-file-watch = "0.6.0"
+aprs-transport-mqtt = "0.6.0"
+aprs-transport-ax25 = "0.6.0"
+aprs-transport-corpus = "0.6.0"
+aprs-transport-channel = "0.6.0"
+aprs-transport-async = "0.6.0"
 ```
 
 Use a Git dependency when testing unreleased changes from this repository.
 
 ```toml
 [dependencies]
-libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.5.0" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v0.6.0" }
 ```
 
 For local development from a checkout:
@@ -178,6 +178,8 @@ See [Security Model](docs/security.md) for details.
 - [Verification](docs/verification.md): local checks and release gates.
 - [Release Checklist](docs/release.md): pre-release steps.
 - [Publishing](docs/publishing.md): crates.io package and publish workflow.
+- [Contributing](CONTRIBUTING.md): development rules, verification, and secure
+  review checklist.
 
 ## Verification
 
@@ -212,7 +214,8 @@ The codec validates a conservative `source>path:payload` shape:
 
 Semantic parsing covers status, position, timestamped position, compressed
 position, messages, bulletins, announcements, acknowledgements, rejects,
-objects, items, weather, telemetry, telemetry metadata, queries, capabilities,
-NMEA checksum inspection, Mic-E coordinates/speed/course when decodable,
-Maidenhead locator, user-defined data, explicit third-party nested parsing,
-malformed data, and unsupported data.
+objects/items with coordinate helpers, weather, telemetry, telemetry metadata,
+queries, capabilities, NMEA identifiers/fields/checksum inspection, Mic-E
+message codes and coordinates/speed/course when decodable, Maidenhead locator,
+user-defined data, explicit third-party nested parsing, malformed data, and
+unsupported data.

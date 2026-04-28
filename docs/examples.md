@@ -108,6 +108,25 @@ fn main() -> Result<(), libaprs_engine::ParseError> {
 }
 ```
 
+## Extract Object And Item Coordinates
+
+```rust
+use libaprs_engine::{parse_packet, AprsData};
+
+fn main() -> Result<(), libaprs_engine::ParseError> {
+    let packet = parse_packet(b"N0CALL>APRS:;LEADER   *092345z4903.50N/07201.75W-object")?;
+
+    if let AprsData::Object(object) = packet.aprs_data() {
+        if let Some(coordinates) = object.coordinates() {
+            println!("lat={}", coordinates.latitude);
+            println!("lon={}", coordinates.longitude);
+        }
+    }
+
+    Ok(())
+}
+```
+
 ## Read Telemetry
 
 ```rust
@@ -146,12 +165,22 @@ fn main() -> Result<(), libaprs_engine::ParseError> {
 ## Inspect NMEA And Third-Party Data
 
 ```rust
-use libaprs_engine::{parse_packet, AprsData};
+use libaprs_engine::{parse_packet, AprsData, MicEMessageCode};
 
 fn main() -> Result<(), libaprs_engine::ParseError> {
     let nmea = parse_packet(b"N0CALL>APRS:$GPGLL,4916.45,N,12311.12,W,225444,A,*1D")?;
     if let AprsData::Nmea(sentence) = nmea.aprs_data() {
+        println!("talker={:?}", sentence.talker_id());
+        println!("sentence={:?}", sentence.sentence_id());
+        println!("fields={:?}", sentence.data_fields());
         println!("checksum={:?}", sentence.checksum());
+    }
+
+    let mic_e = parse_packet(b"N0CALL>ABC123:`abcde")?;
+    if let AprsData::MicE(mic_e) = mic_e.aprs_data() {
+        if let Some(MicEMessageCode::Standard(message)) = mic_e.message_code() {
+            println!("mic-e={message:?}");
+        }
     }
 
     let third_party = parse_packet(b"N0CALL>APRS:}SRC>APRS:>nested")?;
@@ -163,6 +192,15 @@ fn main() -> Result<(), libaprs_engine::ParseError> {
     Ok(())
 }
 ```
+
+## Transport Cookbook Examples
+
+Compile-tested transport examples live with their crates:
+
+- `crates/aprs-transport-aprs-is/examples/reader.rs`
+- `crates/aprs-transport-kiss/examples/frame_pipeline.rs`
+- `crates/aprs-transport-udp/examples/datagram_ingest.rs`
+- `crates/aprs-transport-corpus/examples/replay.rs`
 
 ## Handle Invalid UTF-8 Payloads
 

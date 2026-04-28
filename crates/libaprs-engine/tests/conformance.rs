@@ -37,14 +37,43 @@ fn aprs101_fixture_corpus_parses_without_losing_raw_bytes() {
 #[test]
 fn aprs101_fixture_corpus_has_source_references() {
     let referenced_ids = aprs101_source_reference_ids();
+    let mut seen_ids = BTreeSet::new();
 
     for fixture in aprs101_valid_fixtures() {
+        assert!(
+            seen_ids.insert(fixture.id),
+            "APRS101 fixture {} is duplicated",
+            fixture.id
+        );
         assert!(
             referenced_ids.contains(fixture.id),
             "APRS101 fixture {} is missing a source reference",
             fixture.id
         );
     }
+}
+
+#[test]
+fn aprs101_fixture_corpus_keeps_minimum_family_coverage() {
+    let fixtures = aprs101_valid_fixtures();
+    let semantic_families = fixtures
+        .iter()
+        .map(|fixture| {
+            parse_packet(fixture.packet)
+                .expect("fixture should parse")
+                .aprs_data()
+                .kind_name()
+        })
+        .collect::<BTreeSet<_>>();
+
+    assert!(
+        fixtures.len() >= 30,
+        "APRS101 fixture count regressed below expected coverage"
+    );
+    assert!(
+        semantic_families.len() >= 18,
+        "APRS101 semantic family coverage regressed: {semantic_families:?}"
+    );
 }
 
 #[test]
@@ -55,6 +84,28 @@ fn malformed_fixture_corpus_fails_closed_at_codec_boundary() {
             parse_packet(packet).is_err(),
             "malformed fixture line {} unexpectedly parsed",
             index + 1
+        );
+    }
+}
+
+#[test]
+fn malformed_semantic_fixtures_stay_visible_after_codec_parse() {
+    let cases = [
+        b"N0CALL>APRS:/092345x4903.50N/07201.75W-".as_slice(),
+        b"N0CALL>APRS:!/5L!!<*e7>7P\x7fcomment".as_slice(),
+        b"N0CALL>APRS::SHORT".as_slice(),
+        b"N0CALL>APRS:T#001,111".as_slice(),
+        b"N0CALL>APRS:[IO91".as_slice(),
+        b"N0CALL>APRS:{Q".as_slice(),
+    ];
+
+    for input in cases {
+        let parsed = parse_packet(input).expect("codec framing should parse");
+        assert_eq!(parsed.raw().as_bytes(), input);
+        assert!(
+            matches!(parsed.aprs_data(), AprsData::Malformed { .. }),
+            "expected malformed semantic payload for {input:?}, got {:?}",
+            parsed.aprs_data()
         );
     }
 }

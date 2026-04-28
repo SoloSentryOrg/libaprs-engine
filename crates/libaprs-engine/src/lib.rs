@@ -642,6 +642,15 @@ pub struct Object<'a> {
     pub body: &'a [u8],
 }
 
+impl Object<'_> {
+    /// Returns object coordinates when the object body starts with a supported
+    /// APRS position encoding.
+    #[must_use]
+    pub fn coordinates(&self) -> Option<Coordinates> {
+        coordinates_from_position_body(self.body)
+    }
+}
+
 /// APRS item report fields.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Item<'a> {
@@ -651,6 +660,15 @@ pub struct Item<'a> {
     pub live: bool,
     /// Remaining item body bytes.
     pub body: &'a [u8],
+}
+
+impl Item<'_> {
+    /// Returns item coordinates when the item body starts with a supported APRS
+    /// position encoding.
+    #[must_use]
+    pub fn coordinates(&self) -> Option<Coordinates> {
+        coordinates_from_position_body(self.body)
+    }
 }
 
 /// APRS weather report bytes.
@@ -831,6 +849,29 @@ pub struct Nmea<'a> {
 }
 
 impl Nmea<'_> {
+    /// Returns the NMEA talker ID from the sentence address field.
+    #[must_use]
+    pub fn talker_id(&self) -> Option<&[u8]> {
+        let address = self.address_field()?;
+        (address.len() >= 2).then_some(&address[..2])
+    }
+
+    /// Returns the NMEA sentence formatter ID from the sentence address field.
+    #[must_use]
+    pub fn sentence_id(&self) -> Option<&[u8]> {
+        let address = self.address_field()?;
+        (address.len() >= 5).then_some(&address[2..5])
+    }
+
+    /// Returns data fields after the NMEA address field without the checksum.
+    #[must_use]
+    pub fn data_fields(&self) -> Vec<&[u8]> {
+        let body = self.body_without_checksum();
+        let mut fields = body.split(|byte| *byte == b',');
+        let _address = fields.next();
+        fields.collect()
+    }
+
     /// Returns checksum validation details when the sentence has `*HH` syntax.
     #[must_use]
     pub fn checksum(&self) -> Option<NmeaChecksum> {
@@ -850,6 +891,23 @@ impl Nmea<'_> {
             calculated,
             valid: expected == calculated,
         })
+    }
+
+    fn address_field(&self) -> Option<&[u8]> {
+        let body = self.body_without_checksum();
+        let end = body
+            .iter()
+            .position(|byte| *byte == b',')
+            .unwrap_or(body.len());
+        let address = &body[..end];
+        (address.len() >= 5 && address.iter().all(u8::is_ascii_alphanumeric)).then_some(address)
+    }
+
+    fn body_without_checksum(&self) -> &[u8] {
+        match self.sentence.iter().rposition(|byte| *byte == b'*') {
+            Some(separator) => &self.sentence[..separator],
+            None => self.sentence,
+        }
     }
 }
 
@@ -894,6 +952,12 @@ impl MicE<'_> {
     pub fn speed_course(&self) -> Option<MicESpeedCourse> {
         decode_mic_e_speed_course(self.body)
     }
+
+    /// Returns the Mic-E destination-derived message code when decodable.
+    #[must_use]
+    pub fn message_code(&self) -> Option<MicEMessageCode> {
+        decode_mic_e_message_code(self.destination)
+    }
 }
 
 /// Mic-E destination-derived status bits.
@@ -901,6 +965,36 @@ impl MicE<'_> {
 pub enum MicEStatus {
     /// Standard/custom status bit tuple from the first three destination bytes.
     Custom([bool; 3]),
+}
+
+/// Mic-E destination-derived message code.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum MicEMessageCode {
+    /// Standard Mic-E message code.
+    Standard(MicEStandardMessage),
+    /// Custom Mic-E message code number from 0 through 6.
+    Custom(u8),
+    /// Emergency message code.
+    Emergency,
+}
+
+/// Standard Mic-E message code.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum MicEStandardMessage {
+    /// M0: Off Duty.
+    OffDuty,
+    /// M1: En Route.
+    EnRoute,
+    /// M2: In Service.
+    InService,
+    /// M3: Returning.
+    Returning,
+    /// M4: Committed.
+    Committed,
+    /// M5: Special.
+    Special,
+    /// M6: Priority.
+    Priority,
 }
 
 /// Mic-E speed/course extension.
@@ -1124,7 +1218,7 @@ fn parse_position(messaging: bool, identifier: u8, information: &[u8]) -> AprsDa
         return parse_compressed_position(messaging, identifier, information);
     }
 
-    if information.len() < 18 {
+    if information.len() < 19 {
         return AprsData::Malformed {
             identifier,
             information,
@@ -1156,6 +1250,21 @@ fn parse_position(messaging: bool, identifier: u8, information: &[u8]) -> AprsDa
         symbol_code,
         comment,
     })
+}
+
+fn coordinates_from_position_body(body: &[u8]) -> Option<Coordinates> {
+    if is_compressed_position(body) {
+        let AprsData::CompressedPosition(position) = parse_compressed_position(false, b'!', body)
+        else {
+            return None;
+        };
+        return position.coordinates();
+    }
+
+    let AprsData::Position(position) = parse_position(false, b'!', body) else {
+        return None;
+    };
+    position.coordinates()
 }
 
 fn parse_timestamped_position(messaging: bool, identifier: u8, information: &[u8]) -> AprsData<'_> {
@@ -1556,6 +1665,86 @@ fn decode_mic_e_status(destination: &[u8]) -> Option<MicEStatus> {
         mic_e_status_bit(bytes[1])?,
         mic_e_status_bit(bytes[2])?,
     ]))
+}
+
+fn decode_mic_e_message_code(destination: &[u8]) -> Option<MicEMessageCode> {
+    if destination.len() != 6 {
+        return None;
+    }
+
+    let mut bits = [MicEMessageBit::Zero; 3];
+    for (index, byte) in destination[..3].iter().copied().enumerate() {
+        bits[index] = mic_e_message_bit(byte)?;
+    }
+
+    let code = message_code_number([
+        !matches!(bits[0], MicEMessageBit::Zero),
+        !matches!(bits[1], MicEMessageBit::Zero),
+        !matches!(bits[2], MicEMessageBit::Zero),
+    ]);
+
+    if code == 7 {
+        return Some(MicEMessageCode::Emergency);
+    }
+
+    let has_standard = bits
+        .iter()
+        .any(|bit| matches!(bit, MicEMessageBit::StandardOne));
+    let has_custom = bits
+        .iter()
+        .any(|bit| matches!(bit, MicEMessageBit::CustomOne));
+
+    if has_standard && !has_custom {
+        return standard_mic_e_message(code).map(MicEMessageCode::Standard);
+    }
+
+    if has_custom && !has_standard {
+        return Some(MicEMessageCode::Custom(code));
+    }
+
+    None
+}
+
+#[derive(Clone, Copy)]
+enum MicEMessageBit {
+    Zero,
+    StandardOne,
+    CustomOne,
+}
+
+fn mic_e_message_bit(byte: u8) -> Option<MicEMessageBit> {
+    match byte {
+        b'0'..=b'9' | b'L' => Some(MicEMessageBit::Zero),
+        b'A'..=b'K' => Some(MicEMessageBit::StandardOne),
+        b'P'..=b'Z' => Some(MicEMessageBit::CustomOne),
+        _ => None,
+    }
+}
+
+fn message_code_number(bits: [bool; 3]) -> u8 {
+    match bits {
+        [true, true, true] => 0,
+        [true, true, false] => 1,
+        [true, false, true] => 2,
+        [true, false, false] => 3,
+        [false, true, true] => 4,
+        [false, true, false] => 5,
+        [false, false, true] => 6,
+        [false, false, false] => 7,
+    }
+}
+
+fn standard_mic_e_message(code: u8) -> Option<MicEStandardMessage> {
+    match code {
+        0 => Some(MicEStandardMessage::OffDuty),
+        1 => Some(MicEStandardMessage::EnRoute),
+        2 => Some(MicEStandardMessage::InService),
+        3 => Some(MicEStandardMessage::Returning),
+        4 => Some(MicEStandardMessage::Committed),
+        5 => Some(MicEStandardMessage::Special),
+        6 => Some(MicEStandardMessage::Priority),
+        _ => None,
+    }
 }
 
 fn mic_e_status_bit(byte: u8) -> Option<bool> {
