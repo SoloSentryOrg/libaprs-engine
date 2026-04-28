@@ -7,6 +7,10 @@
   bytes for rejected semantic payloads.
 - Added APRS101 malformed semantic golden fixtures and strict-policy rejection
   coverage for malformed semantic families.
+- Added parser robustness tests for exact packet-size boundaries, invalid
+  address bytes, and deterministic mutation corpora.
+- Hardened CI release gates so advisory and dependency-policy checks run during
+  the Rust CI release-script job.
 
 ## 0.6.0 - 2026-04-28
 
