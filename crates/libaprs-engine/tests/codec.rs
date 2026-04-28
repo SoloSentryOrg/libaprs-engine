@@ -745,11 +745,24 @@ fn third_party_semantics_can_parse_nested_packet_explicitly() {
 #[test]
 fn malformed_semantic_payloads_remain_policy_visible_without_partial_success() {
     let cases = [
+        (b"N0CALL>APRS:!9903.50N/07201.75W-".as_slice(), b'!'),
+        (b"N0CALL>APRS:!9001.00N/07201.75W-".as_slice(), b'!'),
+        (b"N0CALL>APRS:!4903.50N/18001.00W-".as_slice(), b'!'),
         (b"N0CALL>APRS:/badtime4903.50N/07201.75W-".as_slice(), b'/'),
         (b"N0CALL>APRS:!/5L!!<*e7>7P\x7fcomment".as_slice(), b'!'),
         (b"N0CALL>APRS::TOOSHORT".as_slice(), b':'),
+        (
+            b"N0CALL>APRS:;LEADER   *badtime4903.50N/07201.75W-".as_slice(),
+            b';',
+        ),
+        (
+            b"N0CALL>APRS:)TOO-LONG-NAME!4903.50N/07201.75W-".as_slice(),
+            b')',
+        ),
         (b"N0CALL>APRS:T#001,111".as_slice(), b'T'),
+        (b"N0CALL>ABC123:`ab".as_slice(), b'`'),
         (b"N0CALL>APRS:[IO91".as_slice(), b'['),
+        (b"N0CALL>APRS:[9911!!bad locator".as_slice(), b'['),
         (b"N0CALL>APRS:{Q".as_slice(), b'{'),
     ];
 

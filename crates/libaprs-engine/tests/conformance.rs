@@ -90,21 +90,50 @@ fn malformed_fixture_corpus_fails_closed_at_codec_boundary() {
 
 #[test]
 fn malformed_semantic_fixtures_stay_visible_after_codec_parse() {
-    let cases = [
-        b"N0CALL>APRS:/092345x4903.50N/07201.75W-".as_slice(),
-        b"N0CALL>APRS:!/5L!!<*e7>7P\x7fcomment".as_slice(),
-        b"N0CALL>APRS::SHORT".as_slice(),
-        b"N0CALL>APRS:T#001,111".as_slice(),
-        b"N0CALL>APRS:[IO91".as_slice(),
-        b"N0CALL>APRS:{Q".as_slice(),
-    ];
-
-    for input in cases {
-        let parsed = parse_packet(input).expect("codec framing should parse");
-        assert_eq!(parsed.raw().as_bytes(), input);
+    for fixture in aprs101_malformed_semantic_fixtures() {
+        let parsed = parse_packet(fixture.packet).unwrap_or_else(|err| {
+            panic!(
+                "malformed semantic fixture {} failed codec: {err:?}",
+                fixture.id
+            );
+        });
+        assert_eq!(parsed.raw().as_bytes(), fixture.packet);
         assert!(
             matches!(parsed.aprs_data(), AprsData::Malformed { .. }),
-            "expected malformed semantic payload for {input:?}, got {:?}",
+            "expected malformed semantic payload for {}, got {:?}",
+            fixture.id,
+            parsed.aprs_data()
+        );
+    }
+}
+
+#[test]
+fn strict_policy_rejects_all_malformed_semantic_families_by_default() {
+    let mut engine = Engine::new(Policy::strict());
+
+    for fixture in aprs101_malformed_semantic_fixtures() {
+        match engine.process(fixture.packet) {
+            EngineResult::Rejected { reason, packet } => {
+                assert_eq!(reason, PolicyRejection::MalformedSemantics);
+                assert_eq!(packet.raw().as_bytes(), fixture.packet);
+            }
+            other => panic!(
+                "expected strict malformed semantic rejection for {}, got {other:?}",
+                fixture.id
+            ),
+        }
+    }
+}
+
+#[test]
+fn malformed_semantic_fixture_identifiers_match_payloads() {
+    for fixture in aprs101_malformed_semantic_fixtures() {
+        let parsed = parse_packet(fixture.packet).expect("codec framing should parse");
+        assert!(
+            matches!(parsed.aprs_data(), AprsData::Malformed { identifier, .. } if identifier == fixture.identifier),
+            "expected malformed identifier {:?} for {}, got {:?}",
+            fixture.identifier,
+            fixture.id,
             parsed.aprs_data()
         );
     }
@@ -289,6 +318,13 @@ struct Fixture<'a> {
     packet: &'a [u8],
 }
 
+#[derive(Debug)]
+struct MalformedSemanticFixture<'a> {
+    id: &'a str,
+    packet: &'a [u8],
+    identifier: u8,
+}
+
 fn aprs101_valid_fixtures() -> Vec<Fixture<'static>> {
     include_bytes!("fixtures/aprs101_valid.aprs")
         .split(|byte| *byte == b'\n')
@@ -315,6 +351,40 @@ fn aprs101_fixture(id: &str) -> Fixture<'static> {
         .into_iter()
         .find(|fixture| fixture.id == id)
         .unwrap_or_else(|| panic!("missing APRS101 fixture {id}"))
+}
+
+fn aprs101_malformed_semantic_fixtures() -> Vec<MalformedSemanticFixture<'static>> {
+    include_bytes!("fixtures/aprs101_malformed_semantics.aprs")
+        .split(|byte| *byte == b'\n')
+        .filter_map(|line| {
+            let line = line.strip_suffix(b"\r").unwrap_or(line);
+            if line.is_empty() || line.starts_with(b"#") {
+                return None;
+            }
+
+            let mut fields = line.split(|byte| *byte == b'\t');
+            let id = fields.next().expect("malformed semantic fixture has an ID");
+            let packet = fields
+                .next()
+                .expect("malformed semantic fixture has packet bytes");
+            let identifier = fields
+                .next()
+                .expect("malformed semantic fixture has an expected identifier");
+            assert!(
+                fields.next().is_none(),
+                "malformed semantic fixture has too many fields"
+            );
+            let id = std::str::from_utf8(id).expect("fixture IDs are ASCII");
+            let [identifier] = identifier else {
+                panic!("fixture {id} expected identifier must be one byte");
+            };
+            Some(MalformedSemanticFixture {
+                id,
+                packet,
+                identifier: *identifier,
+            })
+        })
+        .collect()
 }
 
 fn aprs101_source_reference_ids() -> BTreeSet<&'static str> {

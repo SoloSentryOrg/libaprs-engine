@@ -1204,6 +1204,13 @@ fn parse_mic_e<'a>(
     information: &'a [u8],
     destination: &'a [u8],
 ) -> AprsData<'a> {
+    if information.len() < 3 {
+        return AprsData::Malformed {
+            identifier: identifier.as_byte(),
+            information,
+        };
+    }
+
     AprsData::MicE(MicE {
         identifier: identifier.as_byte(),
         destination,
@@ -1339,7 +1346,10 @@ fn parse_compressed_position(messaging: bool, identifier: u8, information: &[u8]
 }
 
 fn parse_object(information: &[u8]) -> AprsData<'_> {
-    if information.len() < 17 || !matches!(information[9], b'*' | b'_') {
+    if information.len() < 17
+        || !matches!(information[9], b'*' | b'_')
+        || !is_timestamp(&information[10..17])
+    {
         return AprsData::Malformed {
             identifier: b';',
             information,
@@ -1435,7 +1445,7 @@ fn parse_telemetry(information: &[u8]) -> AprsData<'_> {
 }
 
 fn parse_maidenhead(information: &[u8]) -> AprsData<'_> {
-    if information.len() < 6 {
+    if information.len() < 6 || !is_maidenhead_locator(&information[..6]) {
         return AprsData::Malformed {
             identifier: b'[',
             information,
@@ -1489,7 +1499,7 @@ fn classify_message_kind(addressee: &[u8], text: &[u8]) -> MessageKind {
 }
 
 fn is_latitude(value: &[u8]) -> bool {
-    value.len() == 8
+    if !(value.len() == 8
         && value[0].is_ascii_digit()
         && value[1].is_ascii_digit()
         && value[2].is_ascii_digit()
@@ -1497,11 +1507,16 @@ fn is_latitude(value: &[u8]) -> bool {
         && value[4] == b'.'
         && value[5].is_ascii_digit()
         && value[6].is_ascii_digit()
-        && matches!(value[7], b'N' | b'S')
+        && matches!(value[7], b'N' | b'S'))
+    {
+        return false;
+    }
+
+    coordinate_in_range(&value[..2], &value[2..7], 90)
 }
 
 fn is_longitude(value: &[u8]) -> bool {
-    value.len() == 9
+    if !(value.len() == 9
         && value[0].is_ascii_digit()
         && value[1].is_ascii_digit()
         && value[2].is_ascii_digit()
@@ -1510,7 +1525,23 @@ fn is_longitude(value: &[u8]) -> bool {
         && value[5] == b'.'
         && value[6].is_ascii_digit()
         && value[7].is_ascii_digit()
-        && matches!(value[8], b'E' | b'W')
+        && matches!(value[8], b'E' | b'W'))
+    {
+        return false;
+    }
+
+    coordinate_in_range(&value[..3], &value[3..8], 180)
+}
+
+fn coordinate_in_range(degrees: &[u8], minutes: &[u8], max_degrees: u16) -> bool {
+    let Some(degrees) = parse_u16(degrees) else {
+        return false;
+    };
+    let Some(minutes) = parse_fixed_minutes(minutes) else {
+        return false;
+    };
+
+    degrees < max_degrees || (degrees == max_degrees && minutes == 0.0)
 }
 
 fn is_symbol_table_identifier(value: u8) -> bool {
@@ -1538,6 +1569,21 @@ fn is_timestamp(value: &[u8]) -> bool {
     value.len() == 7
         && value[..6].iter().all(u8::is_ascii_digit)
         && matches!(value[6], b'z' | b'/' | b'h')
+}
+
+fn is_maidenhead_locator(value: &[u8]) -> bool {
+    value.len() == 6
+        && is_ascii_alpha_range(value[0], b'A', b'R')
+        && is_ascii_alpha_range(value[1], b'A', b'R')
+        && value[2].is_ascii_digit()
+        && value[3].is_ascii_digit()
+        && is_ascii_alpha_range(value[4], b'A', b'X')
+        && is_ascii_alpha_range(value[5], b'A', b'X')
+}
+
+fn is_ascii_alpha_range(value: u8, start: u8, end: u8) -> bool {
+    let uppercase = value.to_ascii_uppercase();
+    (start..=end).contains(&uppercase)
 }
 
 fn decode_latitude(value: &[u8]) -> Option<f64> {

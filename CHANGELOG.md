@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Tightened semantic validation for coordinate ranges, object timestamps,
+  short Mic-E bodies, and Maidenhead locator syntax while preserving raw packet
+  bytes for rejected semantic payloads.
+- Added APRS101 malformed semantic golden fixtures and strict-policy rejection
+  coverage for malformed semantic families.
+
 ## 0.6.0 - 2026-04-28
 
 - Added object/item coordinate helpers, NMEA sentence field helpers, and Mic-E

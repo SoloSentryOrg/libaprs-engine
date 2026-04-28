@@ -30,6 +30,11 @@ Target outcome: downstream users can build against the API without expecting bre
 
 ## 2. APRS Semantics Completion Batch
 
+Status: completed for the current `1.0.0` roadmap pass. High-value APRS
+families are represented, raw bytes are preserved, and malformed semantic
+payloads are covered by APRS101 malformed golden fixtures plus strict-policy
+rejection tests.
+
 - Complete high-value APRS packet support:
   - position reports
   - messages
