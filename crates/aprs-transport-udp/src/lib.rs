@@ -5,6 +5,8 @@
 use std::io;
 use std::net::UdpSocket;
 
+use libaprs_engine::TransportErrorCode;
+
 /// Receives up to `max_datagrams` UDP datagrams as owned APRS packet bytes.
 pub fn recv_packet_datagrams(
     socket: &UdpSocket,
@@ -18,7 +20,7 @@ pub fn recv_packet_datagrams(
         if len > max_datagram_len {
             return Err(io::Error::new(
                 io::ErrorKind::InvalidData,
-                "UDP datagram exceeds configured byte limit",
+                TransportErrorCode::OversizedInput.code(),
             ));
         }
         buffer.truncate(len);

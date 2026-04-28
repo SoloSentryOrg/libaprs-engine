@@ -46,7 +46,7 @@ secure code review finds a safety issue that requires a breaking change:
 - `Counters`
 - `PacketSummary`, with additive fields allowed before `1.0.0`
 - Existing `DataTypeIdentifier` variants and `DataTypeIdentifier::name`
-- `LineTransport`
+- `LineTransport`, including bounded `packets_with_limit`
 - `PacketSource` and `PacketSink`
 - `TransportErrorCode` and `TransportErrorCode::code`
 - `DEFAULT_TRANSPORT_READ_LIMIT`

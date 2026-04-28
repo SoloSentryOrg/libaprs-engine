@@ -39,4 +39,5 @@ fn udp_datagram_reader_rejects_oversized_datagrams() {
         recv_packet_datagrams(&receiver, 1, 4).expect_err("oversized datagram must fail closed");
 
     assert_eq!(error.kind(), std::io::ErrorKind::InvalidData);
+    assert_eq!(error.to_string(), "transport.oversized_input");
 }

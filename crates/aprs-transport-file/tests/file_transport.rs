@@ -1,6 +1,8 @@
 use std::fs;
 
-use aprs_transport_file::{read_packet_lines, read_packet_lines_from_path_with_limit};
+use aprs_transport_file::{
+    read_packet_lines, read_packet_lines_from_path_with_limit, try_read_packet_lines,
+};
 
 #[test]
 fn file_transport_preserves_non_utf8_packet_bytes() {
@@ -23,4 +25,19 @@ fn file_transport_rejects_file_over_configured_limit() {
     assert_eq!(error.kind(), std::io::ErrorKind::InvalidData);
     assert_eq!(error.to_string(), "transport.oversized_input");
     let _ = fs::remove_file(path);
+}
+
+#[test]
+fn file_transport_can_reject_packet_line_over_protocol_limit() {
+    let mut input = b"N0CALL>APRS:>".to_vec();
+    input.resize(
+        libaprs_engine::MAX_PACKET_LEN + b"N0CALL>APRS:>".len() + 1,
+        b'A',
+    );
+    input.push(b'\n');
+
+    let error = try_read_packet_lines(&input).expect_err("oversized packet line must fail");
+
+    assert_eq!(error.kind(), std::io::ErrorKind::InvalidData);
+    assert_eq!(error.to_string(), "transport.oversized_input");
 }

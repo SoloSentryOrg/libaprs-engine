@@ -1,4 +1,4 @@
-use aprs_transport_ax25::decode_ax25_ui_frame;
+use aprs_transport_ax25::{decode_ax25_ui_frame, decode_ax25_ui_frame_with_limit, Ax25Error};
 
 #[test]
 fn ax25_ui_frame_decoder_extracts_aprs_payload() {
@@ -14,6 +14,16 @@ fn ax25_ui_frame_decoder_extracts_aprs_payload() {
     assert_eq!(decoded.source, b"N0CALL".to_vec());
     assert_eq!(decoded.destination, b"APRS".to_vec());
     assert_eq!(decoded.information, b">hello".to_vec());
+}
+
+#[test]
+fn ax25_decoder_rejects_frames_over_configured_limit() {
+    let frame = vec![0; 32];
+
+    let error = decode_ax25_ui_frame_with_limit(&frame, 16).expect_err("oversized frame fails");
+
+    assert_eq!(error, Ax25Error::OversizedFrame);
+    assert_eq!(error.code(), "ax25_oversized_frame");
 }
 
 fn encode_addr(callsign: &str, ssid: u8, last: bool) -> [u8; 7] {

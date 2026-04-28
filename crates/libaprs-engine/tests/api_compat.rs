@@ -241,6 +241,26 @@ fn transport_contracts_and_codes_remain_usable() {
 }
 
 #[test]
+fn line_transport_can_fail_closed_on_oversized_packet_lines() {
+    let transport = LineTransport::new(b"N0CALL>APRS:>one\nN1CALL>APRS:>two\n");
+    let error = transport
+        .packets_with_limit(b"N0CALL>APRS:>one".len() - 1)
+        .expect_err("oversized packet line must fail closed");
+
+    assert_eq!(error.kind(), std::io::ErrorKind::InvalidData);
+    assert_eq!(error.to_string(), TransportErrorCode::OversizedInput.code());
+}
+
+#[test]
+fn line_transport_packet_limit_preserves_non_utf8_bytes() {
+    let packets = LineTransport::new(b"N0CALL>APRS:>\xff\r\n")
+        .packets_with_limit(MAX_PACKET_LEN)
+        .expect("valid packet should split");
+
+    assert_eq!(packets, vec![b"N0CALL>APRS:>\xff".as_slice()]);
+}
+
+#[test]
 fn engine_can_process_packet_sources() {
     let mut engine = Engine::new(Policy::permissive());
     let mut source = LineTransport::new(b"N0CALL>APRS:>one\nN1CALL>APRS:~two\n");

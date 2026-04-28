@@ -2,6 +2,11 @@
 
 //! AX.25 UI frame helpers for APRS packet bytes.
 
+use libaprs_engine::MAX_PACKET_LEN;
+
+/// Default maximum accepted AX.25 UI frame bytes.
+pub const MAX_AX25_UI_FRAME_LEN: usize = MAX_PACKET_LEN + 72;
+
 /// Decoded AX.25 UI frame fields relevant to APRS.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Ax25UiFrame {
@@ -22,6 +27,8 @@ pub enum Ax25Error {
     InvalidAddress,
     /// Frame is not a UI/no-layer-3 APRS frame.
     NotAprsUi,
+    /// Frame exceeds the configured byte limit.
+    OversizedFrame,
 }
 
 impl Ax25Error {
@@ -32,12 +39,24 @@ impl Ax25Error {
             Self::Truncated => "ax25_truncated",
             Self::InvalidAddress => "ax25_invalid_address",
             Self::NotAprsUi => "ax25_not_aprs_ui",
+            Self::OversizedFrame => "ax25_oversized_frame",
         }
     }
 }
 
 /// Decodes a complete AX.25 UI frame and extracts the APRS information field.
 pub fn decode_ax25_ui_frame(frame: &[u8]) -> Result<Ax25UiFrame, Ax25Error> {
+    decode_ax25_ui_frame_with_limit(frame, MAX_AX25_UI_FRAME_LEN)
+}
+
+/// Decodes an AX.25 UI frame while enforcing a maximum frame length.
+pub fn decode_ax25_ui_frame_with_limit(
+    frame: &[u8],
+    max_frame_len: usize,
+) -> Result<Ax25UiFrame, Ax25Error> {
+    if frame.len() > max_frame_len {
+        return Err(Ax25Error::OversizedFrame);
+    }
     if frame.len() < 16 {
         return Err(Ax25Error::Truncated);
     }

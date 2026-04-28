@@ -36,6 +36,13 @@ limit should use the explicit `*_with_limit` APIs and select the smallest value
 that fits their source. Oversized batches fail closed with
 `transport.oversized_input`.
 
+Transport adapters also enforce packet or frame limits where the boundary is
+known before parsing. `LineTransport::packets_with_limit` fails closed before
+owned packet copies are allocated; reader-backed file, TCP, serial, APRS-IS,
+HTTP, corpus, file-watch, async, MQTT, UDP, KISS, and AX.25 helpers expose or
+use bounded variants for untrusted packet/frame input. Applications still own
+socket timeouts, cancellation, queue depth, retries, authentication, and TLS.
+
 ## Address Validation
 
 The codec accepts a conservative `source>path:payload` packet envelope:
@@ -66,7 +73,9 @@ let bytes = libaprs_engine::read_all_with_limit(
     file,
     libaprs_engine::DEFAULT_TRANSPORT_READ_LIMIT,
 )?;
-for packet in libaprs_engine::LineTransport::new(&bytes).packets() {
+for packet in libaprs_engine::LineTransport::new(&bytes)
+    .packets_with_limit(libaprs_engine::MAX_PACKET_LEN)?
+{
     let result = libaprs_engine::parse_packet(packet);
 }
 ```

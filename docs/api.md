@@ -230,7 +230,9 @@ use libaprs_engine::{LineTransport, parse_packet};
 fn main() -> Result<(), libaprs_engine::ParseError> {
     let input = b"N0CALL>APRS:>one\r\nN0CALL>APRS:>two\n";
 
-    for packet_bytes in LineTransport::new(input).packets() {
+    for packet_bytes in LineTransport::new(input)
+        .packets_with_limit(libaprs_engine::MAX_PACKET_LEN)?
+    {
         let packet = parse_packet(packet_bytes)?;
         println!("{}", packet.aprs_data().kind_name());
     }
@@ -239,8 +241,13 @@ fn main() -> Result<(), libaprs_engine::ParseError> {
 }
 ```
 
-`LineTransport` also implements the shared `PacketSource` trait. `Vec<Vec<u8>>`
-implements `PacketSink` for tests, examples, and in-process adapters.
+Use `packets()` only for already bounded trusted byte slices. Use
+`packets_with_limit()` for external input; it returns
+`transport.oversized_input` before owned packet copies are allocated.
+
+`LineTransport` also implements the shared `PacketSource` trait with the
+default APRS packet limit. `Vec<Vec<u8>>` implements `PacketSink` for tests,
+examples, and in-process adapters.
 
 ```rust
 use libaprs_engine::{LineTransport, PacketSink, PacketSource};

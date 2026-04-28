@@ -1,5 +1,7 @@
 use std::io::{self, Read};
 
+use crate::MAX_PACKET_LEN;
+
 /// Default maximum byte batch accepted by transport helper readers.
 pub const DEFAULT_TRANSPORT_READ_LIMIT: usize = 1024 * 1024;
 
@@ -92,13 +94,37 @@ impl<'a> LineTransport<'a> {
             .filter(|line| !line.is_empty())
             .collect()
     }
+
+    /// Iterates packet lines while enforcing a per-packet byte limit.
+    ///
+    /// The limit is applied after removing one trailing carriage return from
+    /// CRLF-framed lines and before allocating owned packet copies.
+    pub fn packets_with_limit(&self, max_packet_len: usize) -> io::Result<Vec<&'a [u8]>> {
+        let mut packets = Vec::new();
+        for line in self
+            .input
+            .split(|byte| *byte == b'\n')
+            .map(trim_trailing_carriage_return)
+            .filter(|line| !line.is_empty())
+        {
+            if line.len() > max_packet_len {
+                return Err(oversized_input_error());
+            }
+            packets.push(line);
+        }
+        Ok(packets)
+    }
 }
 
 impl PacketSource for LineTransport<'_> {
     type Error = io::Error;
 
     fn recv_packets(&mut self) -> Result<Vec<Vec<u8>>, Self::Error> {
-        Ok(self.packets().into_iter().map(<[u8]>::to_vec).collect())
+        Ok(self
+            .packets_with_limit(MAX_PACKET_LEN)?
+            .into_iter()
+            .map(<[u8]>::to_vec)
+            .collect())
     }
 }
 

@@ -2,6 +2,8 @@
 
 //! KISS frame helpers for APRS packet bytes.
 
+use libaprs_engine::MAX_PACKET_LEN;
+
 const FEND: u8 = 0xc0;
 const FESC: u8 = 0xdb;
 const TFEND: u8 = 0xdc;
@@ -27,6 +29,8 @@ pub enum KissError {
     InvalidEscape,
     /// The requested KISS port is outside the 4-bit field.
     InvalidPort,
+    /// The decoded payload exceeds the configured frame limit.
+    OversizedFrame,
 }
 
 impl KissError {
@@ -37,6 +41,7 @@ impl KissError {
             Self::UnclosedFrame => "kiss_unclosed_frame",
             Self::InvalidEscape => "kiss_invalid_escape",
             Self::InvalidPort => "kiss_invalid_port",
+            Self::OversizedFrame => "kiss_oversized_frame",
         }
     }
 }
@@ -63,18 +68,30 @@ pub fn encode_data_frame(port: u8, payload: &[u8]) -> Result<Vec<u8>, KissError>
 
 /// Decodes all complete KISS frames from `input`.
 pub fn decode_frames(input: &[u8]) -> Result<Vec<KissFrame>, KissError> {
+    decode_frames_with_limit(input, MAX_PACKET_LEN)
+}
+
+/// Decodes all complete KISS frames while enforcing a decoded payload limit.
+pub fn decode_frames_with_limit(
+    input: &[u8],
+    max_payload_len: usize,
+) -> Result<Vec<KissFrame>, KissError> {
     let mut frames = Vec::new();
     let mut current: Option<Vec<u8>> = None;
+    let max_encoded_frame_len = max_payload_len.saturating_mul(2).saturating_add(1);
 
     for &byte in input {
         if byte == FEND {
             if let Some(frame) = current.take() {
                 if !frame.is_empty() {
-                    frames.push(decode_one_frame(&frame)?);
+                    frames.push(decode_one_frame(&frame, max_payload_len)?);
                 }
             }
             current = Some(Vec::new());
         } else if let Some(frame) = current.as_mut() {
+            if frame.len() >= max_encoded_frame_len {
+                return Err(KissError::OversizedFrame);
+            }
             frame.push(byte);
         }
     }
@@ -86,7 +103,7 @@ pub fn decode_frames(input: &[u8]) -> Result<Vec<KissFrame>, KissError> {
     Ok(frames)
 }
 
-fn decode_one_frame(frame: &[u8]) -> Result<KissFrame, KissError> {
+fn decode_one_frame(frame: &[u8], max_payload_len: usize) -> Result<KissFrame, KissError> {
     let command = frame[0] & 0x0f;
     let port = frame[0] >> 4;
     let mut payload = Vec::with_capacity(frame.len().saturating_sub(1));
@@ -97,14 +114,14 @@ fn decode_one_frame(frame: &[u8]) -> Result<KissFrame, KissError> {
             FESC => {
                 let escaped = *frame.get(index + 1).ok_or(KissError::InvalidEscape)?;
                 match escaped {
-                    TFEND => payload.push(FEND),
-                    TFESC => payload.push(FESC),
+                    TFEND => push_payload_byte(&mut payload, FEND, max_payload_len)?,
+                    TFESC => push_payload_byte(&mut payload, FESC, max_payload_len)?,
                     _ => return Err(KissError::InvalidEscape),
                 }
                 index += 2;
             }
             byte => {
-                payload.push(byte);
+                push_payload_byte(&mut payload, byte, max_payload_len)?;
                 index += 1;
             }
         }
@@ -115,4 +132,16 @@ fn decode_one_frame(frame: &[u8]) -> Result<KissFrame, KissError> {
         command,
         payload,
     })
+}
+
+fn push_payload_byte(
+    payload: &mut Vec<u8>,
+    byte: u8,
+    max_payload_len: usize,
+) -> Result<(), KissError> {
+    if payload.len() >= max_payload_len {
+        return Err(KissError::OversizedFrame);
+    }
+    payload.push(byte);
+    Ok(())
 }

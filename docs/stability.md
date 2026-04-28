@@ -63,7 +63,7 @@ secure code review finds a safety issue that requires a breaking change:
 - `Policy`
 - `PolicyDecision`
 - `PolicyRejection`
-- `LineTransport`
+- `LineTransport`, including bounded `packets_with_limit`
 - `PacketSource`
 - `PacketSink`
 - `TransportErrorCode::code`

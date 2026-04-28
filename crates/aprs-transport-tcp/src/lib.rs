@@ -9,7 +9,9 @@
 use std::io::{self, Read};
 use std::net::{TcpStream, ToSocketAddrs};
 
-use libaprs_engine::{read_all_with_limit, LineTransport, DEFAULT_TRANSPORT_READ_LIMIT};
+use libaprs_engine::{
+    read_all_with_limit, LineTransport, DEFAULT_TRANSPORT_READ_LIMIT, MAX_PACKET_LEN,
+};
 
 /// Reads newline-separated packet bytes from a generic reader.
 pub fn read_packet_lines_from_reader(reader: impl Read) -> io::Result<Vec<Vec<u8>>> {
@@ -22,7 +24,7 @@ pub fn read_packet_lines_from_reader_with_limit(
     max_bytes: usize,
 ) -> io::Result<Vec<Vec<u8>>> {
     let input = read_all_with_limit(reader, max_bytes)?;
-    Ok(read_packet_lines(&input))
+    try_read_packet_lines(&input)
 }
 
 /// Connects to a TCP address and reads newline-separated packet bytes.
@@ -38,4 +40,13 @@ pub fn read_packet_lines(input: &[u8]) -> Vec<Vec<u8>> {
         .into_iter()
         .map(<[u8]>::to_vec)
         .collect()
+}
+
+/// Splits newline-separated packet bytes while enforcing the APRS packet limit.
+pub fn try_read_packet_lines(input: &[u8]) -> io::Result<Vec<Vec<u8>>> {
+    Ok(LineTransport::new(input)
+        .packets_with_limit(MAX_PACKET_LEN)?
+        .into_iter()
+        .map(<[u8]>::to_vec)
+        .collect())
 }
