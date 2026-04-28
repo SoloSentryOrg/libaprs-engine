@@ -26,6 +26,17 @@ The repository also provides a local release gate script:
 scripts/verify-release.sh
 ```
 
+The publish guard also has a focused test:
+
+```sh
+scripts/test-publish-release-guards.sh
+```
+
+That test stubs `git` and `cargo` and verifies `scripts/publish-release.sh`
+does not publish unless clean secure-review evidence, local release evidence,
+security-gate evidence, remote-CI evidence, and release-commit evidence are
+provided.
+
 Before crates are published, the script skips the crates.io downstream smoke
 project by default. After publishing, run:
 
@@ -78,6 +89,8 @@ installed:
   explicit third-party nested parsing.
 - CI release-script coverage installs `cargo-semver-checks` so public API
   compatibility is checked in the normal release path.
+- CI release-script coverage runs `scripts/test-publish-release-guards.sh` so
+  publication cannot regress to a path that skips secure-review evidence.
 
 ## Benchmark Threshold
 

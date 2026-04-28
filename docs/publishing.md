@@ -1,8 +1,8 @@
 # Publishing
 
 This repository is ready for crates.io package validation, but publishing
-requires a crates.io account token and should be done only from a clean,
-verified release commit.
+requires a crates.io account token and must be done only from a clean, verified
+release commit after secure review has passed with no findings.
 
 ## Crates
 
@@ -72,11 +72,23 @@ cargo login
 ```
 
 The repository provides a guarded publish script that refuses to run unless
-publishing is explicitly confirmed and the working tree is clean:
+publishing is explicitly confirmed, the working tree is clean, the release
+commit is identified, and pre-publish evidence confirms clean secure review and
+passing release/security gates:
 
 ```sh
-LIBAPRS_CONFIRM_PUBLISH=1 scripts/publish-release.sh
+LIBAPRS_CONFIRM_PUBLISH=1 \
+LIBAPRS_SECURE_REVIEW=clean \
+LIBAPRS_LOCAL_RELEASE_GATE=passed \
+LIBAPRS_SECURITY_GATE=passed \
+LIBAPRS_REMOTE_CI=passed \
+LIBAPRS_RELEASE_COMMIT="$(git rev-parse HEAD)" \
+  scripts/publish-release.sh
 ```
+
+Use `LIBAPRS_REMOTE_CI=skipped-documented` only when GitHub Actions is blocked
+or intentionally skipped and the release notes document the reason. Do not use
+that override to bypass a failing CI run.
 
 In restricted environments where `~/.cargo` is not writable, keep Cargo state
 outside the repository:
@@ -86,6 +98,11 @@ mkdir -p /tmp/libaprs-cargo-home
 CARGO_HOME=/tmp/libaprs-cargo-home \
   LIBAPRS_COPY_CARGO_CREDENTIALS=1 \
   LIBAPRS_CONFIRM_PUBLISH=1 \
+  LIBAPRS_SECURE_REVIEW=clean \
+  LIBAPRS_LOCAL_RELEASE_GATE=passed \
+  LIBAPRS_SECURITY_GATE=passed \
+  LIBAPRS_REMOTE_CI=passed \
+  LIBAPRS_RELEASE_COMMIT="$(git rev-parse HEAD)" \
   scripts/publish-release.sh
 ```
 
@@ -115,10 +132,18 @@ cargo publish -p aprs-cli
 Wait for each published dependency to become available before publishing crates
 that depend on it.
 
+Manual publishing must still satisfy the same pre-publish evidence requirements
+as `scripts/publish-release.sh`: clean secure review, passing local release
+gate, passing security gate, passing remote CI or documented CI skip, clean
+working tree, and identified release commit.
+
 ## Release Requirements
 
 - Run the local verification gate in `docs/verification.md`.
 - Confirm GitHub Actions passed on the release commit.
+- Confirm secure code review passed cleanly with no findings.
+- Confirm `cargo audit` and `cargo deny check` passed locally or in the
+  security workflow.
 - Run `cargo package -p libaprs-engine`.
 - After `libaprs-engine` is published, run package validation for dependent
   crates before publishing them.

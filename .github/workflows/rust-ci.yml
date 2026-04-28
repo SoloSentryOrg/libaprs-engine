@@ -118,5 +118,8 @@ jobs:
       - name: Install release tools
         run: cargo install cargo-semver-checks --version 0.47.0 --locked
 
+      - name: Test publish guard
+        run: scripts/test-publish-release-guards.sh
+
       - name: Verify release script
         run: scripts/verify-release.sh

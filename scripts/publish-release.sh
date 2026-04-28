@@ -6,9 +6,44 @@ run() {
   "$@"
 }
 
+require_value() {
+  name="$1"
+  actual="$2"
+  expected="$3"
+  description="$4"
+
+  if [ "$actual" != "$expected" ]; then
+    echo "Refusing to publish: $description requires $name=$expected." >&2
+    exit 1
+  fi
+}
+
 if [ "${LIBAPRS_CONFIRM_PUBLISH:-0}" != "1" ]; then
   echo "Set LIBAPRS_CONFIRM_PUBLISH=1 to publish crates to crates.io." >&2
   exit 2
+fi
+
+require_value LIBAPRS_SECURE_REVIEW "${LIBAPRS_SECURE_REVIEW:-}" clean "secure review"
+require_value LIBAPRS_LOCAL_RELEASE_GATE "${LIBAPRS_LOCAL_RELEASE_GATE:-}" passed "local release gate"
+require_value LIBAPRS_SECURITY_GATE "${LIBAPRS_SECURITY_GATE:-}" passed "security gate"
+
+case "${LIBAPRS_REMOTE_CI:-}" in
+  passed | skipped-documented)
+    ;;
+  *)
+    echo "Refusing to publish: remote CI requires LIBAPRS_REMOTE_CI=passed or LIBAPRS_REMOTE_CI=skipped-documented." >&2
+    exit 1
+    ;;
+esac
+
+if [ -z "${LIBAPRS_RELEASE_COMMIT:-}" ]; then
+  echo "Refusing to publish: release commit requires LIBAPRS_RELEASE_COMMIT=<git commit>." >&2
+  exit 1
+fi
+
+if [ "$(git rev-parse HEAD)" != "$LIBAPRS_RELEASE_COMMIT" ]; then
+  echo "Refusing to publish: LIBAPRS_RELEASE_COMMIT does not match HEAD." >&2
+  exit 1
 fi
 
 if [ -n "$(git status --short)" ]; then

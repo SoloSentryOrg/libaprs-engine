@@ -3,16 +3,19 @@
 ## Local Gate
 
 - Run `scripts/verify-release.sh`.
+- Run `scripts/test-publish-release-guards.sh`.
+- Complete a secure code review and fix all findings before publishing.
 - After `libaprs-engine` is published to crates.io, run package validation for
   dependent crates with `LIBAPRS_PACKAGE_ALL=1 scripts/verify-release.sh`.
 - Run `cargo bench -p libaprs-engine` when parser performance changed.
 - Verify the declared MSRV through the release script. It runs Rust `1.80.0`
   checks when that toolchain is installed.
-- Consider `cargo audit` or `cargo deny check` when dependency changes are part
-  of the release. The release script runs them when installed.
+- Run `cargo audit` and `cargo deny check`, either locally or through the
+  security workflow, before publishing.
 - Confirm `CHANGELOG.md` describes the release.
 - Use `scripts/publish-release.sh` when publishing to crates.io; it encodes the
-  crate publish order from `docs/publishing.md`.
+  crate publish order from `docs/publishing.md` and refuses to publish without
+  explicit clean secure-review and gate evidence.
 - In restricted environments where `~/.cargo` is not writable, use
   `CARGO_HOME=/tmp/libaprs-cargo-home` for audit, deny, semver, package, and
   publish commands. Copy crates.io credentials into that temporary Cargo home
@@ -23,12 +26,29 @@
 - Confirm GitHub Actions is enabled before relying on remote CI.
 - If GitHub Actions is blocked before job creation, document that CI was skipped
   and rely on the local gate.
+- Do not publish while a required remote CI or security workflow is failing.
 
 ## Tagging
 
 - Tag the release after local and remote verification pass.
 - If remote CI is intentionally skipped, tag only after the local gate passes
   and the skipped remote gate is documented.
+
+## Pre-Publish Evidence
+
+Before running `scripts/publish-release.sh`, record or verify:
+
+- `LIBAPRS_SECURE_REVIEW=clean`: secure code review completed with no open
+  findings.
+- `LIBAPRS_LOCAL_RELEASE_GATE=passed`: `scripts/verify-release.sh` passed for
+  the release commit.
+- `LIBAPRS_SECURITY_GATE=passed`: `cargo audit` and `cargo deny check` passed
+  locally or in GitHub Actions.
+- `LIBAPRS_REMOTE_CI=passed`: remote CI passed for the release commit. Use
+  `skipped-documented` only when CI was unavailable and the release evidence
+  records the reason.
+- `LIBAPRS_RELEASE_COMMIT="$(git rev-parse HEAD)"`: the publish target matches
+  the checked-out commit.
 
 ## v0.6.0 Release Evidence
 

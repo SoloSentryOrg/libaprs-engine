@@ -27,6 +27,7 @@ package_crate() {
 
 LIBAPRS_MSRV="${LIBAPRS_MSRV:-1.80.0}"
 
+run scripts/test-publish-release-guards.sh
 run cargo fmt --all --check
 run cargo test
 run cargo test --all-features
