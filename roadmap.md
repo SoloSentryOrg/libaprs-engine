@@ -72,6 +72,11 @@ Target outcome: the project has defensible OWASP-aligned handling of untrusted p
 
 ## 4. Transport Reliability Batch
 
+Status: completed for the current `1.0.0` roadmap pass. Transports retain
+byte-oriented boundaries, reader-backed adapters enforce batch and packet-line
+limits, frame decoders fail closed on oversized KISS and AX.25 frames, and
+documentation separates transport responsibilities from codec semantics.
+
 - Harden existing transports:
   - line transport
   - file and stdin CLI ingestion

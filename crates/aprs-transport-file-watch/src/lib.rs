@@ -6,7 +6,9 @@ use std::fs::File;
 use std::io::{self, Seek, SeekFrom};
 use std::path::Path;
 
-use libaprs_engine::{read_all_with_limit, LineTransport, DEFAULT_TRANSPORT_READ_LIMIT};
+use libaprs_engine::{
+    read_all_with_limit, LineTransport, DEFAULT_TRANSPORT_READ_LIMIT, MAX_PACKET_LEN,
+};
 
 /// Result of reading appended bytes from a packet file.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -36,7 +38,7 @@ pub fn read_appended_packet_lines_with_limit(
     let input = read_all_with_limit(file, max_bytes)?;
     let next_offset = offset.saturating_add(input.len() as u64);
     let packets = LineTransport::new(&input)
-        .packets()
+        .packets_with_limit(MAX_PACKET_LEN)?
         .into_iter()
         .map(<[u8]>::to_vec)
         .collect();

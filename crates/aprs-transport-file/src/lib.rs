@@ -12,6 +12,7 @@ use std::path::Path;
 
 use libaprs_engine::{
     oversized_input_error, read_all_with_limit, LineTransport, DEFAULT_TRANSPORT_READ_LIMIT,
+    MAX_PACKET_LEN,
 };
 
 /// Reads newline-separated packet bytes from a file path.
@@ -29,7 +30,7 @@ pub fn read_packet_lines_from_path_with_limit(
         return Err(oversized_input_error());
     }
     let input = read_all_with_limit(File::open(path)?, max_bytes)?;
-    Ok(read_packet_lines(&input))
+    try_read_packet_lines(&input)
 }
 
 /// Splits newline-separated packet bytes into owned packet lines.
@@ -40,4 +41,13 @@ pub fn read_packet_lines(input: &[u8]) -> Vec<Vec<u8>> {
         .into_iter()
         .map(<[u8]>::to_vec)
         .collect()
+}
+
+/// Splits newline-separated packet bytes while enforcing the APRS packet limit.
+pub fn try_read_packet_lines(input: &[u8]) -> io::Result<Vec<Vec<u8>>> {
+    Ok(LineTransport::new(input)
+        .packets_with_limit(MAX_PACKET_LEN)?
+        .into_iter()
+        .map(<[u8]>::to_vec)
+        .collect())
 }

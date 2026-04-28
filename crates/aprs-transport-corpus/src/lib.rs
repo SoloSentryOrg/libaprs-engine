@@ -8,6 +8,7 @@ use std::path::{Path, PathBuf};
 
 use libaprs_engine::{
     oversized_input_error, read_all_with_limit, LineTransport, DEFAULT_TRANSPORT_READ_LIMIT,
+    MAX_PACKET_LEN,
 };
 
 /// Reads all regular files in a directory in stable path order.
@@ -34,7 +35,7 @@ pub fn read_corpus_packet_lines_with_limit(
             let input = read_all_with_limit(File::open(path)?, max_file_bytes)?;
             packets.extend(
                 LineTransport::new(&input)
-                    .packets()
+                    .packets_with_limit(MAX_PACKET_LEN)?
                     .into_iter()
                     .map(<[u8]>::to_vec),
             );

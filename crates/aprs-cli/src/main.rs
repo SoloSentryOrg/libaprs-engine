@@ -5,7 +5,9 @@ use std::fs::File;
 use std::io::{self, Write};
 use std::process::ExitCode;
 
-use libaprs_engine::{read_all_with_limit, Engine, EngineResult, LineTransport, Policy};
+use libaprs_engine::{
+    read_all_with_limit, Engine, EngineResult, LineTransport, Policy, MAX_PACKET_LEN,
+};
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 struct CliOptions {
@@ -59,7 +61,10 @@ fn run() -> Result<ExitCode, String> {
     let mut rejected = false;
     let mut malformed = false;
 
-    for line in LineTransport::new(&input).packets() {
+    for line in LineTransport::new(&input)
+        .packets_with_limit(MAX_PACKET_LEN)
+        .map_err(|err| format!("failed to split packet lines: {err}"))?
+    {
         match engine.process(line) {
             EngineResult::Accepted { packet }
                 if !matches_filter(&options, packet.aprs_data().kind_name()) => {}

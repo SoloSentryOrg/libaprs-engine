@@ -9,6 +9,9 @@
   coverage for malformed semantic families.
 - Added parser robustness tests for exact packet-size boundaries, invalid
   address bytes, and deterministic mutation corpora.
+- Hardened transport adapters with bounded packet-line splitting, fail-closed
+  KISS and AX.25 frame-size checks, stable UDP oversized diagnostics, and
+  byte-preserving transport regression tests.
 - Hardened CI release gates so advisory and dependency-policy checks run during
   the Rust CI release-script job.
 
