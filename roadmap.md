@@ -52,6 +52,11 @@ Target outcome: the crate is useful as an APRS parser, not just as a hardened pa
 
 ## 3. Security And Robustness Batch
 
+Status: completed for the current `1.0.0` roadmap pass. Parser robustness
+coverage includes malformed corpora, boundary lengths, invalid UTF-8 handling,
+deterministic mutation inputs, panic-free fuzz-adjacent assertions, saturating
+engine counters, crate-level unsafe bans, and CI dependency-policy gates.
+
 - Expand secure parser testing:
   - malformed corpus tests
   - boundary-length tests

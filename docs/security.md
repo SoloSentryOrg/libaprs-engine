@@ -106,6 +106,12 @@ warnings, wildcard dependencies are denied, and unknown registries or Git
 sources are denied. This is a local/release gate when `cargo-deny` is installed;
 it does not add runtime dependencies.
 
+The Rust CI release-script job installs pinned versions of `cargo-audit` and
+`cargo-deny` before running `scripts/verify-release.sh`, so pull requests and
+main-branch updates exercise the same dependency-policy checks used by the local
+release gate. The separate Security workflow remains scheduled and path-filtered
+for dependency-focused monitoring.
+
 ## Operational Recommendations
 
 - Log or count parse failures without echoing untrusted bytes into unsafe sinks.

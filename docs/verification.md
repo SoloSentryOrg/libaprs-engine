@@ -87,8 +87,9 @@ installed:
   MQTT topic matcher.
 - Optional semantic-family fuzz targets for weather, telemetry, messages, and
   explicit third-party nested parsing.
-- CI release-script coverage installs `cargo-semver-checks` so public API
-  compatibility is checked in the normal release path.
+- CI release-script coverage installs `cargo-semver-checks`, `cargo-audit`, and
+  `cargo-deny` so public API compatibility, advisory checks, and dependency
+  policy are checked in the normal release path.
 - CI release-script coverage runs `scripts/test-publish-release-guards.sh` so
   publication cannot regress to a path that skips secure-review evidence.
 
@@ -150,9 +151,9 @@ pull requests, and manual dispatch for Rust `1.80.0` and stable. The CI gate
 checks formatting, tests, all-features tests, examples, Cargo metadata, docs,
 package validation, downstream smoke, fuzz workspace formatting, and clippy
 with warnings denied. It also runs `scripts/verify-release.sh` as a dedicated
-job so the required local release gate cannot drift from CI. Optional release
-tools such as semver checks, audit, deny, fuzz, and benchmarks remain local or
-release-time gates unless installed in that job.
+job with pinned semver, audit, and deny tools, so the required local release
+gate and dependency-policy checks cannot drift from CI. Fuzz and benchmarks
+remain local or release-time gates unless installed in that job.
 
 The repository also has a scheduled/manual security workflow that runs
 `cargo audit` and `cargo deny check`. It also runs on dependency, manifest,

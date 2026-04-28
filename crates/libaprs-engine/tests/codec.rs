@@ -158,6 +158,20 @@ fn invalid_utf8_payload_preserves_raw_bytes_and_does_not_panic() {
 }
 
 #[test]
+fn invalid_utf8_address_metadata_fails_closed() {
+    let cases = [
+        b"N0\xffCALL>APRS:>status".as_slice(),
+        b"N0CALL>AP\xffRS:>status".as_slice(),
+        b"N0CALL>APRS,WIDE\xff:>status".as_slice(),
+    ];
+
+    for input in cases {
+        let err = parse_packet(input).expect_err("address bytes must be conservative ASCII");
+        assert_eq!(err, ParseError::InvalidAddress, "{input:?}");
+    }
+}
+
+#[test]
 fn unknown_data_type_identifier_is_preserved_as_byte() {
     let input = b"N0CALL>APRS:~opaque";
 
@@ -815,4 +829,25 @@ fn custom_parse_options_can_tighten_packet_size_limit() {
 
     assert_eq!(err, ParseError::Oversized);
     assert_eq!(err.code(), "parse.oversized");
+}
+
+#[test]
+fn packet_length_boundary_is_exact_and_fail_closed() {
+    let mut exact = b"N0CALL>APRS:".to_vec();
+    exact.resize(MAX_PACKET_LEN, b'A');
+    let parsed = parse_packet(&exact).expect("exact maximum packet size should parse");
+    assert_eq!(parsed.raw().as_bytes(), exact.as_slice());
+
+    let mut oversized = exact;
+    oversized.push(b'A');
+    assert_eq!(
+        parse_packet(&oversized).expect_err("one byte over maximum must fail"),
+        ParseError::Oversized
+    );
+
+    assert_eq!(
+        parse_packet_with_options(b"N0CALL>APRS:>x", ParseOptions::new(0))
+            .expect_err("zero max length rejects non-empty input"),
+        ParseError::Oversized
+    );
 }

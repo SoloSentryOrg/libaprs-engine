@@ -158,6 +158,32 @@ fn byte_fuzz_inputs_never_panic_and_preserve_successful_raw_bytes() {
 }
 
 #[test]
+fn deterministic_mutation_corpus_never_panics_or_loses_successful_raw_bytes() {
+    let seeds: [&[u8]; 6] = [
+        b"N0CALL>APRS:>status",
+        b"N0CALL-15>APRS,WIDE1-1*:!4903.50N/07201.75W-ok",
+        b"N0CALL>APRS:T#001,111,222,033,044,055,10101010",
+        b"N0CALL>APRS:$GPGLL,4916.45,N,12311.12,W,225444,A,*00",
+        b"N0CALL>APRS:}SRC>APRS:>nested",
+        b"N0CALL>APRS:!\xff\xfe\xfd",
+    ];
+    let mutations = [0x00, b'>', b':', b',', b'*', b'-', b'\r', b'\n', 0x7f, 0xff];
+
+    for seed in seeds {
+        for index in 0..seed.len() {
+            for mutation in mutations {
+                let mut input = seed.to_vec();
+                input[index] = mutation;
+
+                if let Ok(parsed) = parse_packet(&input) {
+                    assert_eq!(parsed.raw().as_bytes(), input.as_slice());
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn structured_fuzz_preserves_payload_and_never_panics() {
     let payloads: [&[u8]; 8] = [
         b">status",
