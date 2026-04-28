@@ -55,6 +55,19 @@ Before running `scripts/publish-release.sh`, record or verify:
 - `LIBAPRS_RELEASE_COMMIT="$(git rev-parse HEAD)"`: the publish target matches
   the checked-out commit.
 
+## v1.0.0-rc.1 Release Candidate Evidence
+
+- Tag: `v1.0.0-rc.1` pending after release-candidate PR merge and clean gates.
+- Commit: pending release-candidate PR merge.
+- Local gate: pending `scripts/verify-release.sh` for `1.0.0-rc.1`.
+- Remote GitHub Actions: pending release-candidate PR CI and security workflow.
+- Downstream smoke: pending crates.io release-candidate publication.
+- Notes: first `1.0.0` release candidate after API stabilization, APRS
+  semantics completion, security and robustness hardening, transport
+  reliability hardening, and CI release-gate improvements. Do not promote to
+  `1.0.0` until the release-candidate commit has clean secure review, local
+  gate, security gate, remote CI, and downstream smoke evidence.
+
 ## v0.6.0 Release Evidence
 
 - Tag: `v0.6.0`
