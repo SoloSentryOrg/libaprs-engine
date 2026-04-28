@@ -1,8 +1,11 @@
 use libaprs_engine::{
-    parse_packet, parse_packet_with_options, AprsData, Engine, EngineResult, LineTransport,
-    MicEMessageCode, MicEStandardMessage, PacketSink, PacketSource, ParseError, ParseOptions,
-    Policy, PolicyRejection, TransportErrorCode,
+    parse_packet, parse_packet_with_options, AprsData, Counters, DataTypeIdentifier, Engine,
+    EngineResult, LineTransport, MicEMessageCode, MicEStandardMessage, PacketSink, PacketSource,
+    ParseError, ParseOptions, Policy, PolicyDecision, PolicyRejection, TransportErrorCode,
+    DEFAULT_PARSE_OPTIONS, DEFAULT_TRANSPORT_READ_LIMIT, MAX_PACKET_LEN,
 };
+
+const _: () = assert!(DEFAULT_TRANSPORT_READ_LIMIT >= MAX_PACKET_LEN);
 
 #[test]
 fn stable_intent_parser_api_remains_usable() {
@@ -20,16 +23,29 @@ fn stable_intent_parser_api_remains_usable() {
 
 #[test]
 fn stable_intent_options_and_errors_remain_usable() {
+    assert_eq!(MAX_PACKET_LEN, 512);
+    assert_eq!(DEFAULT_PARSE_OPTIONS, ParseOptions::default());
+    assert_eq!(ParseOptions::default().max_packet_len, MAX_PACKET_LEN);
+
     let err = parse_packet_with_options(b"N0CALL>APRS:>hello", ParseOptions::new(4))
         .expect_err("tight size limit should reject packet");
 
     assert_eq!(err, ParseError::Oversized);
     assert_eq!(err.code(), "parse.oversized");
+
+    assert_eq!(ParseError::Empty.code(), "parse.empty");
+    assert_eq!(
+        ParseError::MissingSeparator.code(),
+        "parse.missing_separator"
+    );
+    assert_eq!(ParseError::EmptySegment.code(), "parse.empty_segment");
+    assert_eq!(ParseError::InvalidAddress.code(), "parse.invalid_address");
 }
 
 #[test]
 fn stable_intent_engine_policy_and_transport_api_remain_usable() {
     let mut engine = Engine::new(Policy::strict());
+    assert_eq!(engine.counters(), Counters::default());
 
     for packet in LineTransport::new(b"N0CALL>APRS:>ok\nN0CALL>APRS:~opaque\n").packets() {
         let _ = engine.process(packet);
@@ -47,6 +63,104 @@ fn stable_intent_engine_policy_and_transport_api_remain_usable() {
         }
         other => panic!("expected rejection, got {other:?}"),
     }
+}
+
+#[test]
+fn stable_intent_policy_decision_api_remains_usable() {
+    let accepted = parse_packet(b"N0CALL>APRS:>ok").expect("status should parse");
+    assert_eq!(
+        Policy::strict().evaluate(&accepted, &accepted.aprs_data()),
+        PolicyDecision::Accept
+    );
+
+    let unsupported = parse_packet(b"N0CALL>APRS:~opaque").expect("unsupported should parse");
+    assert_eq!(
+        Policy::strict().evaluate(&unsupported, &unsupported.aprs_data()),
+        PolicyDecision::Reject(PolicyRejection::UnsupportedSemantics)
+    );
+
+    let malformed = parse_packet(b"N0CALL>APRS:!bad").expect("malformed semantic should parse");
+    assert_eq!(
+        Policy::strict().evaluate(&malformed, &malformed.aprs_data()),
+        PolicyDecision::Reject(PolicyRejection::MalformedSemantics)
+    );
+
+    assert_eq!(PolicyRejection::PathTooLong.code(), "policy.path_too_long");
+    assert_eq!(
+        PolicyRejection::MalformedSemantics.code(),
+        "policy.malformed_semantics"
+    );
+    assert_eq!(
+        PolicyRejection::InvalidNmeaChecksum.code(),
+        "policy.nmea_checksum_mismatch"
+    );
+}
+
+#[test]
+fn stable_intent_data_type_identifier_names_remain_usable() {
+    let identifiers = [
+        (
+            b"!",
+            DataTypeIdentifier::PositionNoTimestamp,
+            "position_no_timestamp",
+        ),
+        (
+            b"=",
+            DataTypeIdentifier::PositionNoTimestampMessaging,
+            "position_no_timestamp_messaging",
+        ),
+        (
+            b"/",
+            DataTypeIdentifier::PositionWithTimestamp,
+            "position_with_timestamp",
+        ),
+        (
+            b"@",
+            DataTypeIdentifier::PositionWithTimestampMessaging,
+            "position_with_timestamp_messaging",
+        ),
+        (b">", DataTypeIdentifier::Status, "status"),
+        (b"?", DataTypeIdentifier::Query, "query"),
+        (b"<", DataTypeIdentifier::Capability, "capability"),
+        (b":", DataTypeIdentifier::Message, "message"),
+        (b";", DataTypeIdentifier::Object, "object"),
+        (b")", DataTypeIdentifier::Item, "item"),
+        (b"_", DataTypeIdentifier::Weather, "weather"),
+        (b"T", DataTypeIdentifier::Telemetry, "telemetry"),
+        (b"$", DataTypeIdentifier::Nmea, "nmea"),
+        (b"`", DataTypeIdentifier::MicECurrent, "mic_e_current"),
+        (b"'", DataTypeIdentifier::MicEOld, "mic_e_old"),
+        (b"[", DataTypeIdentifier::Maidenhead, "maidenhead"),
+        (b"{", DataTypeIdentifier::UserDefined, "user_defined"),
+        (b"}", DataTypeIdentifier::ThirdParty, "third_party"),
+    ];
+
+    for (identifier, expected, name) in identifiers {
+        let mut packet = b"N0CALL>APRS:".to_vec();
+        packet.extend_from_slice(identifier);
+        packet.extend_from_slice(match identifier {
+            b"!" | b"=" => b"4903.50N/07201.75W-comment".as_slice(),
+            b"/" | b"@" => b"092345z4903.50N/07201.75W-comment".as_slice(),
+            b":" => b"TARGET   :hello".as_slice(),
+            b";" => b"OBJECT   *092345z4903.50N/07201.75W-comment".as_slice(),
+            b")" => b"ITEM!4903.50N/07201.75W-comment".as_slice(),
+            b"T" => b"#001,111,222,033,044,055,10101010".as_slice(),
+            b"[" => b"AA00aa comment".as_slice(),
+            b"{" => b"ABbody".as_slice(),
+            _ => b"body".as_slice(),
+        });
+
+        let parsed = parse_packet(&packet).expect("identifier packet should parse");
+        assert_eq!(parsed.data_type_identifier(), expected);
+        assert_eq!(parsed.data_type_identifier().name(), name);
+    }
+
+    let unknown = parse_packet(b"N0CALL>APRS:~body").expect("unknown should parse");
+    assert_eq!(
+        unknown.data_type_identifier(),
+        DataTypeIdentifier::Unknown(b'~')
+    );
+    assert_eq!(unknown.data_type_identifier().name(), "unknown");
 }
 
 #[test]

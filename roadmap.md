@@ -10,6 +10,10 @@
 
 ## 1. API Stabilization Batch
 
+Status: completed for the current `1.0.0` roadmap pass. The candidate public
+API boundary is documented in `docs/public-api.md`, and compatibility coverage
+is enforced by `crates/libaprs-engine/tests/api_compat.rs`.
+
 - Freeze the public API intended for `1.0.0`:
   - `RawPacket`
   - `ParsedPacket`

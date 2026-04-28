@@ -27,6 +27,10 @@ The primary codec API is:
 pub fn parse_packet(input: &[u8]) -> Result<ParsedPacket, ParseError>
 ```
 
+This API is part of the candidate `1.0.0` public boundary. See
+[Public API Boundary](public-api.md) for the full stable API list, internal API
+boundaries, and semver guidance.
+
 Use byte slices. Do not convert packet input to `String` before parsing.
 
 ```rust

@@ -18,7 +18,8 @@ telemetry, indexing, and diagnostics.
   inspector.
 - Current tagged release: `v0.6.0`.
 - Public API has documented pre-1.0 stability intent, but not `1.0.0`
-  semantic-versioning guarantees.
+  semantic-versioning guarantees. The candidate `1.0.0` boundary is tracked in
+  [Public API Boundary](docs/public-api.md).
 - Core runtime remains network-free and async-free. Optional `serde`
   diagnostics and separate transport adapter crates are available.
 - GitHub Actions workflow is active and checks Rust `1.80.0` plus stable,
@@ -173,6 +174,8 @@ See [Security Model](docs/security.md) for details.
 - [Architecture](docs/architecture.md): boundaries, contracts, and pipeline.
 - [Security Model](docs/security.md): untrusted input handling and OWASP-aligned
   controls.
+- [Public API Boundary](docs/public-api.md): candidate `1.0.0` API surface,
+  internal boundaries, and semver guidance.
 - [Stability](docs/stability.md): API stability levels and feature flags.
 - [Conformance Matrix](docs/conformance.md): APRS family support and known gaps.
 - [Verification](docs/verification.md): local checks and release gates.

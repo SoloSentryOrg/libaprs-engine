@@ -13,6 +13,8 @@
 - Run `cargo audit` and `cargo deny check`, either locally or through the
   security workflow, before publishing.
 - Confirm `CHANGELOG.md` describes the release.
+- Review `docs/public-api.md` and `crates/libaprs-engine/tests/api_compat.rs`
+  when the release changes exported library APIs.
 - Use `scripts/publish-release.sh` when publishing to crates.io; it encodes the
   crate publish order from `docs/publishing.md` and refuses to publish without
   explicit clean secure-review and gate evidence.
