@@ -6,19 +6,18 @@
 
 Protocol-first APRS parsing and inspection for Rust.
 
-`libaprs-engine` is a pre-1.0, byte-preserving APRS engine. It accepts untrusted
+`libaprs-engine` is a byte-preserving APRS engine. It accepts untrusted
 packet bytes, keeps the original bytes intact, rejects malformed packet shape at
 the codec boundary, and exposes structured APRS views for downstream policy,
 telemetry, indexing, and diagnostics.
 
 ## Project Status
 
-- Pre-1.0 APRS engine with meaningful semantics, conformance fixtures,
+- APRS engine with meaningful semantics, conformance fixtures,
   compatibility tests, examples, benchmark, optional transport adapters, and CLI
   inspector.
-- Current release candidate: `v1.0.0-rc.1`.
-- Public API has documented pre-1.0 stability intent, but not `1.0.0`
-  semantic-versioning guarantees. The candidate `1.0.0` boundary is tracked in
+- Current tagged release: `v1.0.0`.
+- Public API is semver-protected from `1.0.0`. The public boundary is tracked in
   [Public API Boundary](docs/public-api.md).
 - Core runtime remains network-free and async-free. Optional `serde`
   diagnostics and separate transport adapter crates are available.
@@ -72,27 +71,27 @@ Use crates.io:
 
 ```toml
 [dependencies]
-libaprs-engine = "1.0.0-rc.1"
-aprs-transport-file = "1.0.0-rc.1"
-aprs-transport-tcp = "1.0.0-rc.1"
-aprs-transport-aprs-is = "1.0.0-rc.1"
-aprs-transport-kiss = "1.0.0-rc.1"
-aprs-transport-serial = "1.0.0-rc.1"
-aprs-transport-udp = "1.0.0-rc.1"
-aprs-transport-http = "1.0.0-rc.1"
-aprs-transport-file-watch = "1.0.0-rc.1"
-aprs-transport-mqtt = "1.0.0-rc.1"
-aprs-transport-ax25 = "1.0.0-rc.1"
-aprs-transport-corpus = "1.0.0-rc.1"
-aprs-transport-channel = "1.0.0-rc.1"
-aprs-transport-async = "1.0.0-rc.1"
+libaprs-engine = "1.0.0"
+aprs-transport-file = "1.0.0"
+aprs-transport-tcp = "1.0.0"
+aprs-transport-aprs-is = "1.0.0"
+aprs-transport-kiss = "1.0.0"
+aprs-transport-serial = "1.0.0"
+aprs-transport-udp = "1.0.0"
+aprs-transport-http = "1.0.0"
+aprs-transport-file-watch = "1.0.0"
+aprs-transport-mqtt = "1.0.0"
+aprs-transport-ax25 = "1.0.0"
+aprs-transport-corpus = "1.0.0"
+aprs-transport-channel = "1.0.0"
+aprs-transport-async = "1.0.0"
 ```
 
 Use a Git dependency when testing unreleased changes from this repository.
 
 ```toml
 [dependencies]
-libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v1.0.0-rc.1" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v1.0.0" }
 ```
 
 For local development from a checkout:
@@ -174,7 +173,7 @@ See [Security Model](docs/security.md) for details.
 - [Architecture](docs/architecture.md): boundaries, contracts, and pipeline.
 - [Security Model](docs/security.md): untrusted input handling and OWASP-aligned
   controls.
-- [Public API Boundary](docs/public-api.md): candidate `1.0.0` API surface,
+- [Public API Boundary](docs/public-api.md): semver-protected public API surface,
   internal boundaries, and semver guidance.
 - [Stability](docs/stability.md): API stability levels and feature flags.
 - [Conformance Matrix](docs/conformance.md): APRS family support and known gaps.

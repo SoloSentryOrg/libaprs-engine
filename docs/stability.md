@@ -1,32 +1,29 @@
 # Stability
 
-This project is pre-1.0. Public APIs are usable, and this document defines the
-compatibility intent until a `1.0.0` release locks semantic versioning
-guarantees. The candidate `1.0.0` public boundary is maintained in
-[Public API Boundary](public-api.md).
+This project has reached `1.0.0`. The public APIs listed in
+[Public API Boundary](public-api.md) are semver-protected integration
+contracts.
 
 ## Compatibility Policy
 
-- Patch releases should not intentionally break candidate stable APIs.
+- Patch releases must not intentionally break stable APIs.
 - Minor releases may add fields, variants, helper methods, crates, or feature
-  flags.
-- Breaking changes to candidate stable APIs should be reserved for minor
-  releases before `1.0.0`, covered by compatibility test updates, and called
-  out in `CHANGELOG.md`.
-- Candidate stable APIs are covered by
+  flags in source-compatible ways.
+- Breaking changes to stable APIs require a major version bump, compatibility
+  test updates, secure review, and explicit `CHANGELOG.md` migration notes.
+- Stable APIs are covered by
   `crates/libaprs-engine/tests/api_compat.rs` so documented integration
   patterns fail in CI if they drift.
-- Release checks should run `cargo-semver-checks` when installed. Pre-1.0
-  semver still allows breaking changes in minor releases, but semver output
-  must be reviewed before publishing.
+- Release checks should run `cargo-semver-checks` when installed, and semver
+  output must be reviewed before publishing.
 - Experimental semantic APIs may change while APRS coverage matures, but changes
   must preserve raw-byte access and fail-closed parsing behavior.
 - Diagnostic JSON from `ParsedPacket::to_json()` remains convenience output, not
   a compatibility-stable wire schema.
 
-## 1.0 Readiness Criteria
+## Release Maintenance Criteria
 
-The project should remove pre-1.0 caveats only after these gates are true:
+Release maintenance keeps these gates true:
 
 - Candidate stable APIs in `docs/public-api.md` have at least one compatibility
   test and one documentation example.
@@ -41,10 +38,11 @@ The project should remove pre-1.0 caveats only after these gates are true:
 - Transport adapters document ownership of authentication, timeouts, bounding,
   retries, and byte-preservation responsibilities.
 
-## Candidate Stable APIs
+## Stable APIs
 
-These APIs are intended to remain source-compatible through `1.0.0` unless a
-secure code review finds a safety issue that requires a breaking change:
+These APIs are intended to remain source-compatible through the `1.x` release
+line unless a secure code review finds a safety issue that requires a breaking
+change:
 
 - `parse_packet`
 - `parse_packet_with_options`
@@ -55,7 +53,7 @@ secure code review finds a safety issue that requires a breaking change:
 - `ParsedPacket`
 - `ParseError::code`
 - existing `DataTypeIdentifier` variants and `DataTypeIdentifier::name`
-- `PacketSummary`, with additive fields allowed before `1.0.0`
+- `PacketSummary`, with additive fields allowed in minor releases
 - `PolicyRejection::code`
 - `Engine`
 - `EngineResult`
@@ -108,8 +106,8 @@ future split explicit without promising current `no_std` compatibility.
 
 - `libaprs-engine`: stable-intent parser, engine, policy, line transport, and
   semantic API surface.
-- `aprs-cli`: operational inspection tool; command-line flags may expand before
-  `1.0.0`.
+- `aprs-cli`: operational inspection tool; command-line flags may expand in
+  minor releases.
 - `aprs-transport-file`: stable-intent file helper crate.
 - `aprs-transport-tcp`: optional TCP helper crate. Network I/O stays outside the
   parser core.
@@ -118,5 +116,5 @@ future split explicit without promising current `no_std` compatibility.
   `aprs-transport-file-watch`, `aprs-transport-mqtt`,
   `aprs-transport-ax25`, `aprs-transport-corpus`,
   `aprs-transport-channel`, and `aprs-transport-async`: optional transport
-  helper crates. APIs may expand before `1.0.0`, but byte preservation remains
-  a stable design constraint.
+  helper crates. APIs may expand in minor releases, but byte preservation
+  remains a stable design constraint.
