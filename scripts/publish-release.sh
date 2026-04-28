@@ -36,6 +36,25 @@ case "${LIBAPRS_REMOTE_CI:-}" in
     ;;
 esac
 
+case "${LIBAPRS_GITHUB_RELEASE:-}" in
+  publish)
+    if [ -z "${LIBAPRS_RELEASE_TAG:-}" ]; then
+      echo "Refusing to publish: GitHub release publication requires LIBAPRS_RELEASE_TAG=<tag>." >&2
+      exit 1
+    fi
+    if [ -z "${LIBAPRS_GITHUB_REPO:-}" ]; then
+      echo "Refusing to publish: GitHub release publication requires LIBAPRS_GITHUB_REPO=<owner/name>." >&2
+      exit 1
+    fi
+    ;;
+  skipped-documented)
+    ;;
+  *)
+    echo "Refusing to publish: GitHub release requires LIBAPRS_GITHUB_RELEASE=publish or LIBAPRS_GITHUB_RELEASE=skipped-documented." >&2
+    exit 1
+    ;;
+esac
+
 if [ -z "${LIBAPRS_RELEASE_COMMIT:-}" ]; then
   echo "Refusing to publish: release commit requires LIBAPRS_RELEASE_COMMIT=<git commit>." >&2
   exit 1
@@ -61,6 +80,30 @@ publish_crate() {
   run cargo publish -p "$1"
 }
 
+publish_github_release() {
+  tag="$LIBAPRS_RELEASE_TAG"
+  repo="$LIBAPRS_GITHUB_REPO"
+  title="${LIBAPRS_GITHUB_RELEASE_TITLE:-libaprs-engine $tag}"
+
+  if gh release view "$tag" --repo "$repo" >/dev/null 2>&1; then
+    if [ -n "${LIBAPRS_GITHUB_RELEASE_NOTES_FILE:-}" ]; then
+      run gh release edit "$tag" --repo "$repo" --title "$title" --latest --verify-tag --notes-file "$LIBAPRS_GITHUB_RELEASE_NOTES_FILE"
+    else
+      run gh release edit "$tag" --repo "$repo" --title "$title" --latest --verify-tag
+    fi
+  elif [ -n "${LIBAPRS_GITHUB_RELEASE_NOTES_FILE:-}" ]; then
+    run gh release create "$tag" --repo "$repo" --title "$title" --latest --verify-tag --notes-file "$LIBAPRS_GITHUB_RELEASE_NOTES_FILE"
+  else
+    run gh release create "$tag" --repo "$repo" --title "$title" --latest --verify-tag --generate-notes
+  fi
+
+  latest_tag="$(gh release list --repo "$repo" --limit 100 --json tagName,isLatest --jq '.[] | select(.isLatest == true) | .tagName')"
+  if [ "$latest_tag" != "$tag" ]; then
+    echo "Refusing to finish: GitHub latest release is '$latest_tag', expected '$tag'." >&2
+    exit 1
+  fi
+}
+
 publish_crate libaprs-engine
 publish_crate aprs-transport-file
 publish_crate aprs-transport-tcp
@@ -76,3 +119,7 @@ publish_crate aprs-transport-mqtt
 publish_crate aprs-transport-serial
 publish_crate aprs-transport-udp
 publish_crate aprs-cli
+
+if [ "${LIBAPRS_GITHUB_RELEASE:-}" = "publish" ]; then
+  publish_github_release
+fi

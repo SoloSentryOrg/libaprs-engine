@@ -31,10 +31,10 @@ The publish guard also has a focused test:
 scripts/test-publish-release-guards.sh
 ```
 
-That test stubs `git` and `cargo` and verifies `scripts/publish-release.sh`
-does not publish unless clean secure-review evidence, local release evidence,
-security-gate evidence, remote-CI evidence, and release-commit evidence are
-provided.
+That test stubs `git`, `cargo`, and `gh` and verifies
+`scripts/publish-release.sh` does not publish unless clean secure-review
+evidence, local release evidence, security-gate evidence, remote-CI evidence,
+release-commit evidence, and GitHub Release publication evidence are provided.
 
 Before crates are published, the script and pull-request CI skip the crates.io
 downstream smoke project by default because unpublished version requirements
@@ -93,7 +93,8 @@ installed:
   `cargo-deny` so public API compatibility, advisory checks, and dependency
   policy are checked in the normal release path.
 - CI release-script coverage runs `scripts/test-publish-release-guards.sh` so
-  publication cannot regress to a path that skips secure-review evidence.
+  publication cannot regress to a path that skips secure-review evidence,
+  release-commit evidence, or GitHub Release creation.
 
 ## Benchmark Threshold
 
