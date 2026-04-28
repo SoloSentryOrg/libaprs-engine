@@ -15,7 +15,8 @@
 - Hardened CI release gates so advisory and dependency-policy checks run during
   the Rust CI release-script job.
 - Reduced release-script CI tool-install latency by keeping pinned tool
-  versions but installing them with Cargo's debug profile.
+  versions and verifying SHA-256 checksums for pinned upstream release
+  archives before use.
 
 ## 0.6.0 - 2026-04-28
 
