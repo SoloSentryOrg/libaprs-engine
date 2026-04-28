@@ -90,6 +90,11 @@ Target outcome: users can ingest APRS data without weakening the parser security
 
 ## 5. Release Candidate Batch
 
+Status: in progress. The current branch prepares `1.0.0-rc.1`; final
+publication remains blocked until clean secure review, local release gate,
+security gate, remote CI, and downstream smoke evidence are recorded for the
+exact release-candidate commit.
+
 - Cut `1.0.0-rc.1`.
 - Run the full local release gate.
 - Run remote CI and security workflows.

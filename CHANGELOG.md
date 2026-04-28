@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- No changes yet.
+
+## 1.0.0-rc.1 - 2026-04-28
+
+- Cut the first `1.0.0` release candidate after completing the API
+  stabilization, APRS semantics, security, robustness, transport reliability,
+  and CI release-gate hardening roadmap batches.
 - Tightened semantic validation for coordinate ranges, object timestamps,
   short Mic-E bodies, and Maidenhead locator syntax while preserving raw packet
   bytes for rejected semantic payloads.
@@ -17,6 +24,7 @@
 - Reduced release-script CI tool-install latency by keeping pinned tool
   versions and verifying SHA-256 checksums for pinned upstream release
   archives before use.
+- Bumped all workspace crates to `1.0.0-rc.1`.
 
 ## 0.6.0 - 2026-04-28
 
