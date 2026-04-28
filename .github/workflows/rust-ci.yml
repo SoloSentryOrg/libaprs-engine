@@ -116,10 +116,11 @@ jobs:
             ${{ runner.os }}-cargo-release-script-
 
       - name: Install release tools
+        timeout-minutes: 12
         run: |
-          cargo install cargo-semver-checks --version 0.47.0 --locked
-          cargo install cargo-audit --version 0.22.1 --locked
-          cargo install cargo-deny --version 0.19.4 --locked
+          cargo install cargo-semver-checks --version 0.47.0 --locked --debug
+          cargo install cargo-audit --version 0.22.1 --locked --debug
+          cargo install cargo-deny --version 0.19.4 --locked --debug
 
       - name: Test publish guard
         run: scripts/test-publish-release-guards.sh
