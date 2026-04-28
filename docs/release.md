@@ -57,15 +57,22 @@ Before running `scripts/publish-release.sh`, record or verify:
 
 ## v1.0.0 Release Evidence
 
-- Tag: `v1.0.0` pending after clean final release gates.
-- Commit: pending final release PR merge.
-- Local gate: pending `scripts/verify-release.sh` for `1.0.0`.
-- Remote GitHub Actions: pending final release PR CI and security workflow.
-- crates.io publication: pending final `1.0.0` publication.
-- Post-publication downstream smoke: pending crates.io final publication.
+- Tag: `v1.0.0`.
+- Commit: `97a458eeccaa876856fb4103e469829ac44d7033`.
+- Local gate: `CARGO_HOME=/tmp/libaprs-cargo-home scripts/verify-release.sh`
+  passed before publication.
+- Remote GitHub Actions: final release PR Rust CI run `25076219082` and
+  security run `25076219002` passed; `main` push Rust CI run `25076239313`
+  and security run `25076239328` passed for the merge commit.
+- crates.io publication: all workspace crates published as `1.0.0`.
+- Post-publication downstream smoke:
+  `CARGO_HOME=/tmp/libaprs-cargo-home LIBAPRS_RUN_DOWNSTREAM_SMOKE=1 LIBAPRS_PACKAGE_ALL=1 scripts/verify-release.sh`
+  passed against crates.io and refreshed
+  `examples/downstream-smoke/Cargo.lock` with `1.0.0` checksums.
 - Notes: final `1.0.0` promotion of the tested `1.0.0-rc.1` release
-  candidate. Do not publish until secure review, local release gate, security
-  gate, remote CI, and exact release commit evidence are clean.
+  candidate after clean secure review, local release gate, remote CI, security
+  gate, exact release commit verification, and post-publication downstream
+  smoke.
 
 ## v1.0.0-rc.1 Release Candidate Evidence
 
