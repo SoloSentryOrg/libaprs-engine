@@ -18,9 +18,10 @@
 - Confirm `CHANGELOG.md` describes the release.
 - Review `docs/public-api.md` and `crates/libaprs-engine/tests/api_compat.rs`
   when the release changes exported library APIs.
-- Use `scripts/publish-release.sh` when publishing to crates.io; it encodes the
-  crate publish order from `docs/publishing.md` and refuses to publish without
-  explicit clean secure-review and gate evidence.
+- Use `scripts/publish-release.sh` when publishing to crates.io and GitHub
+  Releases; it encodes the crate publish order from `docs/publishing.md` and
+  refuses to publish without explicit clean secure-review, gate, release-tag,
+  and GitHub Release evidence.
 - In restricted environments where `~/.cargo` is not writable, use
   `CARGO_HOME=/tmp/libaprs-cargo-home` for audit, deny, semver, package, and
   publish commands. Copy crates.io credentials into that temporary Cargo home
@@ -36,6 +37,8 @@
 ## Tagging
 
 - Tag the release after local and remote verification pass.
+- Push the tag before publishing so the GitHub Release step can use
+  `--verify-tag`.
 - If remote CI is intentionally skipped, tag only after the local gate passes
   and the skipped remote gate is documented.
 
@@ -54,6 +57,13 @@ Before running `scripts/publish-release.sh`, record or verify:
   records the reason.
 - `LIBAPRS_RELEASE_COMMIT="$(git rev-parse HEAD)"`: the publish target matches
   the checked-out commit.
+- `LIBAPRS_GITHUB_RELEASE=publish`: create or update the GitHub Release after
+  crates.io publication and verify it is marked latest.
+- `LIBAPRS_RELEASE_TAG=<tag>`: the pushed release tag, for example `v1.0.1`.
+- `LIBAPRS_GITHUB_REPO=elodiejmirza/libaprs-engine`: the repository where the
+  GitHub Release must be created. Use `LIBAPRS_GITHUB_RELEASE=skipped-documented`
+  only if GitHub Releases are unavailable and release evidence records the
+  reason.
 
 ## v1.0.0 Release Evidence
 
@@ -65,6 +75,7 @@ Before running `scripts/publish-release.sh`, record or verify:
   security run `25076219002` passed; `main` push Rust CI run `25076239313`
   and security run `25076239328` passed for the merge commit.
 - crates.io publication: all workspace crates published as `1.0.0`.
+- GitHub Release: `v1.0.0` created and marked latest.
 - Post-publication downstream smoke:
   `CARGO_HOME=/tmp/libaprs-cargo-home LIBAPRS_RUN_DOWNSTREAM_SMOKE=1 LIBAPRS_PACKAGE_ALL=1 scripts/verify-release.sh`
   passed against crates.io and refreshed

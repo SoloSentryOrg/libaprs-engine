@@ -74,7 +74,8 @@ cargo login
 The repository provides a guarded publish script that refuses to run unless
 publishing is explicitly confirmed, the working tree is clean, the release
 commit is identified, and pre-publish evidence confirms clean secure review and
-passing release/security gates:
+passing release/security gates. The same script also creates or updates the
+GitHub Release and verifies that the release tag is marked latest:
 
 ```sh
 LIBAPRS_CONFIRM_PUBLISH=1 \
@@ -82,6 +83,9 @@ LIBAPRS_SECURE_REVIEW=clean \
 LIBAPRS_LOCAL_RELEASE_GATE=passed \
 LIBAPRS_SECURITY_GATE=passed \
 LIBAPRS_REMOTE_CI=passed \
+LIBAPRS_GITHUB_RELEASE=publish \
+LIBAPRS_RELEASE_TAG=v1.0.1 \
+LIBAPRS_GITHUB_REPO=elodiejmirza/libaprs-engine \
 LIBAPRS_RELEASE_COMMIT="$(git rev-parse HEAD)" \
   scripts/publish-release.sh
 ```
@@ -89,6 +93,12 @@ LIBAPRS_RELEASE_COMMIT="$(git rev-parse HEAD)" \
 Use `LIBAPRS_REMOTE_CI=skipped-documented` only when GitHub Actions is blocked
 or intentionally skipped and the release notes document the reason. Do not use
 that override to bypass a failing CI run.
+
+Use `LIBAPRS_GITHUB_RELEASE=skipped-documented` only when GitHub Releases are
+unavailable and the release evidence records the reason. Do not use that
+override for a normal release. Set `LIBAPRS_GITHUB_RELEASE_NOTES_FILE=<path>`
+to publish curated release notes; otherwise the script asks GitHub to generate
+notes for the tag.
 
 In restricted environments where `~/.cargo` is not writable, keep Cargo state
 outside the repository:
@@ -102,6 +112,9 @@ CARGO_HOME=/tmp/libaprs-cargo-home \
   LIBAPRS_LOCAL_RELEASE_GATE=passed \
   LIBAPRS_SECURITY_GATE=passed \
   LIBAPRS_REMOTE_CI=passed \
+  LIBAPRS_GITHUB_RELEASE=publish \
+  LIBAPRS_RELEASE_TAG=v1.0.1 \
+  LIBAPRS_GITHUB_REPO=elodiejmirza/libaprs-engine \
   LIBAPRS_RELEASE_COMMIT="$(git rev-parse HEAD)" \
   scripts/publish-release.sh
 ```
@@ -135,7 +148,8 @@ that depend on it.
 Manual publishing must still satisfy the same pre-publish evidence requirements
 as `scripts/publish-release.sh`: clean secure review, passing local release
 gate, passing security gate, passing remote CI or documented CI skip, clean
-working tree, and identified release commit.
+working tree, identified release commit, pushed release tag, and GitHub Release
+creation or documented GitHub Release skip.
 
 ## Release Requirements
 
@@ -149,3 +163,5 @@ working tree, and identified release commit.
   crates before publishing them.
 - Confirm `CHANGELOG.md` describes the release.
 - Tag only after package validation and CI both pass.
+- Confirm the GitHub Release for the release tag is marked latest before
+  closing the release.
