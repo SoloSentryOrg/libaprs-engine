@@ -2,17 +2,20 @@
 
 This project is pre-1.0. Public APIs are usable, and this document defines the
 compatibility intent until a `1.0.0` release locks semantic versioning
-guarantees.
+guarantees. The candidate `1.0.0` public boundary is maintained in
+[Public API Boundary](public-api.md).
 
 ## Compatibility Policy
 
-- Patch releases should not intentionally break stable-intent APIs.
+- Patch releases should not intentionally break candidate stable APIs.
 - Minor releases may add fields, variants, helper methods, crates, or feature
   flags.
-- Breaking changes to stable-intent APIs should be reserved for minor releases
-  before `1.0.0` and called out in `CHANGELOG.md`.
-- Stable-intent APIs are covered by `crates/libaprs-engine/tests/api_compat.rs`
-  so documented integration patterns fail in CI if they drift.
+- Breaking changes to candidate stable APIs should be reserved for minor
+  releases before `1.0.0`, covered by compatibility test updates, and called
+  out in `CHANGELOG.md`.
+- Candidate stable APIs are covered by
+  `crates/libaprs-engine/tests/api_compat.rs` so documented integration
+  patterns fail in CI if they drift.
 - Release checks should run `cargo-semver-checks` when installed. Pre-1.0
   semver still allows breaking changes in minor releases, but semver output
   must be reviewed before publishing.
@@ -25,11 +28,11 @@ guarantees.
 
 The project should remove pre-1.0 caveats only after these gates are true:
 
-- Stable-intent APIs below have at least one compatibility test and one
-  documentation example.
+- Candidate stable APIs in `docs/public-api.md` have at least one compatibility
+  test and one documentation example.
 - `cargo-semver-checks` runs in the release CI path and any breaking result is
   either fixed or explicitly called out in `CHANGELOG.md` before release.
-- Public API changes are reviewed against `docs/api.md`,
+- Public API changes are reviewed against `docs/api.md`, `docs/public-api.md`,
   `crates/libaprs-engine/tests/api_compat.rs`, and the semver-check output.
 - APRS semantic families in `docs/conformance.md` have fixture coverage for
   accepted, malformed, and policy-rejected cases where applicable.
@@ -38,26 +41,35 @@ The project should remove pre-1.0 caveats only after these gates are true:
 - Transport adapters document ownership of authentication, timeouts, bounding,
   retries, and byte-preservation responsibilities.
 
-## Stable-Intent APIs
+## Candidate Stable APIs
 
-These APIs are intended to remain conceptually stable, though names and exact
-types may still change before 1.0:
+These APIs are intended to remain source-compatible through `1.0.0` unless a
+secure code review finds a safety issue that requires a breaking change:
 
 - `parse_packet`
 - `parse_packet_with_options`
 - `ParseOptions`
+- `DEFAULT_PARSE_OPTIONS`
+- `MAX_PACKET_LEN`
 - `RawPacket`
 - `ParsedPacket`
 - `ParseError::code`
+- existing `DataTypeIdentifier` variants and `DataTypeIdentifier::name`
+- `PacketSummary`, with additive fields allowed before `1.0.0`
 - `PolicyRejection::code`
 - `Engine`
+- `EngineResult`
+- `Counters`
 - `Policy`
+- `PolicyDecision`
+- `PolicyRejection`
 - `LineTransport`
 - `PacketSource`
 - `PacketSink`
 - `TransportErrorCode::code`
 - `DEFAULT_TRANSPORT_READ_LIMIT`
 - `read_all_with_limit`
+- `oversized_input_error`
 
 ## Experimental APIs
 
@@ -67,7 +79,10 @@ These APIs may change as APRS semantic coverage matures:
 - semantic field structs such as `Position`, `Object`, `Item`, `Weather`,
   `Telemetry`, `TelemetryMetadata`, `Nmea`, `MicE`, and `ThirdParty`
 - typed interpretation helper methods
-- `DataTypeIdentifier`
+- newly added `DataTypeIdentifier` variants for APRS families not yet
+  represented
+- stricter malformed semantic classification where raw-byte preservation is
+  maintained
 
 ## Diagnostic APIs
 
