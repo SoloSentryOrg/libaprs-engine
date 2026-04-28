@@ -2,21 +2,22 @@
 
 ## BLUF
 
-- `libaprs-engine` is still pre-1.0, but the core API below is the candidate
-  public contract for `1.0.0`.
+- `libaprs-engine` has reached `1.0.0`; the core API below is the
+  semver-protected public contract.
 - The stable boundary is byte-first: callers pass `&[u8]`, successful parses
   retain exact raw bytes, and malformed packet shape fails closed.
 - Parser, policy, engine, counters, packet accessors, and shared transport
   contracts are the API surface downstream applications should build on now.
-- APRS semantic variants are usable, but field-level semantic expansion remains
-  subject to the APRS semantics batch before `1.0.0`.
+- APRS semantic variants are usable. Field-level semantic expansion should be
+  additive within the `1.x` release line.
 - Internal parser helpers, decoder helpers, diagnostic internals, and module
   layout are not part of the public compatibility contract.
 
-## Candidate 1.0 Stable API
+## Stable API
 
-These APIs are intended to remain source-compatible through `1.0.0` unless a
-secure code review finds a safety issue that requires a breaking change:
+These APIs are intended to remain source-compatible through the `1.x` release
+line unless a secure code review finds a safety issue that requires a breaking
+change:
 
 - `parse_packet(input: &[u8]) -> Result<ParsedPacket, ParseError>`
 - `parse_packet_with_options(input: &[u8], options: ParseOptions)`
@@ -44,7 +45,7 @@ secure code review finds a safety issue that requires a breaking change:
   `Engine::process_source`, and `Engine::counters`
 - `EngineResult`
 - `Counters`
-- `PacketSummary`, with additive fields allowed before `1.0.0`
+- `PacketSummary`, with additive fields allowed in minor releases
 - Existing `DataTypeIdentifier` variants and `DataTypeIdentifier::name`
 - `LineTransport`, including bounded `packets_with_limit`
 - `PacketSource` and `PacketSink`
@@ -66,15 +67,13 @@ compiles and exercises documented integration patterns for:
 - line transport and shared source/sink traits
 - semantic helpers documented in `docs/api.md`
 
-Any `1.0.0` release candidate must pass these tests before publication.
+Any release must pass these tests before publication.
 
 ## Experimental Or Evolving API
 
 The semantic API is intentionally visible so applications can inspect APRS data
-today. The stable promise before the APRS semantics batch is byte preservation,
-not final field completeness. Before `1.0.0`, the APRS semantics batch may
-still add fields, add variants, or tighten malformed semantic classification
-for:
+today. Minor releases may add fields, add variants, or tighten malformed
+semantic classification for:
 
 - `AprsData`
 - semantic structs such as `Position`, `Object`, `Item`, `Weather`,
@@ -103,10 +102,10 @@ they represent a stable integration need.
 
 ## Semver Guidance
 
-- Before `1.0.0`, breaking changes to the candidate stable API require a minor
-  version bump, a changelog entry, compatibility test updates, and secure review.
-- Patch releases should not intentionally break candidate stable APIs.
-- After `1.0.0`, candidate stable APIs become semver-protected public APIs.
+- Breaking changes to stable APIs require a major version bump, a changelog
+  entry, compatibility test updates, and secure review.
+- Patch releases must not intentionally break stable APIs.
+- Minor releases should keep stable APIs source-compatible.
 - Experimental semantic additions should be additive where possible. If a
   semantic change is breaking, the release notes must explain the byte-level
   behavior change and migration path.

@@ -4,6 +4,13 @@
 
 - No changes yet.
 
+## 1.0.0 - 2026-04-28
+
+- Promoted the tested `1.0.0-rc.1` release candidate to final `1.0.0`.
+- Locked the documented public API boundary under `1.0.0` semantic-versioning
+  guarantees.
+- Bumped all workspace crates to `1.0.0`.
+
 ## 1.0.0-rc.1 - 2026-04-28
 
 - Cut the first `1.0.0` release candidate after completing the API
