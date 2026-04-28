@@ -17,7 +17,6 @@ cargo bench -p libaprs-engine
 cargo fmt --manifest-path fuzz/Cargo.toml --all --check
 cargo +1.80.0 test --all-features
 cargo +1.80.0 clippy --all-targets --all-features -- -D warnings
-cargo check --manifest-path examples/downstream-smoke/Cargo.toml
 ```
 
 The repository also provides a local release gate script:
@@ -37,12 +36,15 @@ does not publish unless clean secure-review evidence, local release evidence,
 security-gate evidence, remote-CI evidence, and release-commit evidence are
 provided.
 
-Before crates are published, the script skips the crates.io downstream smoke
-project by default. After publishing, run:
+Before crates are published, the script and pull-request CI skip the crates.io
+downstream smoke project by default because unpublished version requirements
+cannot resolve from crates.io. After publishing, run locally:
 
 ```sh
 LIBAPRS_RUN_DOWNSTREAM_SMOKE=1 scripts/verify-release.sh
 ```
+
+Or trigger the `Rust CI` workflow manually with `downstream_smoke=true`.
 
 After `libaprs-engine` is published and visible in the crates.io index, validate
 all dependent packages with:
