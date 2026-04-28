@@ -14,7 +14,7 @@ semantic coverage and known gaps for APRS101 packet families.
 | Announcement | Supported | Message kind | Classified via addressee |
 | Acknowledgement | Supported | Message kind | `ack` prefix |
 | Reject | Supported | Message kind | `rej` prefix |
-| Object | Supported | Name, liveness, timestamp, body, coordinates when body starts with a supported position | Body preserved |
+| Object | Supported | Name, liveness, timestamp, body, coordinates when body starts with a supported position | Timestamp shape validated; body preserved |
 | Item | Supported | Name, liveness, body, coordinates when body starts with a supported position | Body preserved |
 | Weather | Supported | Common numeric fields, luminosity, snow, raw rain counter | Invalid optional fields are ignored |
 | Telemetry | Supported | Sequence, analog, digital bits | Report values preserved and numerically decoded when safe |
@@ -22,8 +22,8 @@ semantic coverage and known gaps for APRS101 packet families.
 | Query | Supported | Query bytes | Query body preserved |
 | Capability | Supported | Body bytes | Capability fields not split |
 | NMEA | Supported | Sentence bytes, talker ID, sentence ID, data fields, checksum details | Invalid checksums are reported; policy can reject checksum mismatches |
-| Mic-E | Supported | Status bits, message code, latitude digits, coordinates, speed/course | Values decode only when destination/body bytes permit it |
-| Maidenhead | Supported | Locator bytes | Locator syntax is minimally framed |
+| Mic-E | Supported | Status bits, message code, latitude digits, coordinates, speed/course | Short bodies are malformed; values decode only when destination/body bytes permit it |
+| Maidenhead | Supported | Locator bytes | Six-character locator syntax is validated |
 | User-defined | Supported | User ID, packet type, body | Body preserved |
 | Third-party traffic | Supported | Encapsulated bytes, explicit nested parser | Nested parsing is caller-controlled via API |
 | Unknown identifier | Supported | Explicit unsupported variant | Not guessed |
@@ -31,7 +31,8 @@ semantic coverage and known gaps for APRS101 packet families.
 
 ## Future Conformance Work
 
-- Additional semantic consistency policies beyond NMEA checksum mismatch.
+- Additional semantic consistency policies beyond malformed semantic rejection
+  and NMEA checksum mismatch.
 - More real-world corpus fixtures for Mic-E, NMEA, object/item positions, and
   third-party nested traffic.
 - More policy-rejection fixtures as semantic policies are added.
@@ -47,7 +48,11 @@ The APRS101-oriented fixture set stores packet bytes separately from fixture
 IDs and requires source-reference entries for every case.
 Tests assert raw-byte preservation, source-reference coverage, minimum semantic
 family coverage, expected semantic family classification, selected subtype
-classification, and malformed semantic visibility.
+classification, malformed semantic visibility, malformed semantic identifier
+preservation, and strict-policy rejection for malformed semantic payloads.
+`aprs101_malformed_semantics.aprs` stores codec-valid but semantically invalid
+golden packets for position, timestamped position, compressed position,
+message, object, item, telemetry, Mic-E, Maidenhead, and user-defined payloads.
 
 ## Compatibility Coverage
 
