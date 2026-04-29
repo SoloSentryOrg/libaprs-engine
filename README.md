@@ -16,7 +16,7 @@ telemetry, indexing, and diagnostics.
 - APRS engine with meaningful semantics, conformance fixtures,
   compatibility tests, examples, benchmark, optional transport adapters, and CLI
   inspector.
-- Current tagged release: `v1.0.0`.
+- Current tagged release: `v1.1.0`.
 - Public API is semver-protected from `1.0.0`. The public boundary is tracked in
   [Public API Boundary](docs/public-api.md).
 - Core runtime remains network-free and async-free. Optional `serde`
@@ -71,27 +71,27 @@ Use crates.io:
 
 ```toml
 [dependencies]
-libaprs-engine = "1.0.0"
-aprs-transport-file = "1.0.0"
-aprs-transport-tcp = "1.0.0"
-aprs-transport-aprs-is = "1.0.0"
-aprs-transport-kiss = "1.0.0"
-aprs-transport-serial = "1.0.0"
-aprs-transport-udp = "1.0.0"
-aprs-transport-http = "1.0.0"
-aprs-transport-file-watch = "1.0.0"
-aprs-transport-mqtt = "1.0.0"
-aprs-transport-ax25 = "1.0.0"
-aprs-transport-corpus = "1.0.0"
-aprs-transport-channel = "1.0.0"
-aprs-transport-async = "1.0.0"
+libaprs-engine = "1.1.0"
+aprs-transport-file = "1.1.0"
+aprs-transport-tcp = "1.1.0"
+aprs-transport-aprs-is = "1.1.0"
+aprs-transport-kiss = "1.1.0"
+aprs-transport-serial = "1.1.0"
+aprs-transport-udp = "1.1.0"
+aprs-transport-http = "1.1.0"
+aprs-transport-file-watch = "1.1.0"
+aprs-transport-mqtt = "1.1.0"
+aprs-transport-ax25 = "1.1.0"
+aprs-transport-corpus = "1.1.0"
+aprs-transport-channel = "1.1.0"
+aprs-transport-async = "1.1.0"
 ```
 
 Use a Git dependency when testing unreleased changes from this repository.
 
 ```toml
 [dependencies]
-libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v1.0.0" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v1.1.0" }
 ```
 
 For local development from a checkout:
