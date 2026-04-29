@@ -125,36 +125,23 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-release-script-
 
+      - name: Compute advisory cache key
+        id: advisory-cache
+        run: echo "week=$(date -u +%G-%V)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache advisory database
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/advisory-db
+          key: ${{ runner.os }}-cargo-advisory-release-script-${{ steps.advisory-cache.outputs.week }}-${{ hashFiles('.github/workflows/rust-ci.yml', 'scripts/install-release-tools.sh') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-advisory-release-script-${{ steps.advisory-cache.outputs.week }}-
+            ${{ runner.os }}-cargo-advisory-release-script-
+            ${{ runner.os }}-cargo-advisory-
+
       - name: Install release tools
         timeout-minutes: 5
-        run: |
-          install_release_tool() {
-            name="$1"
-            url="$2"
-            sha256="$3"
-            archive="/tmp/${name}.tar.gz"
-            extract_dir="/tmp/${name}"
-
-            curl -LsSf -o "$archive" "$url"
-            printf '%s  %s\n' "$sha256" "$archive" | sha256sum -c -
-            mkdir -p "$extract_dir"
-            tar -xzf "$archive" -C "$extract_dir"
-            find "$extract_dir" -type f -name "$name" -perm /111 -exec cp {} "$HOME/.cargo/bin/$name" \;
-            "$HOME/.cargo/bin/$name" --version
-          }
-
-          install_release_tool \
-            cargo-semver-checks \
-            https://github.com/obi1kenobi/cargo-semver-checks/releases/download/v0.47.0/cargo-semver-checks-x86_64-unknown-linux-musl.tar.gz \
-            daea6dfdebf9b15ce902a8af2fc6b9c2e86ddd49af17a9c5a656939289588f68
-          install_release_tool \
-            cargo-audit \
-            https://github.com/rustsec/rustsec/releases/download/cargo-audit/v0.22.1/cargo-audit-x86_64-unknown-linux-musl-v0.22.1.tgz \
-            c32506f338bdcdaef5a17fb9f33abb6ecf9561324cfd34237fd335f9283a1eab
-          install_release_tool \
-            cargo-deny \
-            https://github.com/EmbarkStudios/cargo-deny/releases/download/0.19.4/cargo-deny-0.19.4-x86_64-unknown-linux-musl.tar.gz \
-            3bd58b784e83715b86ddbc9deac591890372ec77fda5741bb0826970b958506f
+        run: scripts/install-release-tools.sh
 
       - name: Test publish guard
         run: scripts/test-publish-release-guards.sh

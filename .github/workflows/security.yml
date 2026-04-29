@@ -13,6 +13,7 @@ on:
       - "fuzz/Cargo.toml"
       - "fuzz/Cargo.lock"
       - "deny.toml"
+      - "scripts/install-release-tools.sh"
       - ".github/workflows/security.yml"
   pull_request:
     branches: ["main"]
@@ -25,6 +26,7 @@ on:
       - "fuzz/Cargo.toml"
       - "fuzz/Cargo.lock"
       - "deny.toml"
+      - "scripts/install-release-tools.sh"
       - ".github/workflows/security.yml"
   schedule:
     - cron: "17 3 * * 1"
@@ -62,10 +64,23 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-security-
 
+      - name: Compute advisory cache key
+        id: advisory-cache
+        run: echo "week=$(date -u +%G-%V)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache advisory database
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/advisory-db
+          key: ${{ runner.os }}-cargo-advisory-${{ steps.advisory-cache.outputs.week }}-${{ hashFiles('.github/workflows/security.yml', 'scripts/install-release-tools.sh') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-advisory-${{ steps.advisory-cache.outputs.week }}-
+            ${{ runner.os }}-cargo-advisory-
+
       - name: Install security tools
+        timeout-minutes: 5
         run: |
-          cargo install cargo-audit --version 0.22.1 --locked
-          cargo install cargo-deny --version 0.19.4 --locked
+          scripts/install-release-tools.sh cargo-audit cargo-deny
 
       - name: Audit
         run: cargo audit

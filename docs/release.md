@@ -13,8 +13,15 @@
 - Run `cargo audit` and `cargo deny check`, either locally or through the
   security workflow, before publishing.
 - Treat the Rust CI release-script job as a release dependency gate: it installs
-  pinned `cargo-audit` and `cargo-deny` versions and runs both checks through
+  pinned `cargo-audit` and `cargo-deny` versions with
+  `scripts/install-release-tools.sh` and runs both checks through
   `scripts/verify-release.sh`.
+- Security workflows install pinned prebuilt release/security tools instead of
+  compiling them during each run. Tool archives are SHA256 verified before use.
+- GitHub Actions caches `~/.cargo/advisory-db` with a weekly key and older
+  restore fallback. `cargo audit` still fetches advisory updates during the
+  audit step, so restored stale cache data is refreshed before results are
+  evaluated.
 - Confirm `CHANGELOG.md` describes the release.
 - Review `docs/public-api.md` and `crates/libaprs-engine/tests/api_compat.rs`
   when the release changes exported library APIs.
