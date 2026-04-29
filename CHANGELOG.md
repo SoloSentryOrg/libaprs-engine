@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- No changes yet.
+
+## 1.1.0 - 2026-04-29
+
 - Added structured parser, policy, and transport error diagnostics with stable
   layers, codes, descriptions, and remediation guidance.
 - Added a machine-readable CLI support matrix for semantic families, transport
@@ -10,6 +14,7 @@
   and safe defaults.
 - Added a compile-tested service ingestion example that logs stable diagnostic
   codes while preserving raw-byte parser boundaries.
+- Bumped all workspace crates to `1.1.0`.
 
 ## 1.0.0 - 2026-04-28
 
