@@ -65,6 +65,26 @@ Before running `scripts/publish-release.sh`, record or verify:
   only if GitHub Releases are unavailable and release evidence records the
   reason.
 
+## v1.1.0 Release Evidence
+
+- Tag: `v1.1.0`.
+- Commit: `2b81cfbd007deecd6863bef4e5fb77685d9254bd`.
+- Local gate: `CARGO_HOME=/tmp/libaprs-cargo-home scripts/verify-release.sh`
+  passed before publication.
+- Remote GitHub Actions: release PR Rust CI run `25125462505` and security run
+  `25125462437` passed; `main` push Rust CI run `25125723560` and security run
+  `25125723586` passed for the merge commit.
+- crates.io publication: all workspace crates published as `1.1.0`.
+- GitHub Release: `v1.1.0` created, marked latest, and verified at
+  <https://github.com/elodiejmirza/libaprs-engine/releases/tag/v1.1.0>.
+- Post-publication downstream smoke:
+  `CARGO_HOME=/tmp/libaprs-cargo-home LIBAPRS_RUN_DOWNSTREAM_SMOKE=1 LIBAPRS_PACKAGE_ALL=1 scripts/verify-release.sh`
+  passed against crates.io and refreshed
+  `examples/downstream-smoke/Cargo.lock` with `1.1.0` checksums.
+- Notes: production ergonomics release with structured diagnostics, a
+  machine-readable support matrix, operations documentation, a service ingest
+  example, and workspace crate version promotion to `1.1.0`.
+
 ## v1.0.0 Release Evidence
 
 - Tag: `v1.0.0`.
