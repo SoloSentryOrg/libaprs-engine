@@ -39,17 +39,22 @@ change:
   - `to_json`, with diagnostic JSON treated as convenience output rather than
     a stable wire schema
 - `ParseError` variants and `ParseError::code`
+- `ParseError::diagnostic`
 - `Policy`, `Policy::strict`, `Policy::permissive`, and `Policy::evaluate`
-- `PolicyDecision`, `PolicyRejection`, and `PolicyRejection::code`
+- `PolicyDecision`, `PolicyRejection`, `PolicyRejection::code`, and
+  `PolicyRejection::diagnostic`
 - `Engine`, `Engine::new`, `Engine::process`, `Engine::process_packets`,
   `Engine::process_source`, and `Engine::counters`
 - `EngineResult`
 - `Counters`
 - `PacketSummary`, with additive fields allowed in minor releases
+- `DiagnosticLayer`, `ErrorDiagnostic`, `SupportStatus`, `SupportItem`,
+  `TransportSupport`, `SupportMatrix`, and `support_matrix`
 - Existing `DataTypeIdentifier` variants and `DataTypeIdentifier::name`
 - `LineTransport`, including bounded `packets_with_limit`
 - `PacketSource` and `PacketSink`
-- `TransportErrorCode` and `TransportErrorCode::code`
+- `TransportErrorCode`, `TransportErrorCode::code`, and
+  `TransportErrorCode::diagnostic`
 - `DEFAULT_TRANSPORT_READ_LIMIT`
 - `read_all_with_limit`
 - `oversized_input_error`
@@ -62,6 +67,7 @@ compiles and exercises documented integration patterns for:
 - parser entry points and parse options
 - raw-byte preservation and field accessors
 - stable parse error and policy rejection codes
+- structured parser, policy, and transport diagnostics
 - engine, policy, counters, and engine result flow
 - data type identifier names
 - line transport and shared source/sink traits

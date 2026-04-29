@@ -195,6 +195,266 @@ impl<'a> PacketSummary<'a> {
     }
 }
 
+/// Stable diagnostic layer for parser, policy, and transport failures.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum DiagnosticLayer {
+    /// Codec/parser validation at the APRS packet boundary.
+    Parse,
+    /// Operational policy after codec validation.
+    Policy,
+    /// Transport framing or I/O boundary before codec validation.
+    Transport,
+}
+
+impl DiagnosticLayer {
+    /// Returns a stable machine-readable layer code.
+    #[must_use]
+    pub const fn code(self) -> &'static str {
+        match self {
+            Self::Parse => "parse",
+            Self::Policy => "policy",
+            Self::Transport => "transport",
+        }
+    }
+}
+
+/// Structured diagnostic metadata for parser, policy, and transport errors.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ErrorDiagnostic {
+    /// Layer that produced the diagnostic.
+    pub layer: DiagnosticLayer,
+    /// Stable fully-qualified diagnostic code.
+    pub code: &'static str,
+    /// Stable short diagnostic name within the layer.
+    pub name: &'static str,
+    /// Human-readable diagnostic description for operators.
+    pub description: &'static str,
+    /// Human-readable remediation guidance.
+    pub remediation: &'static str,
+}
+
+/// Support status for documented APRS capabilities and integration surfaces.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum SupportStatus {
+    /// Supported by parser semantics or adapter helpers.
+    Supported,
+    /// Supported partially; callers should inspect documentation for limits.
+    Partial,
+    /// Intentionally unsupported in the current release line.
+    Unsupported,
+}
+
+impl SupportStatus {
+    /// Returns a stable machine-readable support status.
+    #[must_use]
+    pub const fn code(self) -> &'static str {
+        match self {
+            Self::Supported => "supported",
+            Self::Partial => "partial",
+            Self::Unsupported => "unsupported",
+        }
+    }
+}
+
+/// Support-matrix item exposed for documentation and machine-readable CLI output.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SupportItem {
+    /// Stable item kind.
+    pub kind: &'static str,
+    /// Current support status.
+    pub status: SupportStatus,
+    /// Short operational note.
+    pub notes: &'static str,
+}
+
+/// Transport adapter support entry.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct TransportSupport {
+    /// Published crate name.
+    pub crate_name: &'static str,
+    /// Boundary handled by the adapter.
+    pub boundary: &'static str,
+    /// Current support status.
+    pub status: SupportStatus,
+    /// Short operational note.
+    pub notes: &'static str,
+}
+
+/// Machine-readable support matrix for operator tooling and docs.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SupportMatrix {
+    /// Schema version for machine-readable output.
+    pub schema_version: u8,
+    /// Documented APRS semantic families.
+    pub semantic_families: &'static [SupportItem],
+    /// Optional transport adapter crates.
+    pub transport_adapters: &'static [TransportSupport],
+    /// Diagnostic layers emitted by the project.
+    pub diagnostic_layers: &'static [DiagnosticLayer],
+}
+
+/// Returns the current support matrix for CLI and documentation consumers.
+#[must_use]
+pub const fn support_matrix() -> SupportMatrix {
+    SupportMatrix {
+        schema_version: 1,
+        semantic_families: SEMANTIC_SUPPORT,
+        transport_adapters: TRANSPORT_SUPPORT,
+        diagnostic_layers: DIAGNOSTIC_LAYERS,
+    }
+}
+
+const DIAGNOSTIC_LAYERS: &[DiagnosticLayer] = &[
+    DiagnosticLayer::Parse,
+    DiagnosticLayer::Policy,
+    DiagnosticLayer::Transport,
+];
+
+const SEMANTIC_SUPPORT: &[SupportItem] = &[
+    SupportItem {
+        kind: "status",
+        status: SupportStatus::Supported,
+        notes: "status text bytes are preserved",
+    },
+    SupportItem {
+        kind: "position",
+        status: SupportStatus::Supported,
+        notes: "uncompressed and compressed coordinates are decoded where valid",
+    },
+    SupportItem {
+        kind: "message",
+        status: SupportStatus::Supported,
+        notes:
+            "messages, acknowledgements, rejections, bulletins, and announcements are classified",
+    },
+    SupportItem {
+        kind: "object",
+        status: SupportStatus::Supported,
+        notes: "object name, liveness, timestamp, body, and supported coordinates are exposed",
+    },
+    SupportItem {
+        kind: "item",
+        status: SupportStatus::Supported,
+        notes: "item name, liveness, body, and supported coordinates are exposed",
+    },
+    SupportItem {
+        kind: "weather",
+        status: SupportStatus::Partial,
+        notes: "common weather fields are extracted and malformed optional fields are ignored",
+    },
+    SupportItem {
+        kind: "telemetry",
+        status: SupportStatus::Supported,
+        notes: "sequence, analogue values, digital bits, and metadata packets are exposed",
+    },
+    SupportItem {
+        kind: "nmea",
+        status: SupportStatus::Supported,
+        notes: "sentence identifiers and checksum diagnostics are exposed",
+    },
+    SupportItem {
+        kind: "mic_e",
+        status: SupportStatus::Partial,
+        notes: "destination-derived status, latitude digits, speed, and course helpers are exposed",
+    },
+    SupportItem {
+        kind: "third_party",
+        status: SupportStatus::Partial,
+        notes: "nested packet bytes can be parsed explicitly by callers",
+    },
+    SupportItem {
+        kind: "unsupported",
+        status: SupportStatus::Supported,
+        notes: "unknown identifiers remain explicit and byte-preserving",
+    },
+    SupportItem {
+        kind: "malformed",
+        status: SupportStatus::Supported,
+        notes: "codec-valid but semantically malformed packets remain visible to policy",
+    },
+];
+
+const TRANSPORT_SUPPORT: &[TransportSupport] = &[
+    TransportSupport {
+        crate_name: "aprs-transport-file",
+        boundary: "newline-separated files and stdin-style byte streams",
+        status: SupportStatus::Supported,
+        notes: "bounded file and packet-line reads",
+    },
+    TransportSupport {
+        crate_name: "aprs-transport-tcp",
+        boundary: "blocking TCP or Read packet streams",
+        status: SupportStatus::Supported,
+        notes: "caller owns socket timeouts and reconnect behavior",
+    },
+    TransportSupport {
+        crate_name: "aprs-transport-aprs-is",
+        boundary: "APRS-IS login framing and server line filtering",
+        status: SupportStatus::Supported,
+        notes: "authentication and reconnect loops stay application-owned",
+    },
+    TransportSupport {
+        crate_name: "aprs-transport-kiss",
+        boundary: "KISS frame encoding and decoding",
+        status: SupportStatus::Supported,
+        notes: "invalid escapes and oversized frames fail closed",
+    },
+    TransportSupport {
+        crate_name: "aprs-transport-serial",
+        boundary: "serial-like byte readers",
+        status: SupportStatus::Supported,
+        notes: "serial configuration stays application-owned",
+    },
+    TransportSupport {
+        crate_name: "aprs-transport-udp",
+        boundary: "UDP datagram payloads",
+        status: SupportStatus::Supported,
+        notes: "datagram length is bounded before parsing",
+    },
+    TransportSupport {
+        crate_name: "aprs-transport-http",
+        boundary: "HTTP request body bytes",
+        status: SupportStatus::Supported,
+        notes: "body and packet-line limits are enforced by helpers",
+    },
+    TransportSupport {
+        crate_name: "aprs-transport-file-watch",
+        boundary: "append-only packet logs",
+        status: SupportStatus::Supported,
+        notes: "appended byte ranges and packet lines are bounded",
+    },
+    TransportSupport {
+        crate_name: "aprs-transport-mqtt",
+        boundary: "MQTT topics and payload copies",
+        status: SupportStatus::Supported,
+        notes: "broker sessions, authentication, and reconnects stay application-owned",
+    },
+    TransportSupport {
+        crate_name: "aprs-transport-ax25",
+        boundary: "AX.25 UI frames",
+        status: SupportStatus::Supported,
+        notes: "oversized UI frames fail closed before payload extraction",
+    },
+    TransportSupport {
+        crate_name: "aprs-transport-corpus",
+        boundary: "fixture and corpus replay",
+        status: SupportStatus::Supported,
+        notes: "stable ordering and per-file limits for tests",
+    },
+    TransportSupport {
+        crate_name: "aprs-transport-channel",
+        boundary: "in-process packet channels",
+        status: SupportStatus::Supported,
+        notes: "caller-owned channel capacity controls backpressure",
+    },
+    TransportSupport {
+        crate_name: "aprs-transport-async",
+        boundary: "runtime-neutral async byte splitting",
+        status: SupportStatus::Supported,
+        notes: "runtime, timeouts, and cancellation stay caller-owned",
+    },
+];
+
 /// Parser and policy orchestration engine.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Engine {
@@ -399,6 +659,41 @@ impl PolicyRejection {
             Self::MalformedSemantics => "policy.malformed_semantics",
             Self::UnsupportedSemantics => "policy.unsupported_semantics",
             Self::InvalidNmeaChecksum => "policy.nmea_checksum_mismatch",
+        }
+    }
+
+    /// Returns structured policy rejection metadata for operator diagnostics.
+    #[must_use]
+    pub fn diagnostic(self) -> ErrorDiagnostic {
+        match self {
+            Self::PathTooLong => ErrorDiagnostic {
+                layer: DiagnosticLayer::Policy,
+                code: self.code(),
+                name: "path_too_long",
+                description: "packet path contains more components than policy permits",
+                remediation: "raise Policy::max_path_components only after reviewing path abuse risk",
+            },
+            Self::MalformedSemantics => ErrorDiagnostic {
+                layer: DiagnosticLayer::Policy,
+                code: self.code(),
+                name: "malformed_semantics",
+                description: "packet passed codec validation but the APRS semantic payload is malformed",
+                remediation: "inspect the preserved raw bytes and keep strict policy enabled for untrusted inputs",
+            },
+            Self::UnsupportedSemantics => ErrorDiagnostic {
+                layer: DiagnosticLayer::Policy,
+                code: self.code(),
+                name: "unsupported_semantics",
+                description: "packet uses an unsupported APRS semantic family or identifier",
+                remediation: "use permissive policy only for corpus collection or add explicit support before accepting",
+            },
+            Self::InvalidNmeaChecksum => ErrorDiagnostic {
+                layer: DiagnosticLayer::Policy,
+                code: self.code(),
+                name: "nmea_checksum_mismatch",
+                description: "NMEA sentence has a present checksum that does not match the calculated value",
+                remediation: "treat the packet as untrusted and investigate upstream data corruption or spoofing",
+            },
         }
     }
 }
@@ -1943,6 +2238,50 @@ impl ParseError {
             Self::MissingSeparator => "parse.missing_separator",
             Self::EmptySegment => "parse.empty_segment",
             Self::InvalidAddress => "parse.invalid_address",
+        }
+    }
+
+    /// Returns structured parse error metadata for operator diagnostics.
+    #[must_use]
+    pub fn diagnostic(&self) -> ErrorDiagnostic {
+        match self {
+            Self::Empty => ErrorDiagnostic {
+                layer: DiagnosticLayer::Parse,
+                code: self.code(),
+                name: "empty",
+                description: "no packet bytes were supplied to the codec boundary",
+                remediation: "drop empty transport records before calling parse_packet",
+            },
+            Self::Oversized => ErrorDiagnostic {
+                layer: DiagnosticLayer::Parse,
+                code: self.code(),
+                name: "oversized",
+                description: "packet exceeds the configured parser byte limit",
+                remediation: "reject the input or lower upstream batch sizes before parsing",
+            },
+            Self::MissingSeparator => ErrorDiagnostic {
+                layer: DiagnosticLayer::Parse,
+                code: self.code(),
+                name: "missing_separator",
+                description: "packet is missing the required source>path:payload separators",
+                remediation: "only send source>path:payload APRS packet bytes into the codec",
+            },
+            Self::EmptySegment => ErrorDiagnostic {
+                layer: DiagnosticLayer::Parse,
+                code: self.code(),
+                name: "empty_segment",
+                description: "packet contains an empty source, path, or payload segment",
+                remediation: "reject the input and inspect upstream framing before retrying",
+            },
+            Self::InvalidAddress => ErrorDiagnostic {
+                layer: DiagnosticLayer::Parse,
+                code: self.code(),
+                name: "invalid_address",
+                description:
+                    "packet source or path contains bytes outside the conservative address set",
+                remediation:
+                    "preserve the raw bytes for review and reject malformed address metadata",
+            },
         }
     }
 }
