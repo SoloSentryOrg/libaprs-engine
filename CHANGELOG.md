@@ -2,7 +2,14 @@
 
 ## Unreleased
 
-- No changes yet.
+- Added structured parser, policy, and transport error diagnostics with stable
+  layers, codes, descriptions, and remediation guidance.
+- Added a machine-readable CLI support matrix for semantic families, transport
+  adapters, and diagnostic layers.
+- Added an operator-focused deployment guide for diagnostics, logging, limits,
+  and safe defaults.
+- Added a compile-tested service ingestion example that logs stable diagnostic
+  codes while preserving raw-byte parser boundaries.
 
 ## 1.0.0 - 2026-04-28
 

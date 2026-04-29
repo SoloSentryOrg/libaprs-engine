@@ -197,10 +197,42 @@ fn main() -> Result<(), libaprs_engine::ParseError> {
 
 Compile-tested transport examples live with their crates:
 
+- `crates/libaprs-engine/examples/service_ingest.rs`
 - `crates/aprs-transport-aprs-is/examples/reader.rs`
 - `crates/aprs-transport-kiss/examples/frame_pipeline.rs`
 - `crates/aprs-transport-udp/examples/datagram_ingest.rs`
 - `crates/aprs-transport-corpus/examples/replay.rs`
+
+## Service Ingestion Pattern
+
+Use `Engine` as the service boundary after transport-specific framing and
+bounded reads. Keep policy strict, log stable diagnostic codes, and leave
+timeouts, reconnects, and worker queues application-owned.
+
+```rust
+use libaprs_engine::{Engine, EngineResult, LineTransport, Policy, MAX_PACKET_LEN};
+
+fn main() -> Result<(), std::io::Error> {
+    let input = b"N0CALL>APRS:>service online\nN1CALL>APRS:~opaque\n";
+    let mut engine = Engine::new(Policy::strict());
+
+    for packet in LineTransport::new(input).packets_with_limit(MAX_PACKET_LEN)? {
+        match engine.process(packet) {
+            EngineResult::Accepted { packet } => {
+                println!("accepted semantic={}", packet.summary().semantic);
+            }
+            EngineResult::Rejected { reason, .. } => {
+                println!("rejected code={}", reason.diagnostic().code);
+            }
+            EngineResult::ParseError(error) => {
+                println!("malformed code={}", error.diagnostic().code);
+            }
+        }
+    }
+
+    Ok(())
+}
+```
 
 ## Handle Invalid UTF-8 Payloads
 

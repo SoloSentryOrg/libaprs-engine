@@ -1,6 +1,6 @@
 use std::io::{self, Read};
 
-use crate::MAX_PACKET_LEN;
+use crate::{DiagnosticLayer, ErrorDiagnostic, MAX_PACKET_LEN};
 
 /// Default maximum byte batch accepted by transport helper readers.
 pub const DEFAULT_TRANSPORT_READ_LIMIT: usize = 1024 * 1024;
@@ -30,6 +30,49 @@ impl TransportErrorCode {
             Self::UnexpectedEof => "transport.unexpected_eof",
             Self::Timeout => "transport.timeout",
             Self::Io => "transport.io",
+        }
+    }
+
+    /// Returns structured transport error metadata for operator diagnostics.
+    #[must_use]
+    pub fn diagnostic(self) -> ErrorDiagnostic {
+        match self {
+            Self::OversizedInput => ErrorDiagnostic {
+                layer: DiagnosticLayer::Transport,
+                code: self.code(),
+                name: "oversized_input",
+                description: "transport input exceeded the configured byte limit",
+                remediation: "keep bounded transport reads enabled and reject the oversized input",
+            },
+            Self::InvalidFrame => ErrorDiagnostic {
+                layer: DiagnosticLayer::Transport,
+                code: self.code(),
+                name: "invalid_frame",
+                description: "transport-specific framing was invalid before codec parsing",
+                remediation: "drop the frame and inspect upstream framing or escaping",
+            },
+            Self::UnexpectedEof => ErrorDiagnostic {
+                layer: DiagnosticLayer::Transport,
+                code: self.code(),
+                name: "unexpected_eof",
+                description: "transport ended before a complete packet or frame was available",
+                remediation: "discard the incomplete record and wait for a complete bounded frame",
+            },
+            Self::Timeout => ErrorDiagnostic {
+                layer: DiagnosticLayer::Transport,
+                code: self.code(),
+                name: "timeout",
+                description: "transport operation exceeded the caller-owned timeout",
+                remediation: "apply reconnect or retry policy outside the core parser",
+            },
+            Self::Io => ErrorDiagnostic {
+                layer: DiagnosticLayer::Transport,
+                code: self.code(),
+                name: "io",
+                description: "underlying transport I/O failed",
+                remediation:
+                    "handle the I/O failure at the adapter boundary before parsing more bytes",
+            },
         }
     }
 }

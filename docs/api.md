@@ -303,6 +303,40 @@ fn main() -> Result<(), libaprs_engine::ParseError> {
 }
 ```
 
+Parser, policy, and transport failures also expose structured diagnostic
+metadata. Use the stable `code` field for alerts and machine processing.
+
+```rust
+use libaprs_engine::{ParseError, PolicyRejection, TransportErrorCode};
+
+fn main() {
+    let parse = ParseError::MissingSeparator.diagnostic();
+    assert_eq!(parse.code, "parse.missing_separator");
+    assert_eq!(parse.layer.code(), "parse");
+
+    let policy = PolicyRejection::UnsupportedSemantics.diagnostic();
+    assert_eq!(policy.code, "policy.unsupported_semantics");
+
+    let transport = TransportErrorCode::OversizedInput.diagnostic();
+    assert_eq!(transport.code, "transport.oversized_input");
+}
+```
+
+`support_matrix()` returns the same capability inventory exposed by the CLI
+`support-matrix --json` command. It is intended for deployment checks and
+documentation tooling.
+
+```rust
+fn main() {
+    let matrix = libaprs_engine::support_matrix();
+    assert_eq!(matrix.schema_version, 1);
+    assert!(matrix
+        .semantic_families
+        .iter()
+        .any(|item| item.kind == "status"));
+}
+```
+
 ## Optional Serde Diagnostics
 
 Enable the `serde` feature to use an owned diagnostic structure that serializes

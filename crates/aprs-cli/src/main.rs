@@ -6,7 +6,8 @@ use std::io::{self, Write};
 use std::process::ExitCode;
 
 use libaprs_engine::{
-    read_all_with_limit, Engine, EngineResult, LineTransport, Policy, MAX_PACKET_LEN,
+    read_all_with_limit, support_matrix, DiagnosticLayer, Engine, EngineResult, LineTransport,
+    Policy, SupportMatrix, MAX_PACKET_LEN,
 };
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
@@ -29,6 +30,7 @@ enum CommandMode {
     Stats,
     Explain,
     Replay,
+    SupportMatrix,
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -51,6 +53,11 @@ fn main() -> ExitCode {
 
 fn run() -> Result<ExitCode, String> {
     let options = parse_args(env::args().skip(1))?;
+    if options.command == CommandMode::SupportMatrix {
+        print_support_matrix(options.json);
+        return Ok(ExitCode::SUCCESS);
+    }
+
     let input = read_input(options.input_path.as_deref())?;
     let policy = if options.permissive {
         Policy::permissive()
@@ -69,7 +76,7 @@ fn run() -> Result<ExitCode, String> {
             EngineResult::Accepted { packet }
                 if !matches_filter(&options, packet.aprs_data().kind_name()) => {}
             EngineResult::Accepted { packet } => match options.command {
-                CommandMode::Validate | CommandMode::Stats => {}
+                CommandMode::Validate | CommandMode::Stats | CommandMode::SupportMatrix => {}
                 CommandMode::Replay => {
                     io::stdout()
                         .write_all(packet.raw().as_bytes())
@@ -95,6 +102,7 @@ fn run() -> Result<ExitCode, String> {
                 } else if options.command != CommandMode::Validate
                     && options.command != CommandMode::Stats
                     && options.command != CommandMode::Replay
+                    && options.command != CommandMode::SupportMatrix
                 {
                     println!("rejected reason={reason:?}");
                 }
@@ -106,6 +114,7 @@ fn run() -> Result<ExitCode, String> {
                 } else if options.command != CommandMode::Validate
                     && options.command != CommandMode::Stats
                     && options.command != CommandMode::Replay
+                    && options.command != CommandMode::SupportMatrix
                 {
                     println!("malformed error={error:?}");
                 }
@@ -159,6 +168,7 @@ fn parse_args(args: impl IntoIterator<Item = String>) -> Result<CliOptions, Stri
                 options.explain = true;
             }
             "replay" => options.command = CommandMode::Replay,
+            "support-matrix" => options.command = CommandMode::SupportMatrix,
             "--json" => options.json = true,
             "--permissive" => options.permissive = true,
             "--explain" => options.explain = true,
@@ -224,10 +234,112 @@ fn read_input(path: Option<&str>) -> Result<Vec<u8>, String> {
     }
 }
 
+fn print_support_matrix(json: bool) {
+    let matrix = support_matrix();
+    if json {
+        println!("{}", support_matrix_json(matrix));
+    } else {
+        println!("support-matrix schema_version={}", matrix.schema_version);
+        println!("semantic_families:");
+        for item in matrix.semantic_families {
+            println!(
+                "- kind={} status={} notes={}",
+                item.kind,
+                item.status.code(),
+                item.notes
+            );
+        }
+        println!("transport_adapters:");
+        for item in matrix.transport_adapters {
+            println!(
+                "- crate={} status={} boundary={} notes={}",
+                item.crate_name,
+                item.status.code(),
+                item.boundary,
+                item.notes
+            );
+        }
+        println!("diagnostic_layers:");
+        for layer in matrix.diagnostic_layers {
+            println!("- code={}", layer.code());
+        }
+    }
+}
+
+fn support_matrix_json(matrix: SupportMatrix) -> String {
+    let mut json = String::new();
+    json.push_str("{\"schema_version\":");
+    json.push_str(&matrix.schema_version.to_string());
+    json.push_str(",\"semantic_families\":[");
+    for (index, item) in matrix.semantic_families.iter().enumerate() {
+        if index > 0 {
+            json.push(',');
+        }
+        json.push_str("{\"kind\":\"");
+        json.push_str(&json_escape(item.kind));
+        json.push_str("\",\"status\":\"");
+        json.push_str(item.status.code());
+        json.push_str("\",\"notes\":\"");
+        json.push_str(&json_escape(item.notes));
+        json.push_str("\"}");
+    }
+    json.push_str("],\"transport_adapters\":[");
+    for (index, item) in matrix.transport_adapters.iter().enumerate() {
+        if index > 0 {
+            json.push(',');
+        }
+        json.push_str("{\"crate\":\"");
+        json.push_str(&json_escape(item.crate_name));
+        json.push_str("\",\"boundary\":\"");
+        json.push_str(&json_escape(item.boundary));
+        json.push_str("\",\"status\":\"");
+        json.push_str(item.status.code());
+        json.push_str("\",\"notes\":\"");
+        json.push_str(&json_escape(item.notes));
+        json.push_str("\"}");
+    }
+    json.push_str("],\"diagnostic_layers\":[");
+    for (index, layer) in matrix.diagnostic_layers.iter().enumerate() {
+        if index > 0 {
+            json.push(',');
+        }
+        json.push_str("{\"code\":\"");
+        json.push_str(match layer {
+            DiagnosticLayer::Parse => "parse",
+            DiagnosticLayer::Policy => "policy",
+            DiagnosticLayer::Transport => "transport",
+        });
+        json.push_str("\"}");
+    }
+    json.push_str("]}");
+    json
+}
+
+fn json_escape(value: &str) -> String {
+    let mut escaped = String::new();
+    for ch in value.chars() {
+        match ch {
+            '"' => escaped.push_str("\\\""),
+            '\\' => escaped.push_str("\\\\"),
+            '\n' => escaped.push_str("\\n"),
+            '\r' => escaped.push_str("\\r"),
+            '\t' => escaped.push_str("\\t"),
+            '\u{08}' => escaped.push_str("\\b"),
+            '\u{0c}' => escaped.push_str("\\f"),
+            ch if ch.is_control() => {
+                escaped.push_str("\\u");
+                escaped.push_str(&format!("{:04x}", u32::from(ch)));
+            }
+            ch => escaped.push(ch),
+        }
+    }
+    escaped
+}
+
 fn lossy(bytes: &[u8]) -> String {
     String::from_utf8_lossy(bytes).into_owned()
 }
 
 fn usage() -> String {
-    "usage: aprs-cli [parse|validate|stats|explain|replay] [--json] [--permissive] [--explain] [--summary] [--filter SEMANTIC] [--fail-on none|malformed|rejected] [PATH]".to_string()
+    "usage: aprs-cli [parse|validate|stats|explain|replay|support-matrix] [--json] [--permissive] [--explain] [--summary] [--filter SEMANTIC] [--fail-on none|malformed|rejected] [PATH]".to_string()
 }

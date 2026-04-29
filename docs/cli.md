@@ -62,6 +62,12 @@ Replay accepted packet bytes:
 cargo run -p aprs-cli -- replay --permissive packets.aprs
 ```
 
+Print the machine-readable support matrix:
+
+```sh
+cargo run -p aprs-cli -- support-matrix --json
+```
+
 ## Input Rules
 
 - Input is read as raw bytes.
@@ -81,6 +87,8 @@ cargo run -p aprs-cli -- replay --permissive packets.aprs
 - `stats`: print aggregate counters only.
 - `explain`: print parse or policy diagnostic codes for non-accepted packets.
 - `replay`: emit accepted raw packet bytes with LF separators.
+- `support-matrix`: print supported semantic families, transport adapters, and
+  diagnostic layers without reading packet input.
 - `--json`: print compact diagnostic JSON for accepted packets.
 - `--explain`: include stable parse or policy codes with malformed/rejected
   output.
@@ -106,6 +114,12 @@ JSON output:
 
 ```json
 {"raw":"N0CALL>APRS:>hello","source":"N0CALL","destination":"APRS","path":"APRS","payload":">hello","data_type":"status","semantic":"status"}
+```
+
+Support matrix JSON output:
+
+```json
+{"schema_version":1,"semantic_families":[{"kind":"status","status":"supported","notes":"status text bytes are preserved"}],"transport_adapters":[{"crate":"aprs-transport-file","boundary":"newline-separated files and stdin-style byte streams","status":"supported","notes":"bounded file and packet-line reads"}],"diagnostic_layers":[{"code":"parse"},{"code":"policy"},{"code":"transport"}]}
 ```
 
 Rejected and malformed packets are printed to stdout:

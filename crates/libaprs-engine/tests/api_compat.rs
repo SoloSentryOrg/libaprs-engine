@@ -1,8 +1,9 @@
 use libaprs_engine::{
-    parse_packet, parse_packet_with_options, AprsData, Counters, DataTypeIdentifier, Engine,
-    EngineResult, LineTransport, MicEMessageCode, MicEStandardMessage, PacketSink, PacketSource,
-    ParseError, ParseOptions, Policy, PolicyDecision, PolicyRejection, TransportErrorCode,
-    DEFAULT_PARSE_OPTIONS, DEFAULT_TRANSPORT_READ_LIMIT, MAX_PACKET_LEN,
+    parse_packet, parse_packet_with_options, support_matrix, AprsData, Counters,
+    DataTypeIdentifier, DiagnosticLayer, Engine, EngineResult, LineTransport, MicEMessageCode,
+    MicEStandardMessage, PacketSink, PacketSource, ParseError, ParseOptions, Policy,
+    PolicyDecision, PolicyRejection, SupportStatus, TransportErrorCode, DEFAULT_PARSE_OPTIONS,
+    DEFAULT_TRANSPORT_READ_LIMIT, MAX_PACKET_LEN,
 };
 
 const _: () = assert!(DEFAULT_TRANSPORT_READ_LIMIT >= MAX_PACKET_LEN);
@@ -40,6 +41,57 @@ fn stable_intent_options_and_errors_remain_usable() {
     );
     assert_eq!(ParseError::EmptySegment.code(), "parse.empty_segment");
     assert_eq!(ParseError::InvalidAddress.code(), "parse.invalid_address");
+}
+
+#[test]
+fn structured_error_diagnostics_remain_usable() {
+    let parse_diagnostic = ParseError::MissingSeparator.diagnostic();
+    assert_eq!(parse_diagnostic.layer, DiagnosticLayer::Parse);
+    assert_eq!(parse_diagnostic.layer.code(), "parse");
+    assert_eq!(parse_diagnostic.code, "parse.missing_separator");
+    assert_eq!(parse_diagnostic.name, "missing_separator");
+    assert!(parse_diagnostic.description.contains("separator"));
+    assert!(parse_diagnostic.remediation.contains("source>path:payload"));
+
+    let policy_diagnostic = PolicyRejection::UnsupportedSemantics.diagnostic();
+    assert_eq!(policy_diagnostic.layer, DiagnosticLayer::Policy);
+    assert_eq!(policy_diagnostic.layer.code(), "policy");
+    assert_eq!(policy_diagnostic.code, "policy.unsupported_semantics");
+    assert_eq!(policy_diagnostic.name, "unsupported_semantics");
+    assert!(policy_diagnostic.description.contains("unsupported"));
+
+    let transport_diagnostic = TransportErrorCode::OversizedInput.diagnostic();
+    assert_eq!(transport_diagnostic.layer, DiagnosticLayer::Transport);
+    assert_eq!(transport_diagnostic.layer.code(), "transport");
+    assert_eq!(transport_diagnostic.code, "transport.oversized_input");
+    assert_eq!(transport_diagnostic.name, "oversized_input");
+    assert!(transport_diagnostic.remediation.contains("bounded"));
+}
+
+#[test]
+fn stable_support_matrix_api_remains_usable() {
+    let matrix = support_matrix();
+
+    assert_eq!(matrix.schema_version, 1);
+    assert!(matrix.semantic_families.iter().any(|item| {
+        item.kind == "status"
+            && item.status == SupportStatus::Supported
+            && item.notes.contains("preserved")
+    }));
+    assert!(matrix
+        .transport_adapters
+        .iter()
+        .any(|item| item.crate_name == "aprs-transport-kiss"
+            && item.status == SupportStatus::Supported
+            && item.boundary.contains("KISS")));
+    assert_eq!(
+        matrix
+            .diagnostic_layers
+            .iter()
+            .map(|layer| layer.code())
+            .collect::<Vec<_>>(),
+        vec!["parse", "policy", "transport"]
+    );
 }
 
 #[test]
