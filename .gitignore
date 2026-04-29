@@ -1,5 +1,6 @@
 target/
 **/target/
+.codex/
 .DS_Store
 **/.DS_Store
 fuzz/artifacts/
