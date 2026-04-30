@@ -31,8 +31,10 @@ fn stable_diagnostic_alternative_to_json_remains_usable() {
     let input = b"N0CALL>APRS:>\xff";
     let parsed = parse_packet(input).expect("packet should parse");
     let diagnostic = PacketDiagnostic::from_packet(&parsed);
+    let explicit_diagnostic = parsed.to_diagnostic();
 
     assert_eq!(diagnostic.raw, input);
+    assert_eq!(explicit_diagnostic, diagnostic);
     assert_eq!(diagnostic.source, b"N0CALL");
     assert_eq!(diagnostic.destination, b"APRS");
     assert_eq!(diagnostic.payload, b">\xff");

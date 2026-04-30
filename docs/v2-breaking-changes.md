@@ -46,7 +46,7 @@ migration path.
 
 | Candidate | Decision | Evidence | Required before an RC |
 | --- | --- | --- | --- |
-| Rename or replace `ParsedPacket::to_json()` | Not approved as a breaking change yet. Keep it as diagnostic convenience in `1.x`. | Docs identify schema-confusion risk, but there are no downstream reports showing external-contract misuse. `serde_support::PacketDiagnostic`, `PacketSummary`, `EngineEvent`, and application-owned schemas already provide safer alternatives. | Add an additive, explicitly named replacement if needed; add compatibility tests for the replacement; record at least one downstream report or internal release-gate finding proving the current name causes real migration risk. |
+| Rename or replace `ParsedPacket::to_json()` | Not approved as a breaking change. Keep it as diagnostic convenience in `1.x`. | Docs identify schema-confusion risk, but there are no downstream reports showing external-contract misuse. `ParsedPacket::to_diagnostic()`, `serde_support::PacketDiagnostic`, `PacketSummary`, `EngineEvent`, and application-owned schemas provide safer alternatives. | Record at least one downstream report or internal release-gate finding proving the current name still causes real migration risk after the additive replacement path. |
 | Split stable packet envelope APIs from evolving semantic interpretation APIs | Not approved as a breaking change yet. Continue additive semantic expansion. | `AprsData` is documented as evolving, and tests cover current semantic helpers. No issue shows the visible enum/struct surface blocking adoption. | Identify specific unstable semantic fields or variants that downstream code cannot absorb additively; add migration examples and semver evidence for the narrower envelope API. |
 | Refine transport trait contracts around receive loops | Not approved as a breaking change yet. Keep adapter-specific options and shared byte traits. | Transport docs explicitly defer a stronger common layer until repeated downstream integrations need it. Existing adapters preserve bytes and expose bounded helpers. | Record multiple transport integrations needing the same runtime-neutral receive-loop trait; prove the trait does not force async, network, or runtime dependencies into the core crate. |
 | Stabilize diagnostic or event serialization under explicit schema versions | Not approved as a breaking change yet. Keep stable event structs and versioned support-matrix JSON. | Operational docs warn that packet JSON is diagnostic. There is no downstream report requiring first-class event JSON as a crate-owned wire protocol. | Add additive schema types first; document schema versioning and rejection behavior; add tests proving unsupported schema versions fail closed in consumers or examples. |
@@ -81,11 +81,13 @@ Before publishing `v2.0.0-rc.1`, update this record so every breaking change has
 ## Next Additive Work
 
 - Keep `ParsedPacket::to_json()` documented as diagnostic output and prefer
-  `serde_support::PacketDiagnostic` for structured diagnostics.
-- Expand compatibility tests around any additive replacement APIs before
+  `ParsedPacket::to_diagnostic()` or `serde_support::PacketDiagnostic` for
+  structured diagnostics.
+- Maintain compatibility tests around additive replacement APIs before
   considering Rust `#[deprecated]` attributes.
 - Convert every downstream report into an issue, fixture, test, or migration
-  note before changing stable APIs.
+  note before changing stable APIs; use the downstream feedback issue template
+  for API or migration reports.
 - Revisit common transport traits only after the criteria in
   `docs/transport-common-layer.md` are met.
 - Continue publishing `1.x` releases until a non-empty breaking-change list is

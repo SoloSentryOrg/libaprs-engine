@@ -4,6 +4,15 @@
 
 - No changes yet.
 
+## 1.7.0 - 2026-04-30
+
+- Added `ParsedPacket::to_diagnostic()` behind the `serde` feature as an
+  explicit structured diagnostic replacement path for integrations that should
+  not rely on `to_json()` as an external schema.
+- Added a downstream feedback issue template for API, migration, and integration
+  evidence capture before any future breaking change.
+- Bumped all workspace crates to `1.7.0`.
+
 ## 1.6.0 - 2026-04-30
 
 - Expanded APRS101 conformance and semantic helper coverage for `1.x`
