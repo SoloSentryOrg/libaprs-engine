@@ -144,6 +144,10 @@ not speculative cleanup.
 Priority: gated by `v1.6.0`. This release candidate should include only
 justified breaking changes.
 
+Current status: not approved for publication. The current decision record in
+`docs/v2-breaking-changes.md` found no concrete downstream issue evidence that
+justifies breaking `1.x` APIs yet.
+
 Possible breaking-change candidates:
 
 - Stronger typed packet views.

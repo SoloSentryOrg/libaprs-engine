@@ -1,0 +1,92 @@
+# `v2.0.0` Breaking-Change Decision Record
+
+## BLUF
+
+- `v2.0.0-rc.1` is not approved for publication from the current evidence set.
+- The current audited evidence supports continued additive `1.x` releases, not
+  breaking API removal or renaming.
+- The final `v2.0.0` breaking-change list is empty until downstream reports,
+  semver evidence, and replacement APIs justify a specific break.
+- Raw-byte preservation, fail-closed malformed-packet behavior, and parser core
+  runtime neutrality are non-negotiable and cannot be traded for API cleanup.
+- Revisit this record before every release candidate or any branch that changes
+  a stable public API.
+
+## Decision Date
+
+2026-04-30.
+
+## Evidence Reviewed
+
+- GitHub issues: none open or closed at the time of review.
+- GitHub pull requests: merged project PRs `#1` through `#28`, including the
+  `1.6.0` release, release evidence, API compatibility, transport maturity,
+  observability, security, and conformance batches.
+- Local public API audit: `crates/*/src` public declarations, `docs/api.md`,
+  `docs/public-api.md`, `docs/stability.md`, compatibility tests, transport
+  tests, and CLI tests.
+- Downstream evidence log: `docs/downstream-feedback.md`.
+- Migration guidance: `docs/v2-migration.md`.
+- Release evidence: `docs/release.md`.
+
+## Current Decision
+
+Do not start a breaking `v2.0.0-rc.1` implementation branch yet. The repository
+has documented possible pain points, but those pain points are currently inferred
+from examples, compatibility boundaries, and release-gate design rather than
+from concrete downstream breakage reports.
+
+The correct next engineering action is to keep strengthening `1.x` with
+additive replacement APIs, compatibility tests, conformance fixtures, and
+downstream feedback capture. A release candidate becomes appropriate only after
+this record identifies at least one justified breaking change with a tested
+migration path.
+
+## Candidate Matrix
+
+| Candidate | Decision | Evidence | Required before an RC |
+| --- | --- | --- | --- |
+| Rename or replace `ParsedPacket::to_json()` | Not approved as a breaking change yet. Keep it as diagnostic convenience in `1.x`. | Docs identify schema-confusion risk, but there are no downstream reports showing external-contract misuse. `serde_support::PacketDiagnostic`, `PacketSummary`, `EngineEvent`, and application-owned schemas already provide safer alternatives. | Add an additive, explicitly named replacement if needed; add compatibility tests for the replacement; record at least one downstream report or internal release-gate finding proving the current name causes real migration risk. |
+| Split stable packet envelope APIs from evolving semantic interpretation APIs | Not approved as a breaking change yet. Continue additive semantic expansion. | `AprsData` is documented as evolving, and tests cover current semantic helpers. No issue shows the visible enum/struct surface blocking adoption. | Identify specific unstable semantic fields or variants that downstream code cannot absorb additively; add migration examples and semver evidence for the narrower envelope API. |
+| Refine transport trait contracts around receive loops | Not approved as a breaking change yet. Keep adapter-specific options and shared byte traits. | Transport docs explicitly defer a stronger common layer until repeated downstream integrations need it. Existing adapters preserve bytes and expose bounded helpers. | Record multiple transport integrations needing the same runtime-neutral receive-loop trait; prove the trait does not force async, network, or runtime dependencies into the core crate. |
+| Stabilize diagnostic or event serialization under explicit schema versions | Not approved as a breaking change yet. Keep stable event structs and versioned support-matrix JSON. | Operational docs warn that packet JSON is diagnostic. There is no downstream report requiring first-class event JSON as a crate-owned wire protocol. | Add additive schema types first; document schema versioning and rejection behavior; add tests proving unsupported schema versions fail closed in consumers or examples. |
+| Rename broad parse, policy, or transport diagnostic names | Not approved as a breaking change yet. Keep current stable codes. | Current diagnostics expose stable machine-readable codes and no report identifies ambiguous names causing unsafe handling. | Record the exact ambiguous code, affected integration, and safer replacement; add migration tests and release notes mapping old-to-new codes. |
+
+## Non-Negotiable Constraints For Any Future Break
+
+- Accepted packets must retain exact raw input bytes.
+- Malformed packet shape must fail closed without partial success.
+- Invalid UTF-8 in payloads must not panic and must not be lossy-converted.
+- Parser core must remain network-free and runtime-neutral.
+- Transport helpers must keep explicit size limits and byte-preserving
+  boundaries.
+- Counters and observability must remain monotonic and saturating where
+  applicable.
+- Security review, local release gates, remote CI, security gates, downstream
+  smoke, and release evidence must pass for the exact release commit.
+
+## RC Entry Criteria
+
+Before publishing `v2.0.0-rc.1`, update this record so every breaking change has:
+
+- a concrete downstream report, compatibility-test finding, semver finding, or
+  secure-review finding,
+- the exact `1.x` API being changed,
+- the replacement API and migration example,
+- compatibility tests for the replacement path,
+- `cargo-semver-checks` output reviewed and recorded,
+- `docs/v2-migration.md`, `docs/public-api.md`, and `CHANGELOG.md` updates, and
+- release evidence in `docs/release.md`.
+
+## Next Additive Work
+
+- Keep `ParsedPacket::to_json()` documented as diagnostic output and prefer
+  `serde_support::PacketDiagnostic` for structured diagnostics.
+- Expand compatibility tests around any additive replacement APIs before
+  considering Rust `#[deprecated]` attributes.
+- Convert every downstream report into an issue, fixture, test, or migration
+  note before changing stable APIs.
+- Revisit common transport traits only after the criteria in
+  `docs/transport-common-layer.md` are met.
+- Continue publishing `1.x` releases until a non-empty breaking-change list is
+  justified by evidence.
