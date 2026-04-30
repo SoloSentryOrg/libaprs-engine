@@ -2,10 +2,23 @@
 
 ## Unreleased
 
+- No changes yet.
+
+## 1.6.0 - 2026-04-30
+
+- Expanded APRS101 conformance and semantic helper coverage for `1.x`
+  production adoption.
+- Added abuse-resistance release gates, threat-model documentation, fuzz corpus
+  hygiene checks, and resource-exhaustion coverage.
+- Added stable observability event structs, bounded malformed-event raw-byte
+  evidence, dependency-free metrics helpers, and JSON schema documentation.
+- Hardened transport integration guidance with TCP read options, timeout
+  coverage, APRS-IS reconnect examples, and transport common-layer decisions.
 - Added downstream feedback and `v2.0.0` migration planning documentation.
 - Documented soft deprecations for weak or confusing integration patterns
   without removing `1.x` APIs.
 - Expanded compatibility tripwires for serde diagnostics and TCP read options.
+- Bumped all workspace crates to `1.6.0`.
 
 ## 1.1.0 - 2026-04-29
 

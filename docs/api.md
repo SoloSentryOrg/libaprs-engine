@@ -9,7 +9,7 @@ Use the package name `libaprs-engine` in `Cargo.toml` and the crate name
 
 ```toml
 [dependencies]
-libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v1.1.0" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v1.6.0" }
 ```
 
 For a local checkout:
@@ -414,7 +414,7 @@ raw bytes as byte arrays rather than assuming UTF-8.
 libaprs-engine = {
   git = "https://github.com/elodiejmirza/libaprs-engine",
   package = "libaprs-engine",
-  tag = "v1.1.0",
+  tag = "v1.6.0",
   features = ["serde"]
 }
 ```
@@ -429,8 +429,8 @@ application-owned.
 
 ```toml
 [dependencies]
-aprs-transport-aprs-is = "1.1.0"
-libaprs-engine = "1.1.0"
+aprs-transport-aprs-is = "1.6.0"
+libaprs-engine = "1.6.0"
 ```
 
 ```rust
@@ -441,7 +441,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let login = AprsIsLogin {
         callsign: "N0CALL",
         passcode: -1,
-        software: "libaprs-engine 1.1.0",
+        software: "libaprs-engine 1.6.0",
         filter: Some("r/49/-72/50"),
     };
     assert!(login.line()?.ends_with("\r\n"));
@@ -474,8 +474,8 @@ bytes before handing packets to the core engine.
 
 ```toml
 [dependencies]
-aprs-transport-file = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "aprs-transport-file", tag = "v1.1.0" }
-libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v1.1.0" }
+aprs-transport-file = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "aprs-transport-file", tag = "v1.6.0" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v1.6.0" }
 ```
 
 ## TCP Transport Adapter
@@ -485,8 +485,8 @@ another `Read` implementation. This keeps network I/O outside the parser core.
 
 ```toml
 [dependencies]
-aprs-transport-tcp = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "aprs-transport-tcp", tag = "v1.1.0" }
-libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v1.1.0" }
+aprs-transport-tcp = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "aprs-transport-tcp", tag = "v1.6.0" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v1.6.0" }
 ```
 
 ```rust
