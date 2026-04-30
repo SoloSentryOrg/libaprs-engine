@@ -1,6 +1,6 @@
 #![forbid(unsafe_code)]
 
-use libaprs_engine::{Engine, EngineResult, LineTransport, Policy, MAX_PACKET_LEN};
+use libaprs_engine::{Engine, EngineEvent, LineTransport, Policy, MAX_PACKET_LEN};
 
 fn main() -> Result<(), std::io::Error> {
     let input = b"N0CALL>APRS:>service online\nN1CALL>APRS:~opaque\nbad packet\n";
@@ -9,22 +9,30 @@ fn main() -> Result<(), std::io::Error> {
     let packets = LineTransport::new(input).packets_with_limit(MAX_PACKET_LEN)?;
 
     for packet in packets {
-        match engine.process(packet) {
-            EngineResult::Accepted { packet } => {
-                println!("accepted semantic={}", packet.summary().semantic);
-            }
-            EngineResult::Rejected { reason, .. } => {
-                let diagnostic = reason.diagnostic();
+        match engine.process_event(packet) {
+            EngineEvent::Accepted(event) => {
                 println!(
-                    "rejected code={} remediation={}",
-                    diagnostic.code, diagnostic.remediation
+                    "event={} semantic={}",
+                    event.kind().code(),
+                    event.packet.summary().semantic
                 );
             }
-            EngineResult::ParseError(error) => {
-                let diagnostic = error.diagnostic();
+            EngineEvent::Rejected(event) => {
                 println!(
-                    "malformed code={} remediation={}",
-                    diagnostic.code, diagnostic.remediation
+                    "event={} code={} remediation={}",
+                    event.kind().code(),
+                    event.diagnostic.code,
+                    event.diagnostic.remediation
+                );
+            }
+            EngineEvent::Malformed(event) => {
+                println!(
+                    "event={} code={} raw_len={} raw_truncated={} remediation={}",
+                    event.kind().code(),
+                    event.diagnostic.code,
+                    event.raw.len(),
+                    event.raw_truncated,
+                    event.diagnostic.remediation
                 );
             }
         }

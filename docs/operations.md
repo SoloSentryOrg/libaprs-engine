@@ -40,6 +40,8 @@ Structured diagnostics are available from:
 - `ParseError::diagnostic()`
 - `PolicyRejection::diagnostic()`
 - `TransportErrorCode::diagnostic()`
+- `Engine::process_event()` for accepted, rejected, and malformed packet events
+- `TransportFailureEvent::from_code()` for transport-boundary events
 
 Each diagnostic includes:
 
@@ -51,6 +53,17 @@ Each diagnostic includes:
 
 Use the stable codes for alerts and dashboards. Treat descriptions and
 remediation text as human-readable guidance that may expand in minor releases.
+
+For long-running services, prefer `Engine::process_event()` when an integration
+needs event-shaped telemetry. It preserves accepted and rejected packet bytes
+through `ParsedPacket`, copies malformed raw input bytes into
+`MalformedPacketEvent` up to `EVENT_RAW_BYTE_LIMIT`, reports truncation through
+`raw_truncated`, and keeps `Engine::counters()` monotonic and saturating.
+
+With the `metrics` feature, `libaprs_engine::metrics_support` exposes stable
+counter names and a small `MetricsRecorder` trait. The module has no runtime
+dependency and is intended to bridge counters into application-owned telemetry
+libraries.
 
 ## Support Matrix
 
@@ -70,6 +83,7 @@ than guessing.
 Recommended fields for each processed packet:
 
 - source system or transport name
+- event kind from `EngineEventKind::code()`
 - diagnostic layer and code, when processing fails
 - semantic kind, when accepted or policy-rejected
 - accepted, rejected, and malformed counters

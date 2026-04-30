@@ -1,8 +1,8 @@
 use std::io::Cursor;
 
 use libaprs_engine::{
-    read_all_with_limit, Engine, EngineResult, LineTransport, Policy, PolicyRejection,
-    TransportErrorCode,
+    read_all_with_limit, Engine, EngineEvent, EngineEventKind, EngineResult, LineTransport, Policy,
+    PolicyRejection, TransportErrorCode, TransportFailureEvent, EVENT_RAW_BYTE_LIMIT,
 };
 
 #[test]
@@ -62,6 +62,67 @@ fn engine_counts_accepted_rejected_and_malformed_packets() {
     assert_eq!(counters.accepted, 1);
     assert_eq!(counters.rejected, 1);
     assert_eq!(counters.malformed, 1);
+}
+
+#[test]
+fn engine_process_event_emits_stable_observability_events() {
+    let mut engine = Engine::default();
+
+    let EngineEvent::Accepted(accepted) = engine.process_event(b"N0CALL>APRS:>ok") else {
+        panic!("accepted packet should emit an accepted event");
+    };
+    assert_eq!(accepted.kind(), EngineEventKind::Accepted);
+    assert_eq!(accepted.kind().code(), "accepted");
+    assert_eq!(accepted.packet.raw().as_bytes(), b"N0CALL>APRS:>ok");
+    assert_eq!(accepted.packet.summary().semantic, "status");
+
+    let EngineEvent::Rejected(rejected) = engine.process_event(b"N0CALL>APRS:~unsupported") else {
+        panic!("unsupported packet should emit a policy rejection event");
+    };
+    assert_eq!(rejected.kind(), EngineEventKind::PolicyRejected);
+    assert_eq!(rejected.reason, PolicyRejection::UnsupportedSemantics);
+    assert_eq!(rejected.diagnostic.code, "policy.unsupported_semantics");
+    assert_eq!(
+        rejected.packet.raw().as_bytes(),
+        b"N0CALL>APRS:~unsupported"
+    );
+
+    let malformed_input = b"not a packet \xff";
+    let EngineEvent::Malformed(malformed) = engine.process_event(malformed_input) else {
+        panic!("malformed packet should emit a malformed event");
+    };
+    assert_eq!(malformed.kind(), EngineEventKind::Malformed);
+    assert_eq!(malformed.diagnostic.code, "parse.missing_separator");
+    assert_eq!(malformed.raw, malformed_input);
+    assert!(!malformed.raw_truncated);
+
+    assert_eq!(engine.counters().accepted, 1);
+    assert_eq!(engine.counters().rejected, 1);
+    assert_eq!(engine.counters().malformed, 1);
+}
+
+#[test]
+fn malformed_event_raw_bytes_are_bounded_for_oversized_input() {
+    let mut engine = Engine::default();
+    let oversized = vec![b'X'; EVENT_RAW_BYTE_LIMIT + 64];
+
+    let EngineEvent::Malformed(malformed) = engine.process_event(&oversized) else {
+        panic!("oversized packet should emit a malformed event");
+    };
+
+    assert_eq!(malformed.diagnostic.code, "parse.oversized");
+    assert_eq!(malformed.raw.len(), EVENT_RAW_BYTE_LIMIT);
+    assert!(malformed.raw_truncated);
+}
+
+#[test]
+fn transport_failure_event_exposes_stable_diagnostic_metadata() {
+    let event = TransportFailureEvent::from_code(TransportErrorCode::OversizedInput);
+
+    assert_eq!(event.kind(), EngineEventKind::TransportFailure);
+    assert_eq!(event.kind().code(), "transport_failure");
+    assert_eq!(event.code, TransportErrorCode::OversizedInput);
+    assert_eq!(event.diagnostic.code, "transport.oversized_input");
 }
 
 #[test]

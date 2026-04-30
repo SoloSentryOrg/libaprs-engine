@@ -21,7 +21,8 @@ change:
 
 - `parse_packet(input: &[u8]) -> Result<ParsedPacket, ParseError>`
 - `parse_packet_with_options(input: &[u8], options: ParseOptions)`
-- `ParseOptions`, `DEFAULT_PARSE_OPTIONS`, and `MAX_PACKET_LEN`
+- `ParseOptions`, `DEFAULT_PARSE_OPTIONS`, `MAX_PACKET_LEN`, and
+  `EVENT_RAW_BYTE_LIMIT`
 - `RawPacket::as_bytes`
 - `ParsedPacket` accessors:
   - `raw`
@@ -43,9 +44,12 @@ change:
 - `Policy`, `Policy::strict`, `Policy::permissive`, and `Policy::evaluate`
 - `PolicyDecision`, `PolicyRejection`, `PolicyRejection::code`, and
   `PolicyRejection::diagnostic`
-- `Engine`, `Engine::new`, `Engine::process`, `Engine::process_packets`,
-  `Engine::process_source`, and `Engine::counters`
+- `Engine`, `Engine::new`, `Engine::process`, `Engine::process_event`,
+  `Engine::process_packets`, `Engine::process_source`, and `Engine::counters`
 - `EngineResult`
+- `EngineEvent`, `EngineEventKind`, `AcceptedPacketEvent`,
+  `PolicyRejectedPacketEvent`, `MalformedPacketEvent`, and
+  `TransportFailureEvent`
 - `Counters`
 - `PacketSummary`, with additive fields allowed in minor releases
 - `DiagnosticLayer`, `ErrorDiagnostic`, `SupportStatus`, `SupportItem`,
@@ -68,6 +72,7 @@ compiles and exercises documented integration patterns for:
 - raw-byte preservation and field accessors
 - stable parse error and policy rejection codes
 - structured parser, policy, and transport diagnostics
+- stable observability events and optional metrics helpers
 - engine, policy, counters, and engine result flow
 - data type identifier names
 - line transport and shared source/sink traits

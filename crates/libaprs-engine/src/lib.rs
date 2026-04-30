@@ -11,6 +11,65 @@ mod transport;
 #[cfg(feature = "serde")]
 pub mod serde_support;
 
+#[cfg(feature = "metrics")]
+pub mod metrics_support {
+    //! Optional dependency-free metrics helpers.
+    //!
+    //! This module is available with the `metrics` feature. It intentionally
+    //! avoids choosing a runtime or metrics crate so applications can bridge
+    //! the stable counter names into their own telemetry stack.
+
+    use crate::Counters;
+
+    /// Accepted packet counter name.
+    pub const ACCEPTED_PACKETS_TOTAL: &str = "libaprs_engine_packets_accepted_total";
+    /// Policy-rejected packet counter name.
+    pub const REJECTED_PACKETS_TOTAL: &str = "libaprs_engine_packets_rejected_total";
+    /// Codec-malformed packet counter name.
+    pub const MALFORMED_PACKETS_TOTAL: &str = "libaprs_engine_packets_malformed_total";
+
+    /// Stable counter metric value.
+    #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+    pub struct CounterMetric {
+        /// Stable metric name.
+        pub name: &'static str,
+        /// Monotonic counter value.
+        pub value: u64,
+    }
+
+    /// Minimal adapter trait for application-owned metrics clients.
+    pub trait MetricsRecorder {
+        /// Records one counter metric.
+        fn record_counter(&mut self, metric: CounterMetric);
+    }
+
+    /// Converts engine counters into stable counter metrics.
+    #[must_use]
+    pub const fn counter_metrics(counters: Counters) -> [CounterMetric; 3] {
+        [
+            CounterMetric {
+                name: ACCEPTED_PACKETS_TOTAL,
+                value: counters.accepted,
+            },
+            CounterMetric {
+                name: REJECTED_PACKETS_TOTAL,
+                value: counters.rejected,
+            },
+            CounterMetric {
+                name: MALFORMED_PACKETS_TOTAL,
+                value: counters.malformed,
+            },
+        ]
+    }
+
+    /// Records all engine counters into an application-owned recorder.
+    pub fn record_counters(recorder: &mut impl MetricsRecorder, counters: Counters) {
+        for metric in counter_metrics(counters) {
+            recorder.record_counter(metric);
+        }
+    }
+}
+
 pub use transport::{
     oversized_input_error, read_all_with_limit, LineTransport, PacketSink, PacketSource,
     TransportErrorCode, DEFAULT_TRANSPORT_READ_LIMIT,
@@ -18,6 +77,9 @@ pub use transport::{
 
 /// Conservative upper bound for an APRS packet handled by this skeleton.
 pub const MAX_PACKET_LEN: usize = 512;
+
+/// Maximum raw bytes copied into malformed packet observability events.
+pub const EVENT_RAW_BYTE_LIMIT: usize = MAX_PACKET_LEN + 1;
 
 /// Default parse options used by [`parse_packet`].
 pub const DEFAULT_PARSE_OPTIONS: ParseOptions = ParseOptions {
@@ -495,6 +557,39 @@ impl Engine {
         }
     }
 
+    /// Processes one packet and returns a stable observability event.
+    pub fn process_event(&mut self, input: &[u8]) -> EngineEvent {
+        match parse_packet(input) {
+            Ok(packet) => {
+                let semantic = packet.aprs_data();
+                match self.policy.evaluate(&packet, &semantic) {
+                    PolicyDecision::Accept => {
+                        self.counters.accepted = self.counters.accepted.saturating_add(1);
+                        EngineEvent::Accepted(AcceptedPacketEvent { packet })
+                    }
+                    PolicyDecision::Reject(reason) => {
+                        self.counters.rejected = self.counters.rejected.saturating_add(1);
+                        EngineEvent::Rejected(PolicyRejectedPacketEvent {
+                            packet,
+                            reason,
+                            diagnostic: reason.diagnostic(),
+                        })
+                    }
+                }
+            }
+            Err(error) => {
+                self.counters.malformed = self.counters.malformed.saturating_add(1);
+                let diagnostic = error.diagnostic();
+                EngineEvent::Malformed(MalformedPacketEvent {
+                    raw: input.iter().copied().take(EVENT_RAW_BYTE_LIMIT).collect(),
+                    raw_truncated: input.len() > EVENT_RAW_BYTE_LIMIT,
+                    error,
+                    diagnostic,
+                })
+            }
+        }
+    }
+
     /// Processes a caller-provided packet batch in order.
     pub fn process_packets<I, P>(&mut self, packets: I) -> Vec<EngineResult>
     where
@@ -545,6 +640,139 @@ pub enum EngineResult {
     },
     /// Packet failed the codec boundary.
     ParseError(ParseError),
+}
+
+/// Stable engine event category for observability.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum EngineEventKind {
+    /// Packet parsed and passed policy.
+    Accepted,
+    /// Packet parsed but was rejected by policy.
+    PolicyRejected,
+    /// Packet failed the codec boundary.
+    Malformed,
+    /// Transport failed before codec parsing.
+    TransportFailure,
+}
+
+impl EngineEventKind {
+    /// Returns a stable machine-readable event kind code.
+    #[must_use]
+    pub const fn code(self) -> &'static str {
+        match self {
+            Self::Accepted => "accepted",
+            Self::PolicyRejected => "policy_rejected",
+            Self::Malformed => "malformed",
+            Self::TransportFailure => "transport_failure",
+        }
+    }
+}
+
+/// Engine processing event for accepted, rejected, or malformed packets.
+#[derive(Clone, Debug, PartialEq)]
+pub enum EngineEvent {
+    /// Packet parsed and passed policy.
+    Accepted(AcceptedPacketEvent),
+    /// Packet parsed but failed policy.
+    Rejected(PolicyRejectedPacketEvent),
+    /// Packet failed the codec boundary.
+    Malformed(MalformedPacketEvent),
+}
+
+impl EngineEvent {
+    /// Returns the stable event kind.
+    #[must_use]
+    pub const fn kind(&self) -> EngineEventKind {
+        match self {
+            Self::Accepted(_) => EngineEventKind::Accepted,
+            Self::Rejected(_) => EngineEventKind::PolicyRejected,
+            Self::Malformed(_) => EngineEventKind::Malformed,
+        }
+    }
+}
+
+/// Accepted packet observability event.
+#[derive(Clone, Debug, PartialEq)]
+pub struct AcceptedPacketEvent {
+    /// Parsed packet with exact raw bytes preserved.
+    pub packet: ParsedPacket,
+}
+
+impl AcceptedPacketEvent {
+    /// Returns the stable event kind.
+    #[must_use]
+    pub const fn kind(&self) -> EngineEventKind {
+        EngineEventKind::Accepted
+    }
+}
+
+/// Policy-rejected packet observability event.
+#[derive(Clone, Debug, PartialEq)]
+pub struct PolicyRejectedPacketEvent {
+    /// Parsed packet with exact raw bytes preserved.
+    pub packet: ParsedPacket,
+    /// Policy rejection reason.
+    pub reason: PolicyRejection,
+    /// Stable policy diagnostic metadata.
+    pub diagnostic: ErrorDiagnostic,
+}
+
+impl PolicyRejectedPacketEvent {
+    /// Returns the stable event kind.
+    #[must_use]
+    pub const fn kind(&self) -> EngineEventKind {
+        EngineEventKind::PolicyRejected
+    }
+}
+
+/// Codec-malformed packet observability event.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct MalformedPacketEvent {
+    /// Original input bytes copied for application-owned evidence.
+    ///
+    /// This is exact when `raw_truncated` is false and capped at
+    /// [`EVENT_RAW_BYTE_LIMIT`] otherwise.
+    pub raw: Vec<u8>,
+    /// Whether `raw` was capped before copying.
+    pub raw_truncated: bool,
+    /// Codec failure.
+    pub error: ParseError,
+    /// Stable parse diagnostic metadata.
+    pub diagnostic: ErrorDiagnostic,
+}
+
+impl MalformedPacketEvent {
+    /// Returns the stable event kind.
+    #[must_use]
+    pub const fn kind(&self) -> EngineEventKind {
+        EngineEventKind::Malformed
+    }
+}
+
+/// Transport failure observability event.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct TransportFailureEvent {
+    /// Transport error category.
+    pub code: TransportErrorCode,
+    /// Stable transport diagnostic metadata.
+    pub diagnostic: ErrorDiagnostic,
+}
+
+impl TransportFailureEvent {
+    /// Creates a transport failure event from a stable transport code.
+    #[must_use]
+    pub fn from_code(code: TransportErrorCode) -> Self {
+        Self {
+            code,
+            diagnostic: code.diagnostic(),
+        }
+    }
+
+    /// Returns the stable event kind.
+    #[must_use]
+    pub const fn kind(&self) -> EngineEventKind {
+        EngineEventKind::TransportFailure
+    }
 }
 
 /// Runtime counters.

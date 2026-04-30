@@ -342,6 +342,53 @@ fn main() {
 }
 ```
 
+`Engine::process_event()` returns stable event structs for long-running
+ingestion services that need packet, policy, malformed, and counter telemetry
+without scraping text output.
+
+```rust
+use libaprs_engine::{Engine, EngineEvent};
+
+fn main() {
+    let mut engine = Engine::default();
+
+    match engine.process_event(b"N0CALL>APRS:>hello") {
+        EngineEvent::Accepted(event) => {
+            assert_eq!(event.kind().code(), "accepted");
+            assert_eq!(event.packet.summary().semantic, "status");
+        }
+        EngineEvent::Rejected(event) => {
+            eprintln!("rejected code={}", event.diagnostic.code);
+        }
+        EngineEvent::Malformed(event) => {
+            eprintln!(
+                "malformed code={} raw_len={} raw_truncated={}",
+                event.diagnostic.code,
+                event.raw.len(),
+                event.raw_truncated
+            );
+        }
+    }
+}
+```
+
+With the optional `metrics` feature, use the dependency-free metrics helpers to
+bridge `Counters` into your own telemetry stack.
+
+```rust
+use libaprs_engine::{metrics_support::counter_metrics, Counters};
+
+fn main() {
+    let metrics = counter_metrics(Counters {
+        accepted: 1,
+        rejected: 2,
+        malformed: 3,
+    });
+
+    assert_eq!(metrics[0].name, "libaprs_engine_packets_accepted_total");
+}
+```
+
 `support_matrix()` returns the same capability inventory exposed by the CLI
 `support-matrix --json` command. It is intended for deployment checks and
 documentation tooling.
