@@ -4,126 +4,129 @@ version = 4
 
 [[package]]
 name = "aprs-transport-aprs-is"
-version = "1.6.0"
+version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "803461545b0abf8caad99ca7c5001f79a48885db14ce4f841228a4cd6b463869"
+checksum = "ee0fccbb562bc85c3028777934a389d0ef3721e414d2ae7aff928bc31dc5a489"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-async"
-version = "1.6.0"
+version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4f9896e3f30f5a66217e767da6467e3c00603b1b1e4661161f59b56fcd57904d"
+checksum = "e59c8981de895ae0ad91e8af9e05c0c713c073c02ab430beced8191f733a1c2c"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-ax25"
-version = "1.6.0"
+version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "15a64d567eb57d07df2d982060ff2c4ceae19cf78a8908919db6d41200c6f32f"
+checksum = "0ee35f2c1ae15466a0da9b8a825b079fc37ffd2cd59f9d92edba40359321e680"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-channel"
-version = "1.6.0"
+version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c58dec698d240608be51ede184ad52a97f5b9527ae0daba074905caaf6820e9c"
+checksum = "4f9717042e990b348de4055af47b60a8235f95995d4bb3f06ea78e86008bd896"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-corpus"
-version = "1.6.0"
+version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c48443b112677976dd7d0c300cb90ad929c647b90e4ddd43d2f354deace9d5b5"
+checksum = "b0975cc19cc1720b6e6edf5393d08e63eacd98d00ceb9cfe1649f9ed252fd5e9"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-file"
-version = "1.6.0"
+version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e67830a8f7cadf50fa3aa543b4c18f0077b006d6f2e015a1af18b7bc2c719339"
+checksum = "5ab9e18a34b38587b39d0a685f20bf7558580dd3e65dcc38dc18f1355d755ba8"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-file-watch"
-version = "1.6.0"
+version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c4cdbb8e6c0836b03340bb2bb7afde181a968d29fe9d90215535bd0c1eb4cd2"
+checksum = "0f1e743fed456a00ab39802bc2128fa996ab3fa384e780b69f000197ae3ec217"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-http"
-version = "1.6.0"
+version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "40041bc409320f1ad79e82ce48d96943f6f1d9c7e1987e54b6a8b3b3803520a6"
+checksum = "1f3b2c78175ae7e2ee97ce005a6c0f013cfc699e38be20fd6ae2abfdb0b2abde"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-kiss"
-version = "1.6.0"
+version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8c1d0928cc12776bb42fa3b85753b11117292ac2e1c0c93129e8e046b6b107be"
+checksum = "c125cf71c4c9b2eac5e196cbe339b4f7eb739be7172b9ab846cbb46942ac4cf9"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-mqtt"
-version = "1.6.0"
+version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ab78c6ddbe158f20b065a73f04b691f7fba3c4c967530989c8fb84d18dd36d4d"
+checksum = "42059c4785afd55a880e667b3c009afa0561354d19b89efcccb223132877cf3d"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-serial"
-version = "1.6.0"
+version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7278b605ee3e7292cdeada64d58c6a2511d24c3f238eadcd7a830bcfb0303dc8"
+checksum = "7162c9972892323af9718bcabcff3f0c2d28557bd24e5eaf1d860183da91ecad"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-tcp"
-version = "1.6.0"
+version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a53e606f3971627c3ecaa2aea7f3d72279b656935c9f6bee1fb55f918319cea1"
+checksum = "40e55f7ba3086fc0dfe6f744b8343f1956bb0a06d01b824168366bda9bbd0243"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-udp"
-version = "1.6.0"
+version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a5c639829d6257326c9d39096a3f51ff9714c507f537dd06d87b044ab7dbe7e9"
+checksum = "1851e5d8b28d82f62b0cb414f2a1e8acde2cfb36594f5729bc98162c3e7384ea"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "libaprs-engine"
-version = "1.6.0"
+version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb04cac6dbbe79a9b281965f3b47e702c102af3ac42a89e1c2a7cfbe01af9810"
+checksum = "3178aa8da97013fc08ea1f71359c96618d487554e7165859dfa4e2fe1a9adebd"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "libaprs-engine-downstream-smoke"
@@ -144,3 +147,68 @@ dependencies = [
  "aprs-transport-udp",
  "libaprs-engine",
 ]
+
+[[package]]
+name = "proc-macro2"
+version = "1.0.106"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8fd00f0bb2e90d81d1044c2b32617f68fcb9fa3bb7640c23e9c748e53fb30934"
+dependencies = [
+ "unicode-ident",
+]
+
+[[package]]
+name = "quote"
+version = "1.0.45"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "41f2619966050689382d2b44f664f4bc593e129785a36d6ee376ddf37259b924"
+dependencies = [
+ "proc-macro2",
+]
+
+[[package]]
+name = "serde"
+version = "1.0.228"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9a8e94ea7f378bd32cbbd37198a4a91436180c5bb472411e48b5ec2e2124ae9e"
+dependencies = [
+ "serde_core",
+ "serde_derive",
+]
+
+[[package]]
+name = "serde_core"
+version = "1.0.228"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "41d385c7d4ca58e59fc732af25c3983b67ac852c1a25000afe1175de458b67ad"
+dependencies = [
+ "serde_derive",
+]
+
+[[package]]
+name = "serde_derive"
+version = "1.0.228"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d540f220d3187173da220f885ab66608367b6574e925011a9353e4badda91d79"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "syn"
+version = "2.0.117"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e665b8803e7b1d2a727f4023456bbbbe74da67099c585258af0ad9c5013b9b99"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "unicode-ident",
+]
+
+[[package]]
+name = "unicode-ident"
+version = "1.0.24"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
