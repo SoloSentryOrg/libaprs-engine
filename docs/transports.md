@@ -18,7 +18,7 @@ parser, preserving the protocol-first boundary.
 | Crate | Boundary | Primary use | Security note |
 | --- | --- | --- | --- |
 | `aprs-transport-file` | Newline-separated byte buffers and files | Offline logs, stdin-style files | Bounded path helpers reject oversized batches and packet lines |
-| `aprs-transport-tcp` | Blocking `Read` and TCP address helpers | TCP-connected packet streams | Reader helpers reject oversized batches and packet lines; connection timeouts stay application-owned |
+| `aprs-transport-tcp` | Blocking `Read` and TCP address helpers | TCP-connected packet streams | Reader helpers reject oversized batches and packet lines; `TcpReadOptions` keeps connection and read timeouts caller-owned |
 | `aprs-transport-aprs-is` | APRS-IS login line and comment filtering | APRS-IS clients | Server comment lines are filtered before parsing and packet lines are bounded |
 | `aprs-transport-kiss` | KISS frame encoding and decoding | TNC, serial, or TCP KISS streams | Invalid escapes and oversized decoded payloads fail closed |
 | `aprs-transport-serial` | Serial-like byte readers | TNC serial pipelines | Reader helpers reject oversized batches and packet lines; serial configuration stays application-owned |
@@ -72,6 +72,31 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let packet = parse_packet(&packet_bytes).map_err(|error| error.code())?;
         println!("{}", packet.aprs_data().kind_name());
     }
+
+    Ok(())
+}
+```
+
+For reconnecting services, keep session ownership in the application. The
+compile-tested `crates/aprs-transport-aprs-is/examples/session_reconnect.rs`
+example shows an APRS-IS login line, bounded reader helper, retry loop, backoff,
+and `Engine::process_event()` integration without adding networking behavior to
+the parser core.
+
+## TCP With Caller-Owned Timeouts
+
+```rust
+use std::time::Duration;
+
+use aprs_transport_tcp::{read_packet_lines_from_tcp_addr_with_options, TcpReadOptions};
+
+fn main() -> std::io::Result<()> {
+    let options = TcpReadOptions::default()
+        .with_connect_timeout(Some(Duration::from_secs(5)))
+        .with_read_timeout(Some(Duration::from_secs(30)));
+
+    let packets = read_packet_lines_from_tcp_addr_with_options("127.0.0.1:14580", options)?;
+    println!("packets={}", packets.len());
 
     Ok(())
 }
@@ -143,6 +168,10 @@ fn encode_ax25_addr(callsign: &str, last: bool) -> [u8; 7] {
   in the application layer, not in parser code.
 - Configure read deadlines, cancellation, and bounded worker queues at the
   application layer. Transport helpers do not spawn workers or own queues.
+- Prefer `TcpReadOptions` for TCP address helpers so connect/read timeouts and
+  read caps are visible in application configuration.
+- Use `drain_packet_channel(receiver, max_packets)` as a bounded batch boundary;
+  set channel capacity/backpressure in the application that owns the sender.
 - Treat `transport.oversized_input`, `kiss_oversized_frame`, and
   `ax25_oversized_frame` as fail-closed security telemetry, not recoverable
   parser warnings.
@@ -159,6 +188,7 @@ The repository includes transport cookbook examples that compile under
 `cargo test --examples`:
 
 - `crates/aprs-transport-aprs-is/examples/reader.rs`
+- `crates/aprs-transport-aprs-is/examples/session_reconnect.rs`
 - `crates/aprs-transport-kiss/examples/frame_pipeline.rs`
 - `crates/aprs-transport-udp/examples/datagram_ingest.rs`
 - `crates/aprs-transport-corpus/examples/replay.rs`

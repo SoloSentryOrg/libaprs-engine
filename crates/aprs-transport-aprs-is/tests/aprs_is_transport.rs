@@ -21,16 +21,32 @@ fn aprs_is_login_line_includes_filter_and_crlf() {
 
 #[test]
 fn aprs_is_login_line_rejects_line_injection() {
-    let login = AprsIsLogin {
-        callsign: "N0CALL\r\nbad",
-        passcode: -1,
-        software: "libaprs-engine 1.1.0",
-        filter: None,
-    };
+    let cases = [
+        AprsIsLogin {
+            callsign: "N0CALL\r\nbad",
+            passcode: -1,
+            software: "libaprs-engine 1.1.0",
+            filter: None,
+        },
+        AprsIsLogin {
+            callsign: "N0CALL",
+            passcode: -1,
+            software: "libaprs-engine\r\nbad",
+            filter: None,
+        },
+        AprsIsLogin {
+            callsign: "N0CALL",
+            passcode: -1,
+            software: "libaprs-engine 1.1.0",
+            filter: Some("r/49/-72/50\r\nbad"),
+        },
+    ];
 
-    let error = login.line().expect_err("CRLF must fail closed");
+    for login in cases {
+        let error = login.line().expect_err("CRLF must fail closed");
 
-    assert_eq!(error.code(), "aprs_is_login_line_injection");
+        assert_eq!(error.code(), "aprs_is_login_line_injection");
+    }
 }
 
 #[test]

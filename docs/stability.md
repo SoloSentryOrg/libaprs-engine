@@ -72,6 +72,7 @@ change:
 - `PacketSource`
 - `PacketSink`
 - `TransportErrorCode::code`
+- `aprs-transport-tcp::TcpReadOptions`
 - `DEFAULT_TRANSPORT_READ_LIMIT`
 - `read_all_with_limit`
 - `oversized_input_error`
@@ -124,7 +125,8 @@ future split explicit without promising current `no_std` compatibility.
   minor releases.
 - `aprs-transport-file`: stable-intent file helper crate.
 - `aprs-transport-tcp`: optional TCP helper crate. Network I/O stays outside the
-  parser core.
+  parser core. `TcpReadOptions` is the stable timeout/read-limit configuration
+  surface for TCP address helpers.
 - `aprs-transport-aprs-is`, `aprs-transport-kiss`, `aprs-transport-serial`,
   `aprs-transport-udp`, `aprs-transport-http`,
   `aprs-transport-file-watch`, `aprs-transport-mqtt`,

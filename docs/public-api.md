@@ -59,6 +59,8 @@ change:
 - `PacketSource` and `PacketSink`
 - `TransportErrorCode`, `TransportErrorCode::code`, and
   `TransportErrorCode::diagnostic`
+- `aprs-transport-tcp::TcpReadOptions` and
+  `read_packet_lines_from_tcp_addr_with_options`
 - `DEFAULT_TRANSPORT_READ_LIMIT`
 - `read_all_with_limit`
 - `oversized_input_error`
