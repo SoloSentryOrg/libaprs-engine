@@ -20,6 +20,10 @@ contracts.
   must preserve raw-byte access and fail-closed parsing behavior.
 - Diagnostic JSON from `ParsedPacket::to_json()` remains convenience output, not
   a compatibility-stable wire schema.
+- Soft deprecations for new integrations are tracked in
+  [`v2.0.0` Migration Plan](v2-migration.md). They do not remove `1.x` support
+  and do not use Rust `#[deprecated]` attributes unless the release gate is
+  updated to handle expected warnings.
 
 ## Release Maintenance Criteria
 
@@ -134,3 +138,13 @@ future split explicit without promising current `no_std` compatibility.
   `aprs-transport-channel`, and `aprs-transport-async`: optional transport
   helper crates. APIs may expand in minor releases, but byte preservation
   remains a stable design constraint.
+
+## Deprecation Planning
+
+The project records deprecation evidence before changing stable APIs:
+
+- integration pain points belong in [Downstream Feedback](downstream-feedback.md),
+- migration guidance belongs in [`v2.0.0` Migration Plan](v2-migration.md),
+- stable replacements must have compatibility tests before a release candidate,
+  and
+- any breaking removal or rename waits for a major-version release candidate.

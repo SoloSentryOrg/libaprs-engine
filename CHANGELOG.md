@@ -2,7 +2,10 @@
 
 ## Unreleased
 
-- No changes yet.
+- Added downstream feedback and `v2.0.0` migration planning documentation.
+- Documented soft deprecations for weak or confusing integration patterns
+  without removing `1.x` APIs.
+- Expanded compatibility tripwires for serde diagnostics and TCP read options.
 
 ## 1.1.0 - 2026-04-29
 

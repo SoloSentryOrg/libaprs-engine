@@ -75,6 +75,9 @@ compiles and exercises documented integration patterns for:
 - stable parse error and policy rejection codes
 - structured parser, policy, and transport diagnostics
 - stable observability events and optional metrics helpers
+- structured serde diagnostics as the preferred stable-integration alternative
+  to ad hoc `to_json()` contracts
+- TCP read-option builder methods used by transport integrations
 - engine, policy, counters, and engine result flow
 - data type identifier names
 - line transport and shared source/sink traits

@@ -70,3 +70,15 @@ fn tcp_addr_helper_applies_caller_owned_read_timeout() {
     ));
     server.join().expect("server thread");
 }
+
+#[test]
+fn tcp_options_builder_api_remains_source_compatible() {
+    let options = TcpReadOptions::default()
+        .with_connect_timeout(Some(Duration::from_secs(2)))
+        .with_read_timeout(Some(Duration::from_secs(3)))
+        .with_max_bytes(128);
+
+    assert_eq!(options.connect_timeout, Some(Duration::from_secs(2)));
+    assert_eq!(options.read_timeout, Some(Duration::from_secs(3)));
+    assert_eq!(options.max_bytes, 128);
+}
