@@ -472,6 +472,82 @@ fn weather_semantics_ignore_malformed_optional_fields() {
 }
 
 #[test]
+fn position_weather_symbol_exposes_weather_report_from_comment() {
+    let parsed =
+        parse_packet(b"N0CALL>APRS:!4903.50N/07201.75W_c220s004g010t077r001p002P003h50b10150")
+            .expect("weather position should parse");
+    let AprsData::Position(position) = parsed.aprs_data() else {
+        panic!("expected position");
+    };
+
+    let weather = position
+        .weather()
+        .expect("weather symbol position should expose weather report");
+
+    assert_eq!(
+        weather.report,
+        b"c220s004g010t077r001p002P003h50b10150".as_slice()
+    );
+    assert_eq!(weather.fields().temperature_fahrenheit, Some(77));
+    assert_eq!(weather.fields().wind_direction_degrees, Some(220));
+}
+
+#[test]
+fn timestamped_position_object_and_item_expose_embedded_weather_reports() {
+    let timestamped = parse_packet(b"N0CALL>APRS:/092345z4903.50N/07201.75W_c220s004g010t077")
+        .expect("timestamped weather position should parse");
+    let object = parse_packet(b"N0CALL>APRS:;WXOBJ    *092345z4903.50N/07201.75W_c180s002t055")
+        .expect("weather object should parse");
+    let item = parse_packet(b"N0CALL>APRS:)WXITEM!4903.50N/07201.75W_c090s001t060")
+        .expect("weather item should parse");
+
+    let AprsData::TimestampedPosition(timestamped) = timestamped.aprs_data() else {
+        panic!("expected timestamped position");
+    };
+    let AprsData::Object(object) = object.aprs_data() else {
+        panic!("expected object");
+    };
+    let AprsData::Item(item) = item.aprs_data() else {
+        panic!("expected item");
+    };
+
+    assert_eq!(
+        timestamped
+            .weather()
+            .expect("timestamped weather")
+            .fields()
+            .temperature_fahrenheit,
+        Some(77)
+    );
+    assert_eq!(
+        object
+            .weather()
+            .expect("object weather")
+            .fields()
+            .temperature_fahrenheit,
+        Some(55)
+    );
+    assert_eq!(
+        item.weather()
+            .expect("item weather")
+            .fields()
+            .temperature_fahrenheit,
+        Some(60)
+    );
+}
+
+#[test]
+fn non_weather_position_symbol_does_not_expose_weather_report() {
+    let parsed = parse_packet(b"N0CALL>APRS:!4903.50N/07201.75W-plain comment")
+        .expect("position should parse");
+    let AprsData::Position(position) = parsed.aprs_data() else {
+        panic!("expected position");
+    };
+
+    assert!(position.weather().is_none());
+}
+
+#[test]
 fn telemetry_semantics_parse_sequence_values_and_bits() {
     let parsed = parse_packet(b"N0CALL>APRS:T#001,111,222,033,044,055,10101010")
         .expect("telemetry should parse");

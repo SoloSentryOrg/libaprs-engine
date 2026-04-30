@@ -246,6 +246,20 @@ fn documented_semantic_helpers_remain_usable() {
     };
     assert!(object.coordinates().is_some());
 
+    let weather_position = parse_packet(b"N0CALL>APRS:!4903.50N/07201.75W_c220s004t077")
+        .expect("weather position should parse");
+    let AprsData::Position(position) = weather_position.aprs_data() else {
+        panic!("expected position");
+    };
+    assert_eq!(
+        position
+            .weather()
+            .expect("weather report")
+            .fields()
+            .temperature_fahrenheit,
+        Some(77)
+    );
+
     let mic_e = parse_packet(b"N0CALL>ABC123:`abcde").expect("Mic-E should parse");
     let AprsData::MicE(mic_e) = mic_e.aprs_data() else {
         panic!("expected Mic-E");
