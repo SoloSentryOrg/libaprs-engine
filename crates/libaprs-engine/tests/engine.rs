@@ -1,4 +1,9 @@
-use libaprs_engine::{Engine, EngineResult, LineTransport, Policy, PolicyRejection};
+use std::io::Cursor;
+
+use libaprs_engine::{
+    read_all_with_limit, Engine, EngineResult, LineTransport, Policy, PolicyRejection,
+    TransportErrorCode,
+};
 
 #[test]
 fn line_transport_splits_lf_and_crlf_packets() {
@@ -11,6 +16,26 @@ fn line_transport_splits_lf_and_crlf_packets() {
             b"N0CALL>APRS:>two".as_slice()
         ]
     );
+}
+
+#[test]
+fn transport_boundaries_reject_oversized_batches_before_parsing() {
+    let error = read_all_with_limit(Cursor::new(b"abcdef"), 5)
+        .expect_err("bounded read must reject oversized input");
+
+    assert_eq!(error.kind(), std::io::ErrorKind::InvalidData);
+    assert_eq!(error.to_string(), TransportErrorCode::OversizedInput.code());
+}
+
+#[test]
+fn line_transport_rejects_oversized_packet_before_owned_copies() {
+    let input = b"N0CALL>APRS:>short\nN0CALL>APRS:>this-packet-is-too-long\n";
+    let error = LineTransport::new(input)
+        .packets_with_limit(b"N0CALL>APRS:>short".len())
+        .expect_err("per-packet limit must reject oversized line");
+
+    assert_eq!(error.kind(), std::io::ErrorKind::InvalidData);
+    assert_eq!(error.to_string(), TransportErrorCode::OversizedInput.code());
 }
 
 #[test]

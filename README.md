@@ -175,6 +175,8 @@ See [Security Model](docs/security.md) for details.
 - [Architecture](docs/architecture.md): boundaries, contracts, and pipeline.
 - [Security Model](docs/security.md): untrusted input handling and OWASP-aligned
   controls.
+- [Threat Model](docs/threat-model.md): per-crate untrusted boundaries and
+  abuse-resistance controls.
 - [Public API Boundary](docs/public-api.md): semver-protected public API surface,
   internal boundaries, and semver guidance.
 - [Stability](docs/stability.md): API stability levels and feature flags.
