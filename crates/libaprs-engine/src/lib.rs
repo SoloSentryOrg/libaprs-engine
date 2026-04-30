@@ -340,7 +340,7 @@ const SEMANTIC_SUPPORT: &[SupportItem] = &[
     SupportItem {
         kind: "weather",
         status: SupportStatus::Partial,
-        notes: "common weather fields are extracted and malformed optional fields are ignored",
+        notes: "common weather fields are extracted; empty weather reports are malformed",
     },
     SupportItem {
         kind: "telemetry",
@@ -360,7 +360,7 @@ const SEMANTIC_SUPPORT: &[SupportItem] = &[
     SupportItem {
         kind: "third_party",
         status: SupportStatus::Partial,
-        notes: "nested packet bytes can be parsed explicitly by callers",
+        notes: "nested packet bytes must pass the codec envelope before explicit caller parsing",
     },
     SupportItem {
         kind: "unsupported",
@@ -1472,9 +1472,7 @@ fn parse_aprs_data<'a>(
         DataTypeIdentifier::Message => parse_message(information),
         DataTypeIdentifier::Object => parse_object(information),
         DataTypeIdentifier::Item => parse_item(information),
-        DataTypeIdentifier::Weather => AprsData::Weather(Weather {
-            report: information,
-        }),
+        DataTypeIdentifier::Weather => parse_weather(information),
         DataTypeIdentifier::Telemetry => parse_telemetry(information),
         DataTypeIdentifier::Query => AprsData::Query(Query { query: information }),
         DataTypeIdentifier::Capability => AprsData::Capability(Capability { body: information }),
@@ -1486,12 +1484,36 @@ fn parse_aprs_data<'a>(
         }
         DataTypeIdentifier::Maidenhead => parse_maidenhead(information),
         DataTypeIdentifier::UserDefined => parse_user_defined(information),
-        DataTypeIdentifier::ThirdParty => AprsData::ThirdParty(ThirdParty { body: information }),
+        DataTypeIdentifier::ThirdParty => parse_third_party(information),
         other => AprsData::Unsupported {
             identifier: other.as_byte(),
             information,
         },
     }
+}
+
+fn parse_weather(information: &[u8]) -> AprsData<'_> {
+    if information.is_empty() {
+        return AprsData::Malformed {
+            identifier: b'_',
+            information,
+        };
+    }
+
+    AprsData::Weather(Weather {
+        report: information,
+    })
+}
+
+fn parse_third_party(information: &[u8]) -> AprsData<'_> {
+    if parse_packet(information).is_err() {
+        return AprsData::Malformed {
+            identifier: b'}',
+            information,
+        };
+    }
+
+    AprsData::ThirdParty(ThirdParty { body: information })
 }
 
 fn parse_mic_e<'a>(

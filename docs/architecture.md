@@ -75,6 +75,10 @@ Mic-E coordinates/speed/course when decodable, and explicit nested third-party
 parsing. Transports, policy rules, and CLI behavior remain separate layers from
 protocol semantics.
 
+Semantic malformed handling is conservative. Empty weather reports and
+third-party bodies that do not pass the nested packet codec envelope are
+represented as malformed semantic payloads so strict policy can reject them.
+
 ## Verification And Release
 
 The repository includes conformance fixtures, malformed packet fixtures,

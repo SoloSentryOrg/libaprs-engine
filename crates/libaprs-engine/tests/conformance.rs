@@ -1,8 +1,8 @@
 use std::collections::BTreeSet;
 
 use libaprs_engine::{
-    parse_packet, AprsData, Engine, EngineResult, MessageKind, Policy, PolicyRejection,
-    TelemetryMetadataKind,
+    parse_packet, support_matrix, AprsData, Engine, EngineResult, MessageKind, Policy,
+    PolicyRejection, TelemetryMetadataKind,
 };
 
 #[test]
@@ -74,6 +74,55 @@ fn aprs101_fixture_corpus_keeps_minimum_family_coverage() {
         semantic_families.len() >= 18,
         "APRS101 semantic family coverage regressed: {semantic_families:?}"
     );
+}
+
+#[test]
+fn aprs101_valid_fixtures_cover_documented_support_matrix_families() {
+    let covered_families = aprs101_valid_fixtures()
+        .iter()
+        .map(|fixture| {
+            parse_packet(fixture.packet)
+                .unwrap_or_else(|err| panic!("APRS101 fixture {} failed: {err:?}", fixture.id))
+                .aprs_data()
+                .kind_name()
+        })
+        .collect::<BTreeSet<_>>();
+
+    for item in support_matrix().semantic_families {
+        if item.kind == "malformed" {
+            continue;
+        }
+
+        assert!(
+            covered_families.contains(item.kind),
+            "support matrix semantic family '{}' has no valid APRS101 fixture; covered: {covered_families:?}",
+            item.kind
+        );
+    }
+}
+
+#[test]
+fn aprs101_malformed_semantic_fixtures_cover_high_risk_families() {
+    let required = [
+        ("weather", b'_'),
+        ("mic_e", b'`'),
+        ("telemetry", b'T'),
+        ("object", b';'),
+        ("item", b')'),
+        ("third_party", b'}'),
+    ];
+    let covered = aprs101_malformed_semantic_fixtures()
+        .iter()
+        .map(|fixture| fixture.identifier)
+        .collect::<BTreeSet<_>>();
+
+    for (family, identifier) in required {
+        assert!(
+            covered.contains(&identifier),
+            "high-risk family '{family}' lacks a malformed semantic fixture for identifier {:?}; covered identifiers: {covered:?}",
+            char::from(identifier)
+        );
+    }
 }
 
 #[test]
