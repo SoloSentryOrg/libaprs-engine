@@ -81,6 +81,27 @@ Before running `scripts/publish-release.sh`, record or verify:
   only if GitHub Releases are unavailable and release evidence records the
   reason.
 
+## v1.6.0 Release Evidence
+
+- Tag: `v1.6.0`.
+- Commit: `89e4b08cf6f7c8fca6e6bfd2bd7a89fe1f1ba3ca`.
+- Local gate: `CARGO_HOME=/tmp/libaprs-cargo-home scripts/verify-release.sh`
+  passed before publication.
+- Remote GitHub Actions: release PR Rust CI run `25185223073` and security run
+  `25185223085` passed; `main` push Rust CI run `25185287243` and security run
+  `25185287223` passed for the merge commit.
+- crates.io publication: all workspace crates published as `1.6.0`.
+- GitHub Release: `v1.6.0` created, marked latest, and verified at
+  <https://github.com/elodiejmirza/libaprs-engine/releases/tag/v1.6.0>.
+- Post-publication downstream smoke:
+  `CARGO_HOME=/tmp/libaprs-cargo-home LIBAPRS_RUN_DOWNSTREAM_SMOKE=1 LIBAPRS_PACKAGE_ALL=1 scripts/verify-release.sh`
+  passed against crates.io and refreshed
+  `examples/downstream-smoke/Cargo.lock` with `1.6.0` checksums.
+- Notes: publishes the completed `1.x` roadmap batches since `v1.1.0`,
+  including conformance expansion, abuse-resistance gates, observability events,
+  transport maturity guidance, downstream feedback, and `v2.0.0` migration
+  planning.
+
 ## v1.1.0 Release Evidence
 
 - Tag: `v1.1.0`.
