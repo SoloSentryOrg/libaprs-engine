@@ -158,6 +158,14 @@ Semantic helper methods include:
 - `MicE::coordinates()`, `MicE::speed_course()`, and `MicE::message_code()`
 - `ThirdParty::nested_packet()`
 
+Semantic malformed handling is explicit and byte-preserving:
+
+- empty `_` weather reports are `AprsData::Malformed`
+- `}` third-party bodies must pass the nested `source>path:payload` codec
+  envelope before they are exposed as `AprsData::ThirdParty`
+- unsupported identifiers remain `AprsData::Unsupported` instead of being
+  guessed as another packet family
+
 ## Engine And Policy
 
 `Engine` combines codec parsing, semantic classification, policy decisions, and

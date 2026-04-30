@@ -223,3 +223,7 @@ queries, capabilities, NMEA identifiers/fields/checksum inspection, Mic-E
 message codes and coordinates/speed/course when decodable, Maidenhead locator,
 user-defined data, explicit third-party nested parsing, malformed data, and
 unsupported data.
+
+Malformed semantic handling is explicit: empty weather reports and third-party
+bodies with invalid nested packet envelopes remain byte-preserving malformed
+semantic payloads for policy rejection.
