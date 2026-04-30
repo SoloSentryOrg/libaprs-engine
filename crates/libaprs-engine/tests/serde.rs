@@ -8,6 +8,7 @@ fn serde_diagnostic_preserves_non_utf8_bytes() {
     let diagnostic = PacketDiagnostic::from_packet(&packet);
     let explicit_diagnostic = packet.to_diagnostic();
 
+    assert_eq!(diagnostic.schema_version, 1);
     assert_eq!(diagnostic.raw, b"N0CALL>APRS:>\xff");
     assert_eq!(explicit_diagnostic, diagnostic);
     assert_eq!(diagnostic.semantic, "status");

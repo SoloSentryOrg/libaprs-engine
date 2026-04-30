@@ -3,23 +3,24 @@
 ## BLUF
 
 - JSON output is for diagnostics and operations, not for replacing the Rust API.
-- `support-matrix --json` is versioned with `schema_version`.
-- `ParsedPacket::to_json()` and `aprs-cli --json` share the accepted-packet
-  diagnostic shape.
+- `aprs-cli --json` and `support-matrix --json` are versioned with
+  `schema_version`.
+- `ParsedPacket::to_json()` was removed from the library API in
+  `v2.0.0-rc.1`; Rust integrations should use structured diagnostics.
 - Rejected and malformed CLI records remain text output; use the Rust event API
   for stable event structs.
 - Consumers should reject unsupported schema versions instead of guessing.
 
 ## Accepted Packet Diagnostic
 
-Produced by `ParsedPacket::to_json()` and `aprs-cli --json` for accepted
-packets.
+Produced by `aprs-cli --json` for accepted packets.
 
 ```json
 {
   "type": "object",
   "additionalProperties": false,
   "required": [
+    "schema_version",
     "raw",
     "source",
     "destination",
@@ -29,6 +30,7 @@ packets.
     "semantic"
   ],
   "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
     "raw": { "type": "string", "description": "Lossless escaped byte display" },
     "source": { "type": "string", "description": "Escaped source address bytes" },
     "destination": { "type": "string", "description": "Escaped destination address bytes" },

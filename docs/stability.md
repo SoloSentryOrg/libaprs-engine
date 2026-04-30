@@ -2,7 +2,7 @@
 
 This project has reached `1.0.0`. The public APIs listed in
 [Public API Boundary](public-api.md) are semver-protected integration
-contracts.
+contracts for the current major release line.
 
 ## Compatibility Policy
 
@@ -18,8 +18,9 @@ contracts.
   output must be reviewed before publishing.
 - Experimental semantic APIs may change while APRS coverage matures, but changes
   must preserve raw-byte access and fail-closed parsing behavior.
-- Diagnostic JSON from `ParsedPacket::to_json()` remains convenience output, not
-  a compatibility-stable wire schema.
+- Library diagnostic JSON is not a compatibility-stable wire schema.
+  `ParsedPacket::to_json()` was removed in `v2.0.0-rc.1` after an explicit
+  replacement path was added.
 - Soft deprecations for new integrations are tracked in
   [`v2.0.0` Migration Plan](v2-migration.md). They do not remove `1.x` support
   and do not use Rust `#[deprecated]` attributes unless the release gate is
@@ -98,7 +99,6 @@ These APIs may change as APRS semantic coverage matures:
 
 These APIs are for inspection and observability:
 
-- `ParsedPacket::to_json`
 - `ParsedPacket::to_diagnostic`, behind the `serde` feature
 - `ParseError::diagnostic`
 - `PolicyRejection::diagnostic`
@@ -107,9 +107,8 @@ These APIs are for inspection and observability:
 - `serde_support::PacketDiagnostic`
 - `metrics_support`, behind the `metrics` feature
 
-Do not treat `to_json()` as a long-term wire protocol. Use
-`ParsedPacket::to_diagnostic()` or `PacketDiagnostic` with the `serde` feature,
-`EngineEvent` structs, the CLI support-matrix schema, or define an
+Use `ParsedPacket::to_diagnostic()` or `PacketDiagnostic` with the `serde`
+feature, `EngineEvent` structs, CLI JSON schemas, or define an
 application-owned schema when external compatibility matters.
 
 ## Feature Flags

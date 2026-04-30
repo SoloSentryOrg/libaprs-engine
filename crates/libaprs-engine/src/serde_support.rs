@@ -7,9 +7,14 @@ use serde::Serialize;
 
 use crate::ParsedPacket;
 
+/// Current packet diagnostic schema version.
+pub const PACKET_DIAGNOSTIC_SCHEMA_VERSION: u8 = 1;
+
 /// Stable diagnostic packet representation for serde-based integrations.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 pub struct PacketDiagnostic {
+    /// Version of this diagnostic structure.
+    pub schema_version: u8,
     /// Original raw packet bytes.
     pub raw: Vec<u8>,
     /// Source address bytes.
@@ -31,6 +36,7 @@ impl PacketDiagnostic {
     #[must_use]
     pub fn from_packet(packet: &ParsedPacket) -> Self {
         Self {
+            schema_version: PACKET_DIAGNOSTIC_SCHEMA_VERSION,
             raw: packet.raw().as_bytes().to_vec(),
             source: packet.source().to_vec(),
             destination: packet.destination().to_vec(),

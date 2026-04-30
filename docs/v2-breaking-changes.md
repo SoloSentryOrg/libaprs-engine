@@ -2,15 +2,15 @@
 
 ## BLUF
 
-- `v2.0.0-rc.1` is not approved for publication from the current evidence set.
-- The current audited evidence supports continued additive `1.x` releases, not
-  breaking API removal or renaming.
-- The final `v2.0.0` breaking-change list is empty until downstream reports,
-  semver evidence, and replacement APIs justify a specific break.
+- `v2.0.0-rc.1` is approved for review with one narrow breaking change.
+- The approved break removes the ambiguous library `ParsedPacket::to_json()`
+  method after the structured `to_diagnostic()` replacement shipped in `1.7.0`.
+- The release-candidate scope is intentionally small: no parser envelope,
+  policy, transport, or semantic behavior changes.
 - Raw-byte preservation, fail-closed malformed-packet behavior, and parser core
   runtime neutrality are non-negotiable and cannot be traded for API cleanup.
-- Revisit this record before every release candidate or any branch that changes
-  a stable public API.
+- Revisit this record before any further release candidate or any branch that
+  changes another stable public API.
 
 ## Decision Date
 
@@ -19,9 +19,9 @@
 ## Evidence Reviewed
 
 - GitHub issues: none open or closed at the time of review.
-- GitHub pull requests: merged project PRs `#1` through `#28`, including the
-  `1.6.0` release, release evidence, API compatibility, transport maturity,
-  observability, security, and conformance batches.
+- GitHub pull requests: merged project PRs `#1` through `#31`, including the
+  `1.7.0` release, release evidence, API compatibility, transport maturity,
+  observability, security, conformance, and structured diagnostic batches.
 - Local public API audit: `crates/*/src` public declarations, `docs/api.md`,
   `docs/public-api.md`, `docs/stability.md`, compatibility tests, transport
   tests, and CLI tests.
@@ -31,22 +31,21 @@
 
 ## Current Decision
 
-Do not start a breaking `v2.0.0-rc.1` implementation branch yet. The repository
-has documented possible pain points, but those pain points are currently inferred
-from examples, compatibility boundaries, and release-gate design rather than
-from concrete downstream breakage reports.
+Start a narrow `v2.0.0-rc.1` implementation branch for the diagnostic JSON API
+boundary only. The accepted evidence is an internal secure-review and
+compatibility-test finding recorded in `docs/downstream-feedback.md`: the
+library method name `ParsedPacket::to_json()` continued to look like a stable
+serialization contract after a safer structured replacement was available.
 
-The correct next engineering action is to keep strengthening `1.x` with
-additive replacement APIs, compatibility tests, conformance fixtures, and
-downstream feedback capture. A release candidate becomes appropriate only after
-this record identifies at least one justified breaking change with a tested
-migration path.
+No other candidate is approved for this release candidate. Continue additive
+`1.x` or later `2.x` work for semantic envelope splits, transport trait changes,
+or diagnostic taxonomy renames unless new evidence justifies them.
 
 ## Candidate Matrix
 
 | Candidate | Decision | Evidence | Required before an RC |
 | --- | --- | --- | --- |
-| Rename or replace `ParsedPacket::to_json()` | Not approved as a breaking change. Keep it as diagnostic convenience in `1.x`. | Docs identify schema-confusion risk, but there are no downstream reports showing external-contract misuse. `ParsedPacket::to_diagnostic()`, `serde_support::PacketDiagnostic`, `PacketSummary`, `EngineEvent`, and application-owned schemas provide safer alternatives. | Record at least one downstream report or internal release-gate finding proving the current name still causes real migration risk after the additive replacement path. |
+| Rename or replace `ParsedPacket::to_json()` | Approved for `v2.0.0-rc.1`. Remove the library method and keep CLI JSON as CLI-owned diagnostic output. | Internal secure-review and compatibility-test finding recorded in `docs/downstream-feedback.md`; `ParsedPacket::to_diagnostic()`, `serde_support::PacketDiagnostic`, `PacketSummary`, `EngineEvent`, and application-owned schemas provide safer alternatives. | Add compatibility tests for `to_diagnostic()`, add `schema_version` to `PacketDiagnostic`, update docs and changelog, and review `cargo-semver-checks` output. |
 | Split stable packet envelope APIs from evolving semantic interpretation APIs | Not approved as a breaking change yet. Continue additive semantic expansion. | `AprsData` is documented as evolving, and tests cover current semantic helpers. No issue shows the visible enum/struct surface blocking adoption. | Identify specific unstable semantic fields or variants that downstream code cannot absorb additively; add migration examples and semver evidence for the narrower envelope API. |
 | Refine transport trait contracts around receive loops | Not approved as a breaking change yet. Keep adapter-specific options and shared byte traits. | Transport docs explicitly defer a stronger common layer until repeated downstream integrations need it. Existing adapters preserve bytes and expose bounded helpers. | Record multiple transport integrations needing the same runtime-neutral receive-loop trait; prove the trait does not force async, network, or runtime dependencies into the core crate. |
 | Stabilize diagnostic or event serialization under explicit schema versions | Not approved as a breaking change yet. Keep stable event structs and versioned support-matrix JSON. | Operational docs warn that packet JSON is diagnostic. There is no downstream report requiring first-class event JSON as a crate-owned wire protocol. | Add additive schema types first; document schema versioning and rejection behavior; add tests proving unsupported schema versions fail closed in consumers or examples. |
@@ -78,13 +77,25 @@ Before publishing `v2.0.0-rc.1`, update this record so every breaking change has
 - `docs/v2-migration.md`, `docs/public-api.md`, and `CHANGELOG.md` updates, and
 - release evidence in `docs/release.md`.
 
+For this release candidate, the approved break is:
+
+- removed API: `ParsedPacket::to_json()`,
+- replacement APIs: `ParsedPacket::to_diagnostic()` with the `serde` feature,
+  `serde_support::PacketDiagnostic`, `PacketSummary`, `EngineEvent`, CLI
+  `--json`, or application-owned schemas,
+- migration test coverage:
+  `crates/libaprs-engine/tests/api_compat.rs::stable_diagnostic_alternative_to_json_remains_usable`
+  and `crates/libaprs-engine/tests/serde.rs::serde_diagnostic_preserves_non_utf8_bytes`,
+- CLI diagnostic coverage:
+  `crates/aprs-cli/tests/cli.rs::cli_reads_json_packets_from_stdin`, and
+- release evidence target: `docs/release.md` after local and remote gates pass.
+
 ## Next Additive Work
 
-- Keep `ParsedPacket::to_json()` documented as diagnostic output and prefer
-  `ParsedPacket::to_diagnostic()` or `serde_support::PacketDiagnostic` for
-  structured diagnostics.
-- Maintain compatibility tests around additive replacement APIs before
-  considering Rust `#[deprecated]` attributes.
+- Keep `ParsedPacket::to_diagnostic()` and `serde_support::PacketDiagnostic`
+  as the structured diagnostic path.
+- Maintain compatibility tests around replacement APIs before considering any
+  further public API removals.
 - Convert every downstream report into an issue, fixture, test, or migration
   note before changing stable APIs; use the downstream feedback issue template
   for API or migration reports.

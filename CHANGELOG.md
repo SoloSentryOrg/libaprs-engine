@@ -1,8 +1,18 @@
 # Changelog
 
-## Unreleased
+## 2.0.0-rc.1 - 2026-04-30
 
-- No changes yet.
+- Removed `ParsedPacket::to_json()` from the library public API. Use
+  `ParsedPacket::to_diagnostic()` with the `serde` feature,
+  `serde_support::PacketDiagnostic`, `PacketSummary`, `EngineEvent`, or an
+  application-owned schema instead.
+- Added `schema_version` to `serde_support::PacketDiagnostic` so serde-backed
+  diagnostic integrations have an explicit schema marker.
+- Kept accepted-packet CLI JSON as a CLI-owned diagnostic output and added
+  `schema_version` to that output.
+- Recorded the approved `v2.0.0-rc.1` breaking-change evidence and migration
+  path in the v2 planning documents.
+- Bumped all workspace crates to `2.0.0-rc.1`.
 
 ## 1.7.0 - 2026-04-30
 

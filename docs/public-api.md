@@ -39,8 +39,6 @@ change:
   - `summary`
   - `to_diagnostic`, behind the `serde` feature, as the preferred structured
     packet diagnostic API
-  - `to_json`, with diagnostic JSON treated as convenience output rather than
-    a stable wire schema
 - `ParseError` variants and `ParseError::code`
 - `ParseError::diagnostic`
 - `Policy`, `Policy::strict`, `Policy::permissive`, and `Policy::evaluate`
@@ -78,7 +76,7 @@ compiles and exercises documented integration patterns for:
 - structured parser, policy, and transport diagnostics
 - stable observability events and optional metrics helpers
 - structured serde diagnostics as the preferred stable-integration alternative
-  to ad hoc `to_json()` contracts
+  to ad hoc JSON contracts
 - TCP read-option builder methods used by transport integrations
 - engine, policy, counters, and engine result flow
 - data type identifier names

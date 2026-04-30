@@ -38,7 +38,8 @@ fn main() -> std::io::Result<()> {
     for packet_bytes in LineTransport::new(&input).packets() {
         match engine.process(packet_bytes) {
             EngineResult::Accepted { packet } => {
-                println!("{}", packet.to_json());
+                let summary = packet.summary();
+                println!("accepted semantic={}", summary.semantic);
             }
             EngineResult::Rejected { reason, .. } => {
                 eprintln!("rejected: {reason:?}");
@@ -244,7 +245,7 @@ fn main() -> Result<(), libaprs_engine::ParseError> {
     let packet = parse_packet(raw)?;
 
     assert_eq!(packet.raw().as_bytes(), raw);
-    println!("{}", packet.to_json());
+    assert_eq!(packet.summary().semantic, "status");
 
     Ok(())
 }

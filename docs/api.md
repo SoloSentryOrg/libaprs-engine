@@ -291,17 +291,10 @@ an `InvalidData` I/O error whose message is the stable code
 
 ## JSON Diagnostics
 
-`ParsedPacket::to_json()` returns compact diagnostic JSON. It is intended for
-inspection and CLI output, not as a stable serialization contract.
-
-```rust
-fn main() -> Result<(), libaprs_engine::ParseError> {
-    let packet = libaprs_engine::parse_packet(b"N0CALL>APRS:>hello")?;
-    println!("{}", packet.to_json());
-
-    Ok(())
-}
-```
+The library no longer exposes `ParsedPacket::to_json()` in `v2.0.0-rc.1`.
+Rust integrations should use structured diagnostics, event structs, or an
+application-owned schema. The CLI still provides `aprs-cli --json` as
+diagnostic output for operators.
 
 ## Structured Diagnostics
 
@@ -429,6 +422,7 @@ use libaprs_engine::parse_packet;
 fn main() -> Result<(), libaprs_engine::ParseError> {
     let packet = parse_packet(b"N0CALL>APRS:>\xff")?;
     let diagnostic = packet.to_diagnostic();
+    assert_eq!(diagnostic.schema_version, 1);
     assert_eq!(diagnostic.raw, b"N0CALL>APRS:>\xff");
     assert_eq!(diagnostic.semantic, "status");
     Ok(())

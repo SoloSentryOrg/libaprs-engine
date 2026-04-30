@@ -149,8 +149,8 @@ to `fuzz/corpus/` only if it remains useful for future fuzzing.
   long-running services.
 - Prefer shared `PacketSource` and `PacketSink` adapters when composing
   transports, so packet batches and sink behavior remain byte-oriented.
-- Treat `to_json()` as diagnostics; define your own stable schema for external
-  APIs.
+- Use `ParsedPacket::to_diagnostic()`, `PacketSummary`, `EngineEvent`, or an
+  application-owned schema for external APIs.
 - Run tests and clippy before accepting parser or policy changes.
 - Run `cargo audit` or `cargo deny check` before releases when the tools are
   available.
