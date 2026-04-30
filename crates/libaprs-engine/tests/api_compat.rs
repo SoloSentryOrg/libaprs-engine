@@ -23,6 +23,23 @@ fn stable_intent_parser_api_remains_usable() {
     assert!(parsed.to_json().contains("\"semantic\":\"status\""));
 }
 
+#[cfg(feature = "serde")]
+#[test]
+fn stable_diagnostic_alternative_to_json_remains_usable() {
+    use libaprs_engine::serde_support::PacketDiagnostic;
+
+    let input = b"N0CALL>APRS:>\xff";
+    let parsed = parse_packet(input).expect("packet should parse");
+    let diagnostic = PacketDiagnostic::from_packet(&parsed);
+
+    assert_eq!(diagnostic.raw, input);
+    assert_eq!(diagnostic.source, b"N0CALL");
+    assert_eq!(diagnostic.destination, b"APRS");
+    assert_eq!(diagnostic.payload, b">\xff");
+    assert_eq!(diagnostic.data_type, "status");
+    assert_eq!(diagnostic.semantic, "status");
+}
+
 #[test]
 fn stable_intent_options_and_errors_remain_usable() {
     assert_eq!(MAX_PACKET_LEN, 512);

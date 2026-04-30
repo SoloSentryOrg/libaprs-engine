@@ -83,6 +83,8 @@ installed:
 - Unit and integration tests for codec behavior.
 - Conformance fixtures for valid and malformed packets.
 - API compatibility tests for documented stable-intent API surfaces.
+- Downstream feedback and migration docs for any soft-deprecated integration
+  pattern.
 - Deterministic byte-fuzz tests to catch panics and raw-byte preservation
   regressions.
 - CLI tests for stdin and invalid UTF-8 payload handling.

@@ -129,6 +129,13 @@ Priority: medium. This release should convert real usage into a concrete
 - Add compile-time compatibility tests for intended `1.x` stable APIs.
 - Decide the final `v2.0.0` breaking-change list.
 
+Implementation notes:
+
+- Record downstream evidence in `docs/downstream-feedback.md`.
+- Track soft deprecations and migration guidance in `docs/v2-migration.md`.
+- Keep deprecations documentation-level during `1.x` unless the release gate is
+  explicitly changed to allow expected Rust deprecation warnings.
+
 Target outcome: the project enters `v2.0.0` planning with measured evidence,
 not speculative cleanup.
 

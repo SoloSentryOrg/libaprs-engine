@@ -29,6 +29,9 @@
 - Confirm `CHANGELOG.md` describes the release.
 - Review `docs/public-api.md` and `crates/libaprs-engine/tests/api_compat.rs`
   when the release changes exported library APIs.
+- Review `docs/downstream-feedback.md` and `docs/v2-migration.md` before any
+  release that adds a soft deprecation, replacement API, or `v2.0.0`
+  breaking-change candidate.
 - Use `scripts/publish-release.sh` when publishing to crates.io and GitHub
   Releases; it encodes the crate publish order from `docs/publishing.md` and
   refuses to publish without explicit clean secure-review, gate, release-tag,
