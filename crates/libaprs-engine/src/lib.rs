@@ -340,7 +340,7 @@ const SEMANTIC_SUPPORT: &[SupportItem] = &[
     SupportItem {
         kind: "weather",
         status: SupportStatus::Partial,
-        notes: "common weather fields are extracted; empty weather reports are malformed",
+        notes: "positionless and weather-symbol position reports expose common weather fields",
     },
     SupportItem {
         kind: "telemetry",
@@ -830,7 +830,7 @@ pub struct Position<'a> {
     pub comment: &'a [u8],
 }
 
-impl Position<'_> {
+impl<'a> Position<'a> {
     /// Returns decimal latitude and longitude if both coordinate fields decode.
     #[must_use]
     pub fn coordinates(&self) -> Option<Coordinates> {
@@ -838,6 +838,13 @@ impl Position<'_> {
             latitude: decode_latitude(self.latitude)?,
             longitude: decode_longitude(self.longitude)?,
         })
+    }
+
+    /// Returns embedded weather fields when this position uses the weather
+    /// station symbol and carries a non-empty weather report in its comment.
+    #[must_use]
+    pub fn weather(&self) -> Option<Weather<'a>> {
+        weather_from_uncompressed_position(self)
     }
 }
 
@@ -859,6 +866,15 @@ pub struct TimestampedPosition<'a> {
     pub timestamp: &'a [u8],
     /// Position fields after the timestamp.
     pub position: Position<'a>,
+}
+
+impl<'a> TimestampedPosition<'a> {
+    /// Returns embedded weather fields from the timestamped position body when
+    /// it uses the weather station symbol.
+    #[must_use]
+    pub fn weather(&self) -> Option<Weather<'a>> {
+        self.position.weather()
+    }
 }
 
 /// Compressed APRS position fields.
@@ -937,12 +953,19 @@ pub struct Object<'a> {
     pub body: &'a [u8],
 }
 
-impl Object<'_> {
+impl<'a> Object<'a> {
     /// Returns object coordinates when the object body starts with a supported
     /// APRS position encoding.
     #[must_use]
     pub fn coordinates(&self) -> Option<Coordinates> {
         coordinates_from_position_body(self.body)
+    }
+
+    /// Returns embedded weather fields when the object body starts with a
+    /// weather-symbol uncompressed position.
+    #[must_use]
+    pub fn weather(&self) -> Option<Weather<'a>> {
+        weather_from_position_body(self.body)
     }
 }
 
@@ -957,12 +980,19 @@ pub struct Item<'a> {
     pub body: &'a [u8],
 }
 
-impl Item<'_> {
+impl<'a> Item<'a> {
     /// Returns item coordinates when the item body starts with a supported APRS
     /// position encoding.
     #[must_use]
     pub fn coordinates(&self) -> Option<Coordinates> {
         coordinates_from_position_body(self.body)
+    }
+
+    /// Returns embedded weather fields when the item body starts with a
+    /// weather-symbol uncompressed position.
+    #[must_use]
+    pub fn weather(&self) -> Option<Weather<'a>> {
+        weather_from_position_body(self.body)
     }
 }
 
@@ -1589,6 +1619,24 @@ fn coordinates_from_position_body(body: &[u8]) -> Option<Coordinates> {
         return None;
     };
     position.coordinates()
+}
+
+fn weather_from_uncompressed_position<'a>(position: &Position<'a>) -> Option<Weather<'a>> {
+    if position.symbol_code == b'_' && !position.comment.is_empty() {
+        return Some(Weather {
+            report: position.comment,
+        });
+    }
+
+    None
+}
+
+fn weather_from_position_body(body: &[u8]) -> Option<Weather<'_>> {
+    let AprsData::Position(position) = parse_position(false, b'!', body) else {
+        return None;
+    };
+
+    position.weather()
 }
 
 fn parse_timestamped_position(messaging: bool, identifier: u8, information: &[u8]) -> AprsData<'_> {

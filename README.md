@@ -218,11 +218,11 @@ The codec validates a conservative `source>path:payload` shape:
 
 Semantic parsing covers status, position, timestamped position, compressed
 position, messages, bulletins, announcements, acknowledgements, rejects,
-objects/items with coordinate helpers, weather, telemetry, telemetry metadata,
-queries, capabilities, NMEA identifiers/fields/checksum inspection, Mic-E
-message codes and coordinates/speed/course when decodable, Maidenhead locator,
-user-defined data, explicit third-party nested parsing, malformed data, and
-unsupported data.
+objects/items with coordinate and embedded weather helpers, weather,
+telemetry, telemetry metadata, queries, capabilities, NMEA
+identifiers/fields/checksum inspection, Mic-E message codes and
+coordinates/speed/course when decodable, Maidenhead locator, user-defined data,
+explicit third-party nested parsing, malformed data, and unsupported data.
 
 Malformed semantic handling is explicit: empty weather reports and third-party
 bodies with invalid nested packet envelopes remain byte-preserving malformed

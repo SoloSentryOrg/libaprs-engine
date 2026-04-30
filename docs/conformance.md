@@ -6,17 +6,17 @@ semantic coverage and known gaps for APRS101 packet families.
 | Family | Status | Typed interpretation | Notes |
 | --- | --- | --- | --- |
 | Status | Supported | Byte-preserving text | Invalid UTF-8 allowed |
-| Uncompressed position | Supported | Decimal coordinates | Conservative coordinate validation |
-| Timestamped position | Supported | Timestamp bytes, decimal coordinates | Timestamp shape validated |
+| Uncompressed position | Supported | Decimal coordinates, embedded weather report when symbol code is `_` | Conservative coordinate validation |
+| Timestamped position | Supported | Timestamp bytes, decimal coordinates, embedded weather report when symbol code is `_` | Timestamp shape validated |
 | Compressed position | Supported | Decimal coordinates | Extension bytes preserved |
 | Message | Supported | Kind classification, message ID | Addressee content remains bytes |
 | Bulletin | Supported | Message kind | Classified via addressee |
 | Announcement | Supported | Message kind | Classified via addressee |
 | Acknowledgement | Supported | Message kind | `ack` prefix |
 | Reject | Supported | Message kind | `rej` prefix |
-| Object | Supported | Name, liveness, timestamp, body, coordinates when body starts with a supported position | Timestamp shape validated; body preserved |
-| Item | Supported | Name, liveness, body, coordinates when body starts with a supported position | Body preserved |
-| Weather | Supported | Common numeric fields, luminosity, snow, raw rain counter | Empty reports are malformed; invalid optional fields are ignored |
+| Object | Supported | Name, liveness, timestamp, body, coordinates/weather when body starts with a supported position | Timestamp shape validated; body preserved |
+| Item | Supported | Name, liveness, body, coordinates/weather when body starts with a supported position | Body preserved |
+| Weather | Supported | Positionless and weather-symbol position reports, common numeric fields, luminosity, snow, raw rain counter | Empty reports are malformed; invalid optional fields are ignored |
 | Telemetry | Supported | Sequence, analog, digital bits | Report values preserved and numerically decoded when safe |
 | Telemetry metadata | Supported | Parameter names, units, equations, bit sense | `PARM.`, `UNIT.`, `EQNS.`, and `BITS.` message packets |
 | Query | Supported | Query bytes | Query body preserved |
@@ -36,6 +36,17 @@ semantic coverage and known gaps for APRS101 packet families.
 - More real-world corpus fixtures for Mic-E, NMEA, object/item positions, and
   third-party nested traffic.
 - More policy-rejection fixtures as semantic policies are added.
+
+## Known Unsupported Edge Cases
+
+- Compressed-position weather extraction is not exposed yet.
+- Mic-E altitude, ambiguity, and telemetry extension decoding are not exposed
+  yet.
+- Capability body fields remain byte-preserving and are not split into typed
+  key/value data.
+- Third-party traffic validates the nested codec envelope but does not apply a
+  separate nested policy decision unless callers explicitly parse and evaluate
+  the nested packet.
 
 ## Fixture Coverage
 
