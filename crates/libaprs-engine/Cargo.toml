@@ -15,6 +15,7 @@ default = ["std"]
 std = ["alloc"]
 alloc = []
 serde = ["dep:serde"]
+metrics = []
 
 [dependencies]
 serde = { version = "1", features = ["derive"], optional = true }

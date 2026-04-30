@@ -116,6 +116,11 @@ JSON output:
 {"raw":"N0CALL>APRS:>hello","source":"N0CALL","destination":"APRS","path":"APRS","payload":">hello","data_type":"status","semantic":"status"}
 ```
 
+The accepted-packet and support-matrix JSON shapes are documented in
+[JSON Schemas](json-schemas.md). Treat accepted-packet JSON as diagnostic
+output; use `ParsedPacket` or `EngineEvent` in Rust integrations when exact raw
+bytes or stable event structs are required.
+
 Support matrix JSON output:
 
 ```json

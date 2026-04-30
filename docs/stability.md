@@ -49,6 +49,7 @@ change:
 - `ParseOptions`
 - `DEFAULT_PARSE_OPTIONS`
 - `MAX_PACKET_LEN`
+- `EVENT_RAW_BYTE_LIMIT`
 - `RawPacket`
 - `ParsedPacket`
 - `ParseError::code`
@@ -57,6 +58,12 @@ change:
 - `PolicyRejection::code`
 - `Engine`
 - `EngineResult`
+- `EngineEvent`
+- `EngineEventKind`
+- `AcceptedPacketEvent`
+- `PolicyRejectedPacketEvent`
+- `MalformedPacketEvent`
+- `TransportFailureEvent`
 - `Counters`
 - `Policy`
 - `PolicyDecision`
@@ -92,16 +99,19 @@ These APIs are for inspection and observability:
 - `TransportErrorCode::diagnostic`
 - `support_matrix`
 - `serde_support::PacketDiagnostic`
+- `metrics_support`, behind the `metrics` feature
 
 Do not treat `to_json()` as a long-term wire protocol. Use
-`PacketDiagnostic` with the `serde` feature, the CLI support-matrix schema, or
-define an application-owned schema when external compatibility matters.
+`PacketDiagnostic` with the `serde` feature, `EngineEvent` structs, the CLI
+support-matrix schema, or define an application-owned schema when external
+compatibility matters.
 
 ## Feature Flags
 
 - `std`: default feature for standard-library support.
 - `alloc`: reserved for future allocation-only support.
 - `serde`: optional diagnostic serialization support.
+- `metrics`: optional dependency-free counter metric helpers.
 
 The crate is not currently `no_std`. The `alloc` feature exists to make the
 future split explicit without promising current `no_std` compatibility.

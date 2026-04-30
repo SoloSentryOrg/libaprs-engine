@@ -20,7 +20,8 @@ telemetry, indexing, and diagnostics.
 - Public API is semver-protected from `1.0.0`. The public boundary is tracked in
   [Public API Boundary](docs/public-api.md).
 - Core runtime remains network-free and async-free. Optional `serde`
-  diagnostics and separate transport adapter crates are available.
+  diagnostics, dependency-free `metrics` helpers, and separate transport
+  adapter crates are available.
 - GitHub Actions workflow is active and checks Rust `1.80.0` plus stable,
   including formatting, tests, examples, metadata, docs, and clippy.
 
@@ -170,6 +171,8 @@ See [Security Model](docs/security.md) for details.
 - [Examples](docs/examples.md): copyable integration patterns.
 - [Operations Guide](docs/operations.md): production deployment patterns,
   diagnostics, logging, limits, and safe defaults.
+- [JSON Schemas](docs/json-schemas.md): documented CLI and diagnostic JSON
+  shapes for operational consumers.
 - [Transport Adapters](docs/transports.md): byte-preserving transport crate
   boundaries and integration examples.
 - [Architecture](docs/architecture.md): boundaries, contracts, and pipeline.

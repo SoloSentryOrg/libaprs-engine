@@ -1,12 +1,13 @@
 use libaprs_engine::{
     parse_packet, parse_packet_with_options, support_matrix, AprsData, Counters,
-    DataTypeIdentifier, DiagnosticLayer, Engine, EngineResult, LineTransport, MicEMessageCode,
-    MicEStandardMessage, PacketSink, PacketSource, ParseError, ParseOptions, Policy,
-    PolicyDecision, PolicyRejection, SupportStatus, TransportErrorCode, DEFAULT_PARSE_OPTIONS,
-    DEFAULT_TRANSPORT_READ_LIMIT, MAX_PACKET_LEN,
+    DataTypeIdentifier, DiagnosticLayer, Engine, EngineEvent, EngineEventKind, EngineResult,
+    LineTransport, MicEMessageCode, MicEStandardMessage, PacketSink, PacketSource, ParseError,
+    ParseOptions, Policy, PolicyDecision, PolicyRejection, SupportStatus, TransportErrorCode,
+    DEFAULT_PARSE_OPTIONS, DEFAULT_TRANSPORT_READ_LIMIT, EVENT_RAW_BYTE_LIMIT, MAX_PACKET_LEN,
 };
 
 const _: () = assert!(DEFAULT_TRANSPORT_READ_LIMIT >= MAX_PACKET_LEN);
+const _: () = assert!(EVENT_RAW_BYTE_LIMIT == MAX_PACKET_LEN + 1);
 
 #[test]
 fn stable_intent_parser_api_remains_usable() {
@@ -335,4 +336,74 @@ fn engine_can_process_packet_sources() {
 
     assert_eq!(results.len(), 2);
     assert_eq!(engine.counters().accepted, 2);
+}
+
+#[test]
+fn stable_observability_event_api_remains_usable() {
+    assert_eq!(EngineEventKind::Accepted.code(), "accepted");
+    assert_eq!(EngineEventKind::PolicyRejected.code(), "policy_rejected");
+    assert_eq!(EngineEventKind::Malformed.code(), "malformed");
+    assert_eq!(
+        EngineEventKind::TransportFailure.code(),
+        "transport_failure"
+    );
+
+    let mut engine = Engine::default();
+    let event = engine.process_event(b"N0CALL>APRS:>ok");
+
+    assert_eq!(event.kind(), EngineEventKind::Accepted);
+    let EngineEvent::Accepted(accepted) = event else {
+        panic!("expected accepted event");
+    };
+    assert_eq!(accepted.packet.summary().semantic, "status");
+}
+
+#[cfg(feature = "metrics")]
+#[test]
+fn metrics_feature_exports_counter_metrics_without_runtime_dependencies() {
+    use libaprs_engine::metrics_support::{
+        counter_metrics, record_counters, CounterMetric, MetricsRecorder, ACCEPTED_PACKETS_TOTAL,
+        MALFORMED_PACKETS_TOTAL, REJECTED_PACKETS_TOTAL,
+    };
+
+    let counters = Counters {
+        accepted: 1,
+        rejected: 2,
+        malformed: 3,
+    };
+    let metrics = counter_metrics(counters);
+
+    assert_eq!(
+        metrics,
+        [
+            CounterMetric {
+                name: ACCEPTED_PACKETS_TOTAL,
+                value: 1
+            },
+            CounterMetric {
+                name: REJECTED_PACKETS_TOTAL,
+                value: 2
+            },
+            CounterMetric {
+                name: MALFORMED_PACKETS_TOTAL,
+                value: 3
+            },
+        ]
+    );
+
+    #[derive(Default)]
+    struct Recorder {
+        metrics: Vec<CounterMetric>,
+    }
+
+    impl MetricsRecorder for Recorder {
+        fn record_counter(&mut self, metric: CounterMetric) {
+            self.metrics.push(metric);
+        }
+    }
+
+    let mut recorder = Recorder::default();
+    record_counters(&mut recorder, counters);
+
+    assert_eq!(recorder.metrics, metrics);
 }
