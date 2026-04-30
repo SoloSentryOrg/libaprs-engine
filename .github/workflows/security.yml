@@ -44,7 +44,6 @@ concurrency:
 
 env:
   CARGO_TERM_COLOR: always
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   cargo-security:
@@ -58,7 +57,7 @@ jobs:
         run: rustup toolchain install stable --profile minimal
 
       - name: Cache Cargo
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cargo/registry
@@ -73,7 +72,7 @@ jobs:
         run: echo "week=$(date -u +%G-%V)" >> "$GITHUB_OUTPUT"
 
       - name: Cache advisory database
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cargo/advisory-db
           key: ${{ runner.os }}-cargo-advisory-${{ steps.advisory-cache.outputs.week }}-${{ hashFiles('.github/workflows/security.yml', 'scripts/install-release-tools.sh') }}
