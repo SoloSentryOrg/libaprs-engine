@@ -81,6 +81,27 @@ Before running `scripts/publish-release.sh`, record or verify:
   only if GitHub Releases are unavailable and release evidence records the
   reason.
 
+## v1.7.0 Release Evidence
+
+- Tag: `v1.7.0`.
+- Commit: `e11aba7d19723cebe95215c1d4c58cccd645c79a`.
+- Secure review: clean before tagging and publication; no open findings.
+- Local gate: `CARGO_HOME=/tmp/libaprs-cargo-home scripts/verify-release.sh`
+  passed before publication.
+- Remote GitHub Actions: release PR Rust CI run `25187204721` and security run
+  `25187204691` passed; `main` push Rust CI run `25187254023` and security run
+  `25187254024` passed for the merge commit.
+- crates.io publication: all workspace crates published as `1.7.0`.
+- GitHub Release: `v1.7.0` created, marked latest, and verified at
+  <https://github.com/elodiejmirza/libaprs-engine/releases/tag/v1.7.0>.
+- Post-publication downstream smoke:
+  `CARGO_HOME=/tmp/libaprs-cargo-home LIBAPRS_RUN_DOWNSTREAM_SMOKE=1 LIBAPRS_PACKAGE_ALL=1 scripts/verify-release.sh`
+  passed against crates.io and refreshed
+  `examples/downstream-smoke/Cargo.lock` with `1.7.0` checksums.
+- Notes: adds `ParsedPacket::to_diagnostic()` behind the `serde` feature as an
+  explicitly structured diagnostic alternative to convenience JSON, expands API
+  compatibility tests, and adds a downstream feedback issue template.
+
 ## v1.6.0 Release Evidence
 
 - Tag: `v1.6.0`.
