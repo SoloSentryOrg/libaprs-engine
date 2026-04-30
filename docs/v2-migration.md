@@ -9,7 +9,12 @@
   engine, event, and transport contracts.
 - APIs listed below are soft-deprecated for new stable integrations only when a
   safer documented alternative exists.
+- The current breaking-change decision record does not approve publishing a
+  `v2.0.0-rc.1` until at least one break is justified by downstream evidence.
 - The final `v2.0.0` release must be promoted from a tested release candidate.
+
+See [`v2.0.0` Breaking-Change Decision Record](v2-breaking-changes.md) for the
+current go/no-go status.
 
 ## Soft Deprecations For New Integrations
 
@@ -71,7 +76,8 @@ let packets = LineTransport::new(b"N0CALL>APRS:>hello\n")
 
 ## Final `v2.0.0` Breaking-Change Candidate List
 
-These are the only currently justified candidates. Each one still requires
+These are possible candidates only. None is approved for a release candidate
+until the decision record marks it justified. Each one still requires
 release-candidate evidence before it can ship.
 
 - Rename or replace `ParsedPacket::to_json()` with a diagnostic-only name or a

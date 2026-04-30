@@ -181,6 +181,8 @@ See [Security Model](docs/security.md) for details.
   feedback intake, and evidence for `v2.0.0` planning.
 - [`v2.0.0` Migration Plan](docs/v2-migration.md): soft deprecations,
   migration guidance, and release-candidate gates.
+- [`v2.0.0` Breaking-Change Decisions](docs/v2-breaking-changes.md): current
+  go/no-go evidence for release-candidate API breaks.
 - [Architecture](docs/architecture.md): boundaries, contracts, and pipeline.
 - [Security Model](docs/security.md): untrusted input handling and OWASP-aligned
   controls.
