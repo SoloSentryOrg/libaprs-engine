@@ -71,7 +71,7 @@ Observed needs:
 
 | Area | Pain point | `1.x` decision | `v2.0.0` consideration |
 | --- | --- | --- | --- |
-| Diagnostic JSON | `ParsedPacket::to_json()` was convenient but could look like a stable wire schema. | Removed from the `v2.0.0-rc.1` review branch after `ParsedPacket::to_diagnostic()` shipped in `1.7.0`. | Keep CLI JSON as CLI-owned diagnostics and use structured Rust diagnostics or application-owned schemas for integrations. |
+| Diagnostic JSON | `ParsedPacket::to_json()` was convenient but could look like a stable wire schema. | Removed in `v2.0.0-rc.1` after `ParsedPacket::to_diagnostic()` shipped in `1.7.0`. | Keep CLI JSON as CLI-owned diagnostics and use structured Rust diagnostics or application-owned schemas for integrations. |
 | Semantic APIs | `AprsData` is useful but still expanding as APRS coverage deepens. | Keep additions source-compatible and preserve raw bytes. | Split stable envelope views from evolving semantic interpretations if field growth becomes awkward. |
 | Transport abstractions | Adapters share byte-oriented behavior but differ in runtime and failure ownership. | Keep `PacketSource`, `PacketSink`, `LineTransport`, and adapter-specific options. | Introduce stronger traits only if multiple downstream users need the same receive-loop contract. |
 | Error taxonomy | Parse, policy, and transport diagnostics are structured, but some names may remain broader than future users want. | Keep codes stable and add detail additively. | Rename or split confusing codes only with migration evidence. |
@@ -82,8 +82,8 @@ Observed needs:
 ### Diagnostic JSON API Boundary
 
 - Integration type: parser library and CLI diagnostics.
-- Crate and version: `libaprs-engine` `1.7.0`, preparing
-  `2.0.0-rc.1`.
+- Crate and version: `libaprs-engine` `1.7.0` preparing the published
+  `2.0.0-rc.1` release candidate.
 - Finding source: internal secure-review and compatibility-test review after
   adding `ParsedPacket::to_diagnostic()` in `1.7.0`.
 - Raw-byte behavior: the replacement keeps exact accepted-packet bytes in

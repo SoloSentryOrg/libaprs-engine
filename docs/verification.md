@@ -54,6 +54,11 @@ cannot resolve from crates.io. After publishing, run locally:
 LIBAPRS_RUN_DOWNSTREAM_SMOKE=1 scripts/verify-release.sh
 ```
 
+When downstream smoke is enabled, the release script first verifies every
+published-crate dependency in `examples/downstream-smoke/Cargo.toml` matches
+the workspace `libaprs-engine` version. This fails the gate if the smoke
+project still points at an older crates.io release.
+
 Or trigger the `Rust CI` workflow manually with `downstream_smoke=true`.
 
 After `libaprs-engine` is published and visible in the crates.io index, validate
