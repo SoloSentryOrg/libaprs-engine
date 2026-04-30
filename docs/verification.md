@@ -36,6 +36,16 @@ That test stubs `git`, `cargo`, and `gh` and verifies
 evidence, local release evidence, security-gate evidence, remote-CI evidence,
 release-commit evidence, and GitHub Release publication evidence are provided.
 
+Fuzz corpus hygiene also has focused checks:
+
+```sh
+scripts/test-fuzz-corpus-guard.sh
+scripts/check-fuzz-corpus.sh
+```
+
+The guard rejects hidden files, temporary fuzzer artifacts, logs, profile data,
+and oversized corpus entries before release packaging.
+
 Before crates are published, the script and pull-request CI skip the crates.io
 downstream smoke project by default because unpublished version requirements
 cannot resolve from crates.io. After publishing, run locally:
@@ -89,6 +99,8 @@ installed:
   MQTT topic matcher.
 - Optional semantic-family fuzz targets for weather, telemetry, messages, and
   explicit third-party nested parsing.
+- Fuzz corpus hygiene checks for minimized, sanitized, bounded regression
+  seeds.
 - CI release-script coverage installs `cargo-semver-checks`, `cargo-audit`, and
   `cargo-deny` so public API compatibility, advisory checks, and dependency
   policy are checked in the normal release path.
@@ -129,6 +141,12 @@ are safe to publish and do not contain private station or operator data.
 
 Fuzz findings should be reduced to deterministic regression tests before
 merging parser or transport changes.
+
+Run corpus hygiene before committing new seeds:
+
+```sh
+scripts/check-fuzz-corpus.sh
+```
 
 ## Restricted Cargo Home
 

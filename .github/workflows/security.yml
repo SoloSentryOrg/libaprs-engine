@@ -13,6 +13,8 @@ on:
       - "fuzz/Cargo.toml"
       - "fuzz/Cargo.lock"
       - "deny.toml"
+      - "scripts/check-fuzz-corpus.sh"
+      - "scripts/test-fuzz-corpus-guard.sh"
       - "scripts/install-release-tools.sh"
       - ".github/workflows/security.yml"
   pull_request:
@@ -26,6 +28,8 @@ on:
       - "fuzz/Cargo.toml"
       - "fuzz/Cargo.lock"
       - "deny.toml"
+      - "scripts/check-fuzz-corpus.sh"
+      - "scripts/test-fuzz-corpus-guard.sh"
       - "scripts/install-release-tools.sh"
       - ".github/workflows/security.yml"
   schedule:

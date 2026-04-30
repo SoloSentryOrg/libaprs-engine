@@ -23,6 +23,9 @@ External bytes enter through a transport or the CLI and must be passed to the
 codec unchanged. The codec validates only the minimal packet envelope and
 conservative address metadata needed to establish safe structure.
 
+See [Threat Model](threat-model.md) for the per-crate untrusted boundaries,
+primary abuse cases, and required controls.
+
 The current trusted boundary is:
 
 ```text
@@ -120,6 +123,23 @@ The Rust CI release-script job installs pinned versions of `cargo-audit` and
 main-branch updates exercise the same dependency-policy checks used by the local
 release gate. The separate Security workflow remains scheduled and path-filtered
 for dependency-focused monitoring.
+
+The dependency policy is intentionally strict for the current dependency graph:
+only MIT-licensed third-party crates are allowed, duplicate crate versions are
+denied, wildcard dependencies are denied, and unknown registries or Git sources
+are denied. Reintroduce additional allowed licenses only when a dependency
+requires them and the license review is recorded.
+
+## Fuzz Corpus Hygiene
+
+Fuzz corpus inputs are release evidence, not scratch space. Keep them small,
+sanitized, and safe to publish. `scripts/check-fuzz-corpus.sh` rejects hidden
+files, common fuzzer artifact names, temporary logs, and corpus files larger
+than `LIBAPRS_MAX_FUZZ_CORPUS_BYTES` bytes, defaulting to 4096 bytes.
+
+When a fuzz finding is found, minimize the input, remove private station or
+operator data, add a deterministic regression test, then add the minimized input
+to `fuzz/corpus/` only if it remains useful for future fuzzing.
 
 ## Operational Recommendations
 

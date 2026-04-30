@@ -87,6 +87,19 @@ fn separator_and_path_mutations_fail_closed() {
 }
 
 #[test]
+fn path_component_flood_fails_closed_without_partial_packet() {
+    let mut input = b"N0CALL>APRS".to_vec();
+    for _ in 0..128 {
+        input.extend_from_slice(b",");
+    }
+    input.extend_from_slice(b":>path flood");
+
+    let err = parse_packet(&input).expect_err("empty path components must fail closed");
+
+    assert_eq!(err, ParseError::InvalidAddress);
+}
+
+#[test]
 fn packet_with_non_ax25_like_source_fails_closed() {
     let err = parse_packet(b"N0 CALL>APRS:hello").expect_err("invalid source must be rejected");
 

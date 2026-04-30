@@ -4,6 +4,8 @@
 
 - Run `scripts/verify-release.sh`.
 - Run `scripts/test-publish-release-guards.sh`.
+- Run `scripts/test-fuzz-corpus-guard.sh` and `scripts/check-fuzz-corpus.sh`
+  when fuzz corpus entries or fuzz targets changed.
 - Complete a secure code review and fix all findings before publishing.
 - After `libaprs-engine` is published to crates.io, run package validation for
   dependent crates with `LIBAPRS_PACKAGE_ALL=1 scripts/verify-release.sh`.
@@ -12,6 +14,8 @@
   checks when that toolchain is installed.
 - Run `cargo audit` and `cargo deny check`, either locally or through the
   security workflow, before publishing.
+- Record fuzz compile and fuzz corpus hygiene results when parser, transport,
+  semantic decoder, or corpus files changed.
 - Treat the Rust CI release-script job as a release dependency gate: it installs
   pinned `cargo-audit` and `cargo-deny` versions with
   `scripts/install-release-tools.sh` and runs both checks through
@@ -59,6 +63,8 @@ Before running `scripts/publish-release.sh`, record or verify:
   the release commit.
 - `LIBAPRS_SECURITY_GATE=passed`: `cargo audit` and `cargo deny check` passed
   locally or in GitHub Actions.
+- Fuzz evidence: `cargo +nightly fuzz check` passed when available, corpus
+  hygiene passed, and any new minimized regression inputs are documented.
 - `LIBAPRS_REMOTE_CI=passed`: remote CI passed for the release commit. Use
   `skipped-documented` only when CI was unavailable and the release evidence
   records the reason.
