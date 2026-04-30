@@ -29,6 +29,7 @@ LIBAPRS_MSRV="${LIBAPRS_MSRV:-1.80.0}"
 
 run scripts/test-publish-release-guards.sh
 run scripts/test-fuzz-corpus-guard.sh
+run scripts/test-downstream-smoke-version-guard.sh
 run scripts/check-fuzz-corpus.sh
 run cargo fmt --all --check
 run cargo fmt --manifest-path fuzz/Cargo.toml --all --check
@@ -48,6 +49,7 @@ else
 fi
 
 if [ "${LIBAPRS_RUN_DOWNSTREAM_SMOKE:-0}" = "1" ]; then
+  run scripts/check-downstream-smoke-versions.sh
   run cargo check --manifest-path examples/downstream-smoke/Cargo.toml
 else
   echo "LIBAPRS_RUN_DOWNSTREAM_SMOKE is not set; skipping crates.io downstream smoke" >&2

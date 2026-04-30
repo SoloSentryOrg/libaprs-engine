@@ -81,28 +81,30 @@ Before running `scripts/publish-release.sh`, record or verify:
   only if GitHub Releases are unavailable and release evidence records the
   reason.
 
-## v2.0.0-rc.1 Release Candidate Review Evidence
+## v2.0.0-rc.1 Release Evidence
 
-- Branch: `codex/v2-rc1-breaking-diagnostics`.
-- Publication status: not published; review branch only.
+- Tag: `v2.0.0-rc.1`.
+- Commit: `37c6ee29b5fe5bde018c9e8b510e2aba03750314`.
 - Scope: removes the library `ParsedPacket::to_json()` diagnostic convenience
   method, keeps raw-byte-preserving structured diagnostics through
   `ParsedPacket::to_diagnostic()`, and keeps CLI `--json` as CLI-owned
   diagnostic output.
 - Schema evidence: `serde_support::PacketDiagnostic` and CLI accepted-packet
   JSON now expose `schema_version = 1`.
-- Downstream smoke: local path-based downstream smoke passed against
-  workspace crates at `2.0.0-rc.1`; crates.io downstream smoke remains pending
-  until publication.
+- Secure review: clean before tagging and publication; no open findings.
 - Local gate: `CARGO_HOME=/tmp/libaprs-cargo-home scripts/verify-release.sh`
-  passed on the clean review branch before PR review. crates.io downstream
-  smoke and dependent-crate package validation remain pending until the release
-  candidate is published.
-- Security review: local pre-push secure review completed clean; repeat before
-  merge, tag, or crates.io publication.
-- Pending before publication: PR review, remote CI, security gate, release tag,
-  crates.io publication, GitHub Release latest verification, and
-  post-publication downstream smoke/package validation.
+  passed on a clean `/tmp` clone of the release commit before tagging and
+  publication.
+- Remote GitHub Actions: `main` push security run `25189100168` and Rust CI
+  run `25189100182` passed for the release commit.
+- crates.io publication: all workspace crates published as `2.0.0-rc.1`.
+- GitHub Release: `v2.0.0-rc.1` created, marked latest, and verified at
+  <https://github.com/elodiejmirza/libaprs-engine/releases/tag/v2.0.0-rc.1>.
+- Post-publication downstream smoke:
+  `CARGO_HOME=/tmp/libaprs-cargo-home LIBAPRS_RUN_DOWNSTREAM_SMOKE=1 LIBAPRS_PACKAGE_ALL=1 scripts/verify-release.sh`
+  passed after refreshing the smoke project to target `2.0.0-rc.1`.
+- Notes: downstream smoke now fails the release gate if the smoke manifest still
+  targets an older workspace release version.
 
 ## v1.7.0 Release Evidence
 
