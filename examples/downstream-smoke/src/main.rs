@@ -16,6 +16,7 @@ use std::time::Duration;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let packet = parse_packet(b"N0CALL>APRS:>hello").map_err(|error| error.code())?;
     assert!(matches!(packet.aprs_data(), AprsData::Status { .. }));
+    assert_eq!(packet.to_diagnostic().semantic, "status");
 
     let file_packets = read_packet_lines(b"N0CALL>APRS:>file\n");
     assert_eq!(file_packets.len(), 1);
@@ -26,7 +27,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let aprs_is_login = AprsIsLogin {
         callsign: "N0CALL",
         passcode: -1,
-        software: "libaprs-engine-downstream-smoke 1.6.0",
+        software: "libaprs-engine-downstream-smoke 1.7.0",
         filter: Some("r/49/-72/50"),
     };
     assert!(aprs_is_login.line()?.ends_with("\r\n"));

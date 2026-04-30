@@ -99,6 +99,7 @@ These APIs may change as APRS semantic coverage matures:
 These APIs are for inspection and observability:
 
 - `ParsedPacket::to_json`
+- `ParsedPacket::to_diagnostic`, behind the `serde` feature
 - `ParseError::diagnostic`
 - `PolicyRejection::diagnostic`
 - `TransportErrorCode::diagnostic`
@@ -107,9 +108,9 @@ These APIs are for inspection and observability:
 - `metrics_support`, behind the `metrics` feature
 
 Do not treat `to_json()` as a long-term wire protocol. Use
-`PacketDiagnostic` with the `serde` feature, `EngineEvent` structs, the CLI
-support-matrix schema, or define an application-owned schema when external
-compatibility matters.
+`ParsedPacket::to_diagnostic()` or `PacketDiagnostic` with the `serde` feature,
+`EngineEvent` structs, the CLI support-matrix schema, or define an
+application-owned schema when external compatibility matters.
 
 ## Feature Flags
 

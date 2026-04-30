@@ -37,6 +37,8 @@ change:
   - `aprs_data`, with the semantic enum details governed by the evolving API
     section below until the APRS semantics batch is complete
   - `summary`
+  - `to_diagnostic`, behind the `serde` feature, as the preferred structured
+    packet diagnostic API
   - `to_json`, with diagnostic JSON treated as convenience output rather than
     a stable wire schema
 - `ParseError` variants and `ParseError::code`

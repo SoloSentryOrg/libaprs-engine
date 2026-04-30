@@ -24,7 +24,7 @@ These APIs remain supported in `1.x`. The project avoids Rust
 
 | API or pattern | `1.x` status | Preferred `1.x` alternative | Possible `v2.0.0` change |
 | --- | --- | --- | --- |
-| `ParsedPacket::to_json()` for external contracts | Supported diagnostic convenience. | Use `serde_support::PacketDiagnostic`, `PacketSummary`, `EngineEvent`, or an application-owned schema. | Rename or replace with an explicitly diagnostic API if confusion persists. |
+| `ParsedPacket::to_json()` for external contracts | Supported diagnostic convenience. | Use `ParsedPacket::to_diagnostic()`, `serde_support::PacketDiagnostic`, `PacketSummary`, `EngineEvent`, or an application-owned schema. | Rename or replace with an explicitly diagnostic API only if downstream confusion persists after the additive replacement path. |
 | Unbounded in-memory transport helpers for untrusted input | Supported only for already bounded byte slices. | Use `try_read_packet_lines`, `packets_with_limit`, reader/path `*_with_limit`, or adapter options such as `TcpReadOptions`. | Make bounded helper names the primary surface and move convenience helpers to examples. |
 | Treating `AprsData` as a fully stable semantic schema | Supported but evolving. | Use raw byte access, `PacketSummary`, and optional helper methods defensively. | Split stable packet envelope types from richer semantic interpretation types. |
 | Application-owned event JSON inferred from current debug output | Unsupported as a compatibility contract. | Serialize application-owned structs or serde diagnostics under your own schema version. | Add first-class stable event serialization only if downstream users need it. |
@@ -63,6 +63,16 @@ match engine.process_event(b"N0CALL>APRS:>hello") {
         let code = event.code.code();
     }
 }
+```
+
+Serde diagnostic integrations should prefer:
+
+```rust
+use libaprs_engine::parse_packet;
+
+let packet = parse_packet(b"N0CALL>APRS:>hello")?;
+let diagnostic = packet.to_diagnostic();
+let raw_bytes = diagnostic.raw;
 ```
 
 Transport integrations should prefer bounded byte APIs:

@@ -213,6 +213,16 @@ impl ParsedPacket {
         PacketSummary::from_packet(self)
     }
 
+    /// Returns an owned serde-backed packet diagnostic.
+    ///
+    /// Prefer this over [`ParsedPacket::to_json`] when an integration needs a
+    /// structured diagnostic value instead of convenience JSON text.
+    #[cfg(feature = "serde")]
+    #[must_use]
+    pub fn to_diagnostic(&self) -> serde_support::PacketDiagnostic {
+        serde_support::PacketDiagnostic::from_packet(self)
+    }
+
     /// Serializes the parsed packet into a compact JSON diagnostic string.
     #[must_use]
     pub fn to_json(&self) -> String {
