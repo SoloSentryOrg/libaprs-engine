@@ -175,6 +175,8 @@ See [Security Model](docs/security.md) for details.
   shapes for operational consumers.
 - [Transport Adapters](docs/transports.md): byte-preserving transport crate
   boundaries and integration examples.
+- [Transport Common Layer Review](docs/transport-common-layer.md): current
+  shared transport trait decision and `v2.0.0` revisit criteria.
 - [Architecture](docs/architecture.md): boundaries, contracts, and pipeline.
 - [Security Model](docs/security.md): untrusted input handling and OWASP-aligned
   controls.
