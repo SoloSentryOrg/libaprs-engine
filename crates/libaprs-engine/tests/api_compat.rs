@@ -20,7 +20,7 @@ fn stable_intent_parser_api_remains_usable() {
     assert_eq!(parsed.payload(), b">hello");
     assert_eq!(parsed.information(), b"hello");
     assert_eq!(parsed.aprs_data().kind_name(), "status");
-    assert!(parsed.to_json().contains("\"semantic\":\"status\""));
+    assert_eq!(parsed.summary().semantic, "status");
 }
 
 #[cfg(feature = "serde")]
@@ -33,6 +33,7 @@ fn stable_diagnostic_alternative_to_json_remains_usable() {
     let diagnostic = PacketDiagnostic::from_packet(&parsed);
     let explicit_diagnostic = parsed.to_diagnostic();
 
+    assert_eq!(diagnostic.schema_version, 1);
     assert_eq!(diagnostic.raw, input);
     assert_eq!(explicit_diagnostic, diagnostic);
     assert_eq!(diagnostic.source, b"N0CALL");

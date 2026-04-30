@@ -81,6 +81,29 @@ Before running `scripts/publish-release.sh`, record or verify:
   only if GitHub Releases are unavailable and release evidence records the
   reason.
 
+## v2.0.0-rc.1 Release Candidate Review Evidence
+
+- Branch: `codex/v2-rc1-breaking-diagnostics`.
+- Publication status: not published; review branch only.
+- Scope: removes the library `ParsedPacket::to_json()` diagnostic convenience
+  method, keeps raw-byte-preserving structured diagnostics through
+  `ParsedPacket::to_diagnostic()`, and keeps CLI `--json` as CLI-owned
+  diagnostic output.
+- Schema evidence: `serde_support::PacketDiagnostic` and CLI accepted-packet
+  JSON now expose `schema_version = 1`.
+- Downstream smoke: local path-based downstream smoke passed against
+  workspace crates at `2.0.0-rc.1`; crates.io downstream smoke remains pending
+  until publication.
+- Local gate: `CARGO_HOME=/tmp/libaprs-cargo-home scripts/verify-release.sh`
+  passed on the clean review branch before PR review. crates.io downstream
+  smoke and dependent-crate package validation remain pending until the release
+  candidate is published.
+- Security review: local pre-push secure review completed clean; repeat before
+  merge, tag, or crates.io publication.
+- Pending before publication: PR review, remote CI, security gate, release tag,
+  crates.io publication, GitHub Release latest verification, and
+  post-publication downstream smoke/package validation.
+
 ## v1.7.0 Release Evidence
 
 - Tag: `v1.7.0`.

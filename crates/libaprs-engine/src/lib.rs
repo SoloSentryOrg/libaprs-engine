@@ -5,7 +5,6 @@
 //! The codec boundary accepts untrusted bytes, preserves them exactly, and
 //! fails closed when the packet shape is malformed.
 
-mod diagnostic;
 mod transport;
 
 #[cfg(feature = "serde")]
@@ -214,19 +213,10 @@ impl ParsedPacket {
     }
 
     /// Returns an owned serde-backed packet diagnostic.
-    ///
-    /// Prefer this over [`ParsedPacket::to_json`] when an integration needs a
-    /// structured diagnostic value instead of convenience JSON text.
     #[cfg(feature = "serde")]
     #[must_use]
     pub fn to_diagnostic(&self) -> serde_support::PacketDiagnostic {
         serde_support::PacketDiagnostic::from_packet(self)
-    }
-
-    /// Serializes the parsed packet into a compact JSON diagnostic string.
-    #[must_use]
-    pub fn to_json(&self) -> String {
-        diagnostic::packet_to_json(self)
     }
 }
 

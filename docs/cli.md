@@ -113,7 +113,7 @@ accepted source=N0CALL destination=APRS semantic=status
 JSON output:
 
 ```json
-{"raw":"N0CALL>APRS:>hello","source":"N0CALL","destination":"APRS","path":"APRS","payload":">hello","data_type":"status","semantic":"status"}
+{"schema_version":1,"raw":"N0CALL>APRS:>hello","source":"N0CALL","destination":"APRS","path":"APRS","payload":">hello","data_type":"status","semantic":"status"}
 ```
 
 The accepted-packet and support-matrix JSON shapes are documented in

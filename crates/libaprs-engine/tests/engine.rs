@@ -187,12 +187,12 @@ fn policy_rejections_have_stable_codes() {
 }
 
 #[test]
-fn json_diagnostic_escapes_raw_bytes_and_identifies_semantics() {
+fn packet_summary_identifies_semantics_without_json_contract() {
     let packet =
-        libaprs_engine::parse_packet(b"N0CALL>APRS:>hello \"json\"").expect("packet should parse");
-    let json = packet.to_json();
+        libaprs_engine::parse_packet(b"N0CALL>APRS:>hello summary").expect("packet should parse");
+    let summary = packet.summary();
 
-    assert!(json.contains("\"source\":\"N0CALL\""));
-    assert!(json.contains("\"semantic\":\"status\""));
-    assert!(json.contains("\\\"json\\\""));
+    assert_eq!(summary.source, b"N0CALL");
+    assert_eq!(summary.destination, b"APRS");
+    assert_eq!(summary.semantic, "status");
 }

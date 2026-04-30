@@ -15,7 +15,15 @@ fn main() -> std::io::Result<()> {
 
     for packet_bytes in LineTransport::new(&input).packets() {
         match engine.process(packet_bytes) {
-            EngineResult::Accepted { packet } => println!("{}", packet.to_json()),
+            EngineResult::Accepted { packet } => {
+                let summary = packet.summary();
+                println!(
+                    "accepted source={} destination={} semantic={}",
+                    String::from_utf8_lossy(summary.source),
+                    String::from_utf8_lossy(summary.destination),
+                    summary.semantic
+                );
+            }
             EngineResult::Rejected { reason, .. } => eprintln!("rejected: {}", reason.code()),
             EngineResult::ParseError(error) => eprintln!("malformed: {}", error.code()),
         }

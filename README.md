@@ -16,7 +16,10 @@ telemetry, indexing, and diagnostics.
 - APRS engine with meaningful semantics, conformance fixtures,
   compatibility tests, examples, benchmark, optional transport adapters, and CLI
   inspector.
-- Current tagged release: `v1.7.0`.
+- Current tagged stable release: `v1.7.0`.
+- Current review branch prepares `v2.0.0-rc.1`; do not publish or promote it
+  until secure review, local gates, remote CI, and release-candidate evidence
+  are clean.
 - Public API is semver-protected from `1.0.0`. The public boundary is tracked in
   [Public API Boundary](docs/public-api.md).
 - Core runtime remains network-free and async-free. Optional `serde`
@@ -28,7 +31,7 @@ telemetry, indexing, and diagnostics.
 ## Workspace Crates
 
 - `libaprs-engine`: library crate with packet types, parser, semantic views,
-  policy, engine orchestration, counters, JSON diagnostics, shared transport
+  policy, engine orchestration, counters, structured diagnostics, shared transport
   contracts, bounded-read helpers, and line transport.
 - `aprs-cli`: command-line packet inspector built on the library crate.
 - `aprs-transport-file`: optional file transport helper crate that reads packet
@@ -92,7 +95,7 @@ Use a Git dependency when testing unreleased changes from this repository.
 
 ```toml
 [dependencies]
-libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", tag = "v1.7.0" }
+libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", branch = "main" }
 ```
 
 For local development from a checkout:

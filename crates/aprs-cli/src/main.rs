@@ -7,7 +7,7 @@ use std::process::ExitCode;
 
 use libaprs_engine::{
     read_all_with_limit, support_matrix, DiagnosticLayer, Engine, EngineResult, LineTransport,
-    Policy, SupportMatrix, MAX_PACKET_LEN,
+    ParsedPacket, Policy, SupportMatrix, MAX_PACKET_LEN,
 };
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
@@ -86,7 +86,7 @@ fn run() -> Result<ExitCode, String> {
                         .map_err(|err| format!("failed to write newline: {err}"))?;
                 }
                 CommandMode::Parse | CommandMode::Explain if options.json => {
-                    println!("{}", packet.to_json());
+                    println!("{}", packet_json(&packet));
                 }
                 CommandMode::Parse | CommandMode::Explain => println!(
                     "accepted source={} destination={} semantic={}",
@@ -313,6 +313,47 @@ fn support_matrix_json(matrix: SupportMatrix) -> String {
     }
     json.push_str("]}");
     json
+}
+
+fn packet_json(packet: &ParsedPacket) -> String {
+    format!(
+        "{{\"schema_version\":1,\"raw\":\"{}\",\"source\":\"{}\",\"destination\":\"{}\",\"path\":\"{}\",\"payload\":\"{}\",\"data_type\":\"{}\",\"semantic\":\"{}\"}}",
+        json_escape_bytes(packet.raw().as_bytes()),
+        json_escape_bytes(packet.source()),
+        json_escape_bytes(packet.destination()),
+        json_escape_bytes(packet.path()),
+        json_escape_bytes(packet.payload()),
+        packet.data_type_identifier().name(),
+        packet.aprs_data().kind_name(),
+    )
+}
+
+fn json_escape_bytes(bytes: &[u8]) -> String {
+    let mut escaped = String::new();
+    for byte in bytes {
+        match byte {
+            b'"' => escaped.push_str("\\\""),
+            b'\\' => escaped.push_str("\\\\"),
+            b'\n' => escaped.push_str("\\n"),
+            b'\r' => escaped.push_str("\\r"),
+            b'\t' => escaped.push_str("\\t"),
+            0x20..=0x7e => escaped.push(char::from(*byte)),
+            _ => {
+                escaped.push_str("\\u00");
+                escaped.push(hex_digit(byte >> 4));
+                escaped.push(hex_digit(byte & 0x0f));
+            }
+        }
+    }
+    escaped
+}
+
+fn hex_digit(value: u8) -> char {
+    match value {
+        0..=9 => char::from(b'0' + value),
+        10..=15 => char::from(b'a' + value - 10),
+        _ => '0',
+    }
 }
 
 fn json_escape(value: &str) -> String {
