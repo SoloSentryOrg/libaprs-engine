@@ -1,4 +1,14 @@
+use libaprs_engine::service::{
+    DuplicateDecision, DuplicateWindow, PacketRateBudget, RateLimitDecision, SemanticBlocklist,
+    SemanticFamily,
+};
 use libaprs_engine::{
+    encoder::{
+        encode_ack, encode_announcement, encode_bulletin, encode_message, encode_packet,
+        encode_reject, encode_status, encode_telemetry, encode_telemetry_metadata,
+        encode_uncompressed_position, EncodeError, TelemetryMetadataEncodingKind,
+        UncompressedPositionEncoding,
+    },
     parse_packet, parse_packet_with_options, support_matrix, AprsData, Counters,
     DataTypeIdentifier, DiagnosticLayer, Engine, EngineEvent, EngineEventKind, EngineResult,
     LineTransport, MicEMessageCode, MicEStandardMessage, PacketSink, PacketSource, ParseError,
@@ -303,6 +313,106 @@ fn documented_semantic_helpers_remain_usable() {
         mic_e.message_code(),
         Some(MicEMessageCode::Standard(MicEStandardMessage::OffDuty))
     );
+}
+
+#[test]
+fn stable_encoder_api_remains_usable() {
+    let status = encode_status(b"N0CALL", &[b"APRS".as_slice()], b"api").expect("status encoder");
+    assert_eq!(status, b"N0CALL>APRS:>api");
+    assert!(parse_packet(&status).is_ok());
+
+    let packet =
+        encode_packet(b"N0CALL", &[b"APRS".as_slice()], b">raw").expect("generic packet encoder");
+    assert_eq!(packet, b"N0CALL>APRS:>raw");
+
+    let position = encode_uncompressed_position(
+        b"N0CALL",
+        &[b"APRS".as_slice()],
+        UncompressedPositionEncoding {
+            messaging: true,
+            latitude: b"4903.50N",
+            symbol_table: b'/',
+            longitude: b"07201.75W",
+            symbol_code: b'-',
+            comment: b"api",
+        },
+    )
+    .expect("position encoder");
+    assert!(matches!(
+        parse_packet(&position).expect("position").aprs_data(),
+        AprsData::Position(_)
+    ));
+
+    let message = encode_message(b"N0CALL", &[b"APRS".as_slice()], b"TARGET   ", b"ack", None)
+        .expect("message encoder");
+    assert!(matches!(
+        parse_packet(&message).expect("message").aprs_data(),
+        AprsData::Message(_)
+    ));
+
+    let telemetry = encode_telemetry(b"N0CALL", &[b"APRS".as_slice()], 7, [1, 2, 3, 4, 5], None)
+        .expect("telemetry encoder");
+    assert!(matches!(
+        parse_packet(&telemetry).expect("telemetry").aprs_data(),
+        AprsData::Telemetry(_)
+    ));
+
+    let ack =
+        encode_ack(b"N0CALL", &[b"APRS".as_slice()], b"TARGET   ", b"1").expect("ack encoder");
+    let reject = encode_reject(b"N0CALL", &[b"APRS".as_slice()], b"TARGET   ", b"1")
+        .expect("reject encoder");
+    let bulletin =
+        encode_bulletin(b"N0CALL", &[b"APRS".as_slice()], b'1', b"api").expect("bulletin");
+    let announcement =
+        encode_announcement(b"N0CALL", &[b"APRS".as_slice()], b'A', b"api").expect("announcement");
+    let metadata = encode_telemetry_metadata(
+        b"N0CALL",
+        &[b"APRS".as_slice()],
+        TelemetryMetadataEncodingKind::Units,
+        b"degC,volt",
+    )
+    .expect("telemetry metadata");
+    for encoded in [ack, reject, bulletin, announcement, metadata] {
+        assert!(matches!(
+            parse_packet(&encoded).expect("encoded packet").aprs_data(),
+            AprsData::Message(_) | AprsData::TelemetryMetadata(_)
+        ));
+    }
+
+    assert_eq!(
+        encode_status(b"bad", &[b"APRS".as_slice()], b"api").expect_err("invalid source"),
+        EncodeError::LowercaseAddress
+    );
+}
+
+#[test]
+fn stable_service_toolkit_api_remains_usable() {
+    let mut duplicates = DuplicateWindow::new(1);
+    assert_eq!(duplicates.capacity(), 1);
+    assert_eq!(
+        duplicates.observe(b"N0CALL>APRS:>api"),
+        DuplicateDecision::New
+    );
+    assert_eq!(
+        duplicates.observe(b"N0CALL>APRS:>api"),
+        DuplicateDecision::Duplicate
+    );
+    assert_eq!(DuplicateDecision::Duplicate.code(), "duplicate.duplicate");
+
+    let mut budget = PacketRateBudget::new(1);
+    assert_eq!(budget.limit(), 1);
+    assert_eq!(budget.try_consume(), RateLimitDecision::Allowed);
+    assert_eq!(budget.try_consume(), RateLimitDecision::Limited);
+    assert_eq!(RateLimitDecision::Limited.code(), "rate.limited");
+
+    let packet = parse_packet(b"N0CALL>APRS:>api").expect("packet");
+    let family = SemanticFamily::from_aprs_data(&packet.aprs_data());
+    assert_eq!(family, SemanticFamily::Status);
+    assert_eq!(family.code(), "status");
+
+    let blocklist = SemanticBlocklist::new(&[SemanticFamily::Status]);
+    assert!(blocklist.rejects(&packet.aprs_data()));
+    assert_eq!(blocklist.families(), &[SemanticFamily::Status]);
 }
 
 #[test]

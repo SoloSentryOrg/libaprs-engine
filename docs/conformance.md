@@ -70,4 +70,22 @@ third-party payloads.
 The conformance corpus verifies packet-family behavior. The separate
 `api_compat` test verifies documented integration APIs, including parser entry
 points, parse options, stable error codes, engine/policy flow, line transport,
-and typed helper methods.
+typed helper methods, encoder APIs, service-toolkit helpers, and
+interoperability-profile helpers.
+
+## Non-Parser Protocol Tooling
+
+The project also covers adjacent protocol tooling that preserves parser
+boundaries:
+
+- APRS-IS profile helpers validate uppercase login callsigns, bounded filter
+  expressions, and q-construct diagnostics over raw TNC2 monitor bytes.
+- Encoder helpers construct owned packet bytes for supported packet families,
+  including explicit acknowledgement, rejection, bulletin, announcement, and
+  telemetry metadata helpers, and round-trip them through `parse_packet()` in
+  tests.
+- KISS frame encoding and decoding stay in `aprs-transport-kiss`, where frame
+  boundaries and oversize failures are tested separately from the core parser.
+- The interoperability fixture corpus keeps APRS-IS q-construct examples
+  separate from core AX.25-like parser acceptance, so transport diagnostics do
+  not require weakening the codec boundary.

@@ -1,8 +1,13 @@
 use std::io::Cursor;
 
 use libaprs_engine::{
-    read_all_with_limit, Engine, EngineEvent, EngineEventKind, EngineResult, LineTransport, Policy,
-    PolicyRejection, TransportErrorCode, TransportFailureEvent, EVENT_RAW_BYTE_LIMIT,
+    parse_packet, read_all_with_limit,
+    service::{
+        DuplicateDecision, DuplicateWindow, PacketRateBudget, RateLimitDecision, SemanticBlocklist,
+        SemanticFamily,
+    },
+    Engine, EngineEvent, EngineEventKind, EngineResult, LineTransport, Policy, PolicyRejection,
+    TransportErrorCode, TransportFailureEvent, EVENT_RAW_BYTE_LIMIT,
 };
 
 #[test]
@@ -195,4 +200,52 @@ fn packet_summary_identifies_semantics_without_json_contract() {
     assert_eq!(summary.source, b"N0CALL");
     assert_eq!(summary.destination, b"APRS");
     assert_eq!(summary.semantic, "status");
+}
+
+#[test]
+fn service_duplicate_window_detects_recent_raw_packet_bytes() {
+    let mut window = DuplicateWindow::new(2);
+
+    assert_eq!(window.observe(b"N0CALL>APRS:>one"), DuplicateDecision::New);
+    assert_eq!(
+        window.observe(b"N0CALL>APRS:>one"),
+        DuplicateDecision::Duplicate
+    );
+    assert_eq!(window.observe(b"N0CALL>APRS:>two"), DuplicateDecision::New);
+    assert_eq!(
+        window.observe(b"N0CALL>APRS:>three"),
+        DuplicateDecision::New
+    );
+    assert_eq!(window.observe(b"N0CALL>APRS:>one"), DuplicateDecision::New);
+}
+
+#[test]
+fn service_packet_rate_budget_is_caller_reset_and_saturating() {
+    let mut budget = PacketRateBudget::new(2);
+
+    assert_eq!(budget.try_consume(), RateLimitDecision::Allowed);
+    assert_eq!(budget.try_consume(), RateLimitDecision::Allowed);
+    assert_eq!(budget.remaining(), 0);
+    assert_eq!(budget.try_consume(), RateLimitDecision::Limited);
+
+    budget.reset();
+    assert_eq!(budget.remaining(), 2);
+    assert_eq!(budget.try_consume(), RateLimitDecision::Allowed);
+}
+
+#[test]
+fn service_semantic_blocklist_matches_families_without_reparsing() {
+    let packet = parse_packet(b"N0CALL>APRS:>blocked").expect("packet should parse");
+    let semantic = packet.aprs_data();
+    let blocklist = SemanticBlocklist::new(&[SemanticFamily::Status]);
+
+    assert!(blocklist.rejects(&semantic));
+    assert_eq!(
+        SemanticFamily::from_aprs_data(&semantic),
+        SemanticFamily::Status
+    );
+
+    let telemetry =
+        parse_packet(b"N0CALL>APRS:T#001,111,222,033,044,055").expect("telemetry should parse");
+    assert!(!blocklist.rejects(&telemetry.aprs_data()));
 }

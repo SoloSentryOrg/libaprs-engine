@@ -6,12 +6,17 @@ packet is malformed.
 
 ## Pipeline
 
-`Types -> Codec -> Policy -> Engine -> Transports -> CLI`
+`Types -> Codec -> Semantics -> Policy -> Engine -> Transports -> CLI`
+
+Owned-byte encoders and runtime-neutral service helpers are adjacent helper
+layers. Encoders construct packet bytes for caller-owned transmission, and
+service helpers support ingestion policy without owning transport, storage, or
+runtime behavior.
 
 The workspace keeps the core parser crate separate from adapters:
 
 - `libaprs-engine`: codec, APRS semantic views, diagnostics, policy, engine,
-  and the byte-oriented line splitter.
+  owned-byte encoders, service helpers, and the byte-oriented line splitter.
 - `aprs-transport-file`: optional file adapter crate that reads packet files as
   bytes and delegates splitting to the core line transport.
 - transport adapter crates: optional boundaries for TCP, APRS-IS, KISS,
@@ -33,6 +38,12 @@ The workspace keeps the core parser crate separate from adapters:
   does not repair malformed codec input.
 - **Engine:** orchestrates codec, semantics, policy decisions, and counters. It
   does not parse raw transport bytes directly.
+- **Encoders:** validate conservative address and packet-field shape before
+  returning owned bytes. They do not transmit, log, normalize, or choose
+  transport behavior.
+- **Service helpers:** provide duplicate suppression, rate budgets, and
+  semantic-family blocklists without owning clocks, queues, storage, or
+  networking.
 - **Transports:** supply bytes from external systems. Transport crates may
   frame, split, or copy bytes for their source protocol, but they do not parse
   APRS semantics or lossy-convert payloads before the codec boundary. Shared
@@ -92,11 +103,12 @@ Transport adapters live outside `libaprs-engine` so the parser core remains
 network-free and focused on bytes, codec validation, policy, and semantics.
 `aprs-transport-file` handles file/stdin-style packet sources,
 `aprs-transport-tcp` handles blocking TCP or reader-backed packet sources,
-`aprs-transport-aprs-is` handles APRS-IS login framing plus APRS-IS comment
-filtering, `aprs-transport-kiss` handles KISS byte stuffing, and the remaining
-transport crates cover serial-like readers, UDP datagrams, HTTP bodies,
-append-only packet files, MQTT payloads, AX.25 UI frames, corpus replay,
-in-process channels, and runtime-neutral async splitting. These adapters
-preserve packet bytes and hand APRS packet bytes to the codec unchanged. File,
-TCP, serial-like, APRS-IS, corpus, and file-watch helpers expose bounded default
+`aprs-transport-aprs-is` handles APRS-IS login framing, profile validation,
+q-construct diagnostics, and APRS-IS comment filtering,
+`aprs-transport-kiss` handles KISS byte stuffing, and the remaining transport
+crates cover serial-like readers, UDP datagrams, HTTP bodies, append-only
+packet files, MQTT payloads, AX.25 UI frames, corpus replay, in-process
+channels, and runtime-neutral async splitting. These adapters preserve packet
+bytes and hand APRS packet bytes to the codec unchanged. File, TCP,
+serial-like, APRS-IS, corpus, and file-watch helpers expose bounded default
 reads plus explicit `*_with_limit` variants for application-specific limits.

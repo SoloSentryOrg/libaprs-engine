@@ -7,6 +7,9 @@
 
 mod transport;
 
+pub mod encoder;
+pub mod service;
+
 #[cfg(feature = "serde")]
 pub mod serde_support;
 
@@ -452,9 +455,9 @@ const TRANSPORT_SUPPORT: &[TransportSupport] = &[
     },
     TransportSupport {
         crate_name: "aprs-transport-aprs-is",
-        boundary: "APRS-IS login framing and server line filtering",
+        boundary: "APRS-IS login framing, q-construct diagnostics, and server line filtering",
         status: SupportStatus::Supported,
-        notes: "authentication and reconnect loops stay application-owned",
+        notes: "profile validation is available; authentication and reconnect loops stay application-owned",
     },
     TransportSupport {
         crate_name: "aprs-transport-kiss",

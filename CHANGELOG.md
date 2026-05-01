@@ -6,6 +6,19 @@
   weather reports through `CompressedPosition::weather()` and through
   object/item embedded weather helpers when their bodies start with compressed
   weather-symbol positions.
+- Added APRS-IS profile helpers for uppercase login callsign validation,
+  conservative filter validation, and q-construct diagnostics over raw TNC2
+  bytes.
+- Added owned-byte encoder helpers for generic payload, status, uncompressed
+  position, message, acknowledgement, rejection, bulletin, announcement,
+  telemetry, telemetry metadata, object, and item packets.
+- Added a safe interoperability fixture corpus covering APRS-IS q-construct,
+  KISS/TNC2, and LoRa APRS examples with tests for the expected parser versus
+  transport-diagnostic boundaries.
+- Added runtime-neutral service helpers for bounded duplicate suppression,
+  caller-reset packet-rate budgets, and semantic-family blocklists.
+- Added API-readiness, supply-chain, and `v3.0.0` breaking-change decision
+  documentation for the next major release track.
 - Updated the roadmap backup and GitHub Project #3 with the accepted `v2.1.0`
   through `v3.0.0` release series.
 - Documented the release-process rule that GitHub Project #3 and the

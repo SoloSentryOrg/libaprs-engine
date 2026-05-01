@@ -19,7 +19,7 @@ parser, preserving the protocol-first boundary.
 | --- | --- | --- | --- |
 | `aprs-transport-file` | Newline-separated byte buffers and files | Offline logs, stdin-style files | Bounded path helpers reject oversized batches and packet lines |
 | `aprs-transport-tcp` | Blocking `Read` and TCP address helpers | TCP-connected packet streams | Reader helpers reject oversized batches and packet lines; `TcpReadOptions` keeps connection and read timeouts caller-owned |
-| `aprs-transport-aprs-is` | APRS-IS login line and comment filtering | APRS-IS clients | Server comment lines are filtered before parsing and packet lines are bounded |
+| `aprs-transport-aprs-is` | APRS-IS login, filters, q constructs, and comment filtering | APRS-IS clients | Server comment lines are filtered before parsing and packet lines are bounded |
 | `aprs-transport-kiss` | KISS frame encoding and decoding | TNC, serial, or TCP KISS streams | Invalid escapes and oversized decoded payloads fail closed |
 | `aprs-transport-serial` | Serial-like byte readers | TNC serial pipelines | Reader helpers reject oversized batches and packet lines; serial configuration stays application-owned |
 | `aprs-transport-udp` | UDP datagram receive helper | Datagram packet input | Datagram length is bounded; caller owns socket binding and timeouts |
@@ -52,30 +52,50 @@ Use `read_packet_lines` only for already trusted and bounded byte slices. Use
 `try_read_packet_lines` or path/reader `*_with_limit` helpers for external
 input.
 
-## APRS-IS Reader
+## APRS-IS Profile And Reader
 
 ```rust
-use aprs_transport_aprs_is::{read_packet_lines_from_reader, AprsIsLogin};
+use aprs_transport_aprs_is::{
+    q_construct_from_tnc2, read_packet_lines_from_reader, AprsIsFilter, AprsIsLogin,
+};
 use libaprs_engine::parse_packet;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let filter = AprsIsFilter::new("r/49/-72/50 t/poimq")?;
     let login = AprsIsLogin {
         callsign: "N0CALL",
         passcode: -1,
         software: "libaprs-engine 2.0.0",
-        filter: Some("r/49/-72/50"),
+        filter: Some(filter.as_str()),
     };
-    assert!(login.line()?.ends_with("\r\n"));
+    assert!(login.profile_line()?.ends_with("\r\n"));
 
-    let input = std::io::Cursor::new(b"# banner\r\nN0CALL>APRS:>hello\n");
+    let input = std::io::Cursor::new(b"# banner\r\nN0CALL>APRS,TCPIP*,qAC,T2SERVER:>hello\n");
     for packet_bytes in read_packet_lines_from_reader(input)? {
-        let packet = parse_packet(&packet_bytes).map_err(|error| error.code())?;
-        println!("{}", packet.aprs_data().kind_name());
+        if let Some(q) = q_construct_from_tnc2(&packet_bytes) {
+            println!("q_construct={}", q.kind.code());
+        }
+
+        // q constructs are APRS-IS transport metadata. Normalize or handle
+        // them in application policy before passing packet bytes to the core
+        // parser's AX.25-like envelope.
+        let packet = parse_packet(b"N0CALL>APRS:>hello").map_err(|error| error.code())?;
+        println!("semantic={}", packet.aprs_data().kind_name());
     }
 
     Ok(())
 }
 ```
+
+The q-construct helper follows the
+[APRS-IS q construct](https://www.aprs-is.net/q.aspx) family and classifies
+known components such as `qAC`, `qAR`, `qAS`, and related variants while
+preserving the original path bytes for diagnostics.
+
+APRS-IS q constructs are transport metadata and include lowercase `q` path
+components. The core parser keeps its conservative AX.25-like address boundary,
+so checked-in APRS-IS q fixtures are used for transport diagnostics rather than
+silently weakening packet parsing.
 
 For reconnecting services, keep session ownership in the application. The
 compile-tested `crates/aprs-transport-aprs-is/examples/session_reconnect.rs`
@@ -181,14 +201,18 @@ fn encode_ax25_addr(callsign: &str, last: bool) -> [u8; 7] {
   production before adding new parser behavior.
 - Keep private callsigns, precise locations, and operator data out of checked-in
   corpora unless they are already public and safe to redistribute.
+- Use `crates/aprs-transport-corpus/tests/fixtures/interoperability/` for safe,
+  publishable APRS-IS, KISS/TNC2, and LoRa APRS fixture lines.
 
 ## Compile-Tested Examples
 
 The repository includes transport cookbook examples that compile under
 `cargo test --examples`:
 
+- `crates/aprs-transport-aprs-is/examples/profile.rs`
 - `crates/aprs-transport-aprs-is/examples/reader.rs`
 - `crates/aprs-transport-aprs-is/examples/session_reconnect.rs`
 - `crates/aprs-transport-kiss/examples/frame_pipeline.rs`
+- `crates/aprs-transport-kiss/examples/tcp_serial_profile.rs`
 - `crates/aprs-transport-udp/examples/datagram_ingest.rs`
 - `crates/aprs-transport-corpus/examples/replay.rs`

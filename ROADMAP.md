@@ -35,10 +35,10 @@ last synced on 2026-05-01.
 | `v2.0.0-rc.2`: Metadata And Org Migration Release Candidate | Done | Released 2026-05-01 |
 | `v2.0.0`: Final Major Release | Done | Released 2026-05-01 |
 | `v2.1.0`: APRS Conformance Depth | In progress | Not released |
-| `v2.2.0`: Interoperability Profiles | Todo | Not released |
-| `v2.3.0`: Encoding And Packet Construction | Todo | Not released |
-| `v2.4.0`: Production Service Toolkit | Todo | Not released |
-| `v2.5.0`: Assurance And API Readiness | Todo | Not released |
+| `v2.2.0`: Interoperability Profiles | In progress | Implementation slice on feature branch; not released |
+| `v2.3.0`: Encoding And Packet Construction | In progress | Implementation slice on feature branch; not released |
+| `v2.4.0`: Production Service Toolkit | In progress | Implementation slice on feature branch; not released |
+| `v2.5.0`: Assurance And API Readiness | In progress | Implementation slice on feature branch; not released |
 | `v3.0.0-rc.1`: Breaking API Candidate | Todo | Not released |
 | `v3.0.0`: Final Major Release | Todo | Not released |
 

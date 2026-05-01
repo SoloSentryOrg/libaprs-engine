@@ -132,6 +132,14 @@ installed:
 - Unit and integration tests for codec behavior.
 - Conformance fixtures for valid and malformed packets.
 - API compatibility tests for documented stable-intent API surfaces.
+- Encoder round-trip tests for packet families that already have parser
+  support, including message variants and telemetry metadata.
+- Service-helper tests for duplicate suppression, caller-reset rate budgets,
+  and semantic-family blocklists.
+- APRS-IS profile tests for login validation, filter validation, and q-construct
+  diagnostics.
+- Interoperability fixture tests for safe APRS-IS, KISS/TNC2, and LoRa APRS
+  captures, including the expected APRS-IS q-construct parser boundary.
 - Downstream feedback and migration docs for any soft-deprecated integration
   pattern.
 - Deterministic byte-fuzz tests to catch panics and raw-byte preservation

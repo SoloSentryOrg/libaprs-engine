@@ -59,8 +59,32 @@ change:
 - `PacketSource` and `PacketSink`
 - `TransportErrorCode`, `TransportErrorCode::code`, and
   `TransportErrorCode::diagnostic`
+- `encoder` module packet-construction helpers:
+  - `EncodeError` and `EncodeError::code`
+  - `encode_packet`
+  - `encode_status`
+  - `encode_uncompressed_position` and `UncompressedPositionEncoding`
+  - `encode_message`
+  - `encode_ack` and `encode_reject`
+  - `encode_bulletin` and `encode_announcement`
+  - `encode_telemetry`
+  - `encode_telemetry_metadata` and `TelemetryMetadataEncodingKind`
+  - `encode_object` and `ObjectEncoding`
+  - `encode_item` and `ItemEncoding`
+- `service` module runtime-neutral helpers:
+  - `DuplicateDecision` and `DuplicateWindow`
+  - `RateLimitDecision` and `PacketRateBudget`
+  - `SemanticFamily` and `SemanticBlocklist`
 - `aprs-transport-tcp::TcpReadOptions` and
   `read_packet_lines_from_tcp_addr_with_options`
+- `aprs-transport-aprs-is` profile helpers:
+  - `AprsIsFilter`
+  - `AprsIsProfileError`
+  - `AprsIsQConstruct` and `AprsIsQConstructKind`
+  - `AprsIsLogin::profile_line`
+  - `validate_aprs_is_callsign`
+  - `validate_aprs_is_filter`
+  - `q_construct_from_tnc2`
 - `DEFAULT_TRANSPORT_READ_LIMIT`
 - `read_all_with_limit`
 - `oversized_input_error`
@@ -75,6 +99,7 @@ compiles and exercises documented integration patterns for:
 - stable parse error and policy rejection codes
 - structured parser, policy, and transport diagnostics
 - stable observability events and optional metrics helpers
+- encoder and service-toolkit helper APIs
 - structured serde diagnostics as the preferred stable-integration alternative
   to ad hoc JSON contracts
 - TCP read-option builder methods used by transport integrations

@@ -1,7 +1,8 @@
 use std::io::Cursor;
 
 use aprs_transport_aprs_is::{
-    read_packet_lines_from_reader, read_packet_lines_from_reader_with_limit, AprsIsLogin,
+    q_construct_from_tnc2, read_packet_lines_from_reader, read_packet_lines_from_reader_with_limit,
+    validate_aprs_is_callsign, AprsIsFilter, AprsIsLogin, AprsIsProfileError, AprsIsQConstructKind,
 };
 
 #[test]
@@ -47,6 +48,73 @@ fn aprs_is_login_line_rejects_line_injection() {
 
         assert_eq!(error.code(), "aprs_is_login_line_injection");
     }
+}
+
+#[test]
+fn aprs_is_profile_login_requires_uppercase_callsign_and_valid_filter() {
+    let login = AprsIsLogin {
+        callsign: "N0CALL-7",
+        passcode: -1,
+        software: "libaprs-engine 2.1.0",
+        filter: Some("r/49/-72/50 t/poimq"),
+    };
+
+    assert_eq!(
+        login.profile_line().expect("profile login should encode"),
+        "user N0CALL-7 pass -1 vers libaprs-engine 2.1.0 filter r/49/-72/50 t/poimq\r\n"
+    );
+
+    let lowercase = AprsIsLogin {
+        callsign: "n0call",
+        passcode: -1,
+        software: "libaprs-engine 2.1.0",
+        filter: None,
+    };
+
+    assert_eq!(
+        lowercase.profile_line().expect_err("lowercase callsign"),
+        AprsIsProfileError::LowercaseCallsign
+    );
+}
+
+#[test]
+fn aprs_is_filter_validation_rejects_empty_tokens_and_line_injection() {
+    assert_eq!(
+        AprsIsFilter::new("r/49/-72/50 t/poimq")
+            .expect("valid filter")
+            .as_str(),
+        "r/49/-72/50 t/poimq"
+    );
+    assert_eq!(validate_aprs_is_callsign("N0CALL-15"), Ok(()));
+    assert_eq!(
+        validate_aprs_is_callsign("N0CALL-16"),
+        Err(AprsIsProfileError::InvalidCallsign)
+    );
+    assert_eq!(
+        AprsIsFilter::new("r/49/-72/50  t/poimq").expect_err("empty filter token"),
+        AprsIsProfileError::InvalidFilter
+    );
+    assert_eq!(
+        AprsIsFilter::new("r/49/-72/50\r\nbad").expect_err("line injection"),
+        AprsIsProfileError::LineInjection { field: "filter" }
+    );
+}
+
+#[test]
+fn aprs_is_q_construct_diagnostics_parse_raw_tnc2_paths() {
+    let packet = b"N0CALL>APRS,TCPIP*,qAC,T2SERVER:>status";
+    let construct = q_construct_from_tnc2(packet).expect("q construct should be found");
+
+    assert_eq!(construct.component, b"qAC");
+    assert_eq!(construct.next_component, Some(b"T2SERVER".as_slice()));
+    assert_eq!(construct.kind, AprsIsQConstructKind::VerifiedLogin);
+    assert_eq!(construct.kind.code(), "qac");
+
+    let gated =
+        q_construct_from_tnc2(b"N0CALL>APRS,WIDE1-1,qAR,IGATE:>rf").expect("qAR should be found");
+    assert_eq!(gated.kind, AprsIsQConstructKind::VerifiedIgate);
+
+    assert!(q_construct_from_tnc2(b"N0CALL>APRS,WIDE1-1:>rf").is_none());
 }
 
 #[test]

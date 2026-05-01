@@ -163,6 +163,54 @@ fn main() -> Result<(), libaprs_engine::ParseError> {
 }
 ```
 
+## Encode Packets
+
+```rust
+use libaprs_engine::{
+    encoder::{
+        encode_ack, encode_status, encode_telemetry, encode_telemetry_metadata,
+        encode_uncompressed_position, TelemetryMetadataEncodingKind, UncompressedPositionEncoding,
+    },
+    parse_packet,
+};
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let path = [b"APRS".as_slice(), b"WIDE1-1".as_slice()];
+    let status = encode_status(b"N0CALL", &path, b"hello")?;
+    assert_eq!(parse_packet(&status)?.summary().semantic, "status");
+
+    let position = encode_uncompressed_position(
+        b"N0CALL",
+        &path,
+        UncompressedPositionEncoding {
+            messaging: false,
+            latitude: b"4903.50N",
+            symbol_table: b'/',
+            longitude: b"07201.75W",
+            symbol_code: b'-',
+            comment: b"encoded",
+        },
+    )?;
+    assert_eq!(parse_packet(&position)?.summary().semantic, "position");
+
+    let telemetry = encode_telemetry(b"N0CALL", &path, 1, [111, 222, 33, 44, 55], None)?;
+    assert_eq!(parse_packet(&telemetry)?.summary().semantic, "telemetry");
+
+    let ack = encode_ack(b"N0CALL", &path, b"TARGET   ", b"42")?;
+    assert_eq!(parse_packet(&ack)?.summary().semantic, "message");
+
+    let metadata = encode_telemetry_metadata(
+        b"N0CALL",
+        &path,
+        TelemetryMetadataEncodingKind::Parameters,
+        b"Vbat,Temp",
+    )?;
+    assert_eq!(parse_packet(&metadata)?.summary().semantic, "telemetry_metadata");
+
+    Ok(())
+}
+```
+
 ## Inspect NMEA And Third-Party Data
 
 ```rust
@@ -198,9 +246,13 @@ fn main() -> Result<(), libaprs_engine::ParseError> {
 
 Compile-tested transport examples live with their crates:
 
+- `crates/libaprs-engine/examples/encode_packets.rs`
 - `crates/libaprs-engine/examples/service_ingest.rs`
+- `crates/libaprs-engine/examples/service_toolkit.rs`
+- `crates/aprs-transport-aprs-is/examples/profile.rs`
 - `crates/aprs-transport-aprs-is/examples/reader.rs`
 - `crates/aprs-transport-kiss/examples/frame_pipeline.rs`
+- `crates/aprs-transport-kiss/examples/tcp_serial_profile.rs`
 - `crates/aprs-transport-udp/examples/datagram_ingest.rs`
 - `crates/aprs-transport-corpus/examples/replay.rs`
 

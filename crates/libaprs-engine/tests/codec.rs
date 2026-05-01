@@ -1,4 +1,10 @@
 use libaprs_engine::{
+    encoder::{
+        encode_ack, encode_announcement, encode_bulletin, encode_item, encode_message,
+        encode_object, encode_reject, encode_status, encode_telemetry, encode_telemetry_metadata,
+        encode_uncompressed_position, EncodeError, ItemEncoding, ObjectEncoding,
+        TelemetryMetadataEncodingKind, UncompressedPositionEncoding,
+    },
     parse_packet, parse_packet_with_options, AprsData, Capability, CompressedPosition,
     DataTypeIdentifier, Item, Maidenhead, Message, MessageKind, MicE, MicEMessageCode,
     MicEStandardMessage, MicEStatus, Nmea, NmeaChecksum, Object, ParseError, ParseOptions,
@@ -24,6 +30,195 @@ fn valid_packet_preserves_exact_raw_bytes() {
     assert_eq!(parsed.payload(), b">hello world");
     assert_eq!(parsed.data_type_identifier(), DataTypeIdentifier::Status);
     assert_eq!(parsed.information(), b"hello world");
+}
+
+#[test]
+fn encoder_status_packet_round_trips_through_parser() {
+    let encoded = encode_status(
+        b"N0CALL",
+        &[b"APRS".as_slice(), b"WIDE1-1".as_slice()],
+        b"hello",
+    )
+    .expect("status packet should encode");
+
+    assert_eq!(encoded, b"N0CALL>APRS,WIDE1-1:>hello");
+
+    let parsed = parse_packet(&encoded).expect("encoded packet should parse");
+    assert_eq!(parsed.raw().as_bytes(), encoded.as_slice());
+    assert_eq!(parsed.source(), b"N0CALL");
+    assert_eq!(parsed.destination(), b"APRS");
+}
+
+#[test]
+fn encoder_rejects_invalid_address_and_oversized_packet_before_emitting() {
+    assert_eq!(
+        encode_status(b"n0call", &[b"APRS".as_slice()], b"hello"),
+        Err(EncodeError::LowercaseAddress)
+    );
+
+    let oversized = vec![b'A'; libaprs_engine::MAX_PACKET_LEN];
+    assert_eq!(
+        encode_status(b"N0CALL", &[b"APRS".as_slice()], &oversized),
+        Err(EncodeError::OversizedPacket)
+    );
+}
+
+#[test]
+fn encoder_position_message_and_telemetry_round_trip() {
+    let position = encode_uncompressed_position(
+        b"N0CALL",
+        &[b"APRS".as_slice()],
+        UncompressedPositionEncoding {
+            messaging: false,
+            latitude: b"4903.50N",
+            symbol_table: b'/',
+            longitude: b"07201.75W",
+            symbol_code: b'-',
+            comment: b"encoder",
+        },
+    )
+    .expect("position should encode");
+    assert_eq!(position, b"N0CALL>APRS:!4903.50N/07201.75W-encoder");
+    assert!(matches!(
+        parse_packet(&position)
+            .expect("position should parse")
+            .aprs_data(),
+        AprsData::Position(_)
+    ));
+
+    let message = encode_message(
+        b"N0CALL",
+        &[b"APRS".as_slice()],
+        b"TARGET   ",
+        b"hello",
+        Some(b"42"),
+    )
+    .expect("message should encode");
+    assert_eq!(message, b"N0CALL>APRS::TARGET   :hello{42");
+    let parsed = parse_packet(&message).expect("message should parse");
+    let AprsData::Message(message) = parsed.aprs_data() else {
+        panic!("expected message");
+    };
+    assert_eq!(message.text, b"hello");
+    assert_eq!(message.id, Some(b"42".as_slice()));
+
+    let telemetry = encode_telemetry(
+        b"N0CALL",
+        &[b"APRS".as_slice()],
+        1,
+        [111, 222, 33, 44, 55],
+        Some([true, false, true, false, true, false, true, false]),
+    )
+    .expect("telemetry should encode");
+    assert_eq!(telemetry, b"N0CALL>APRS:T#001,111,222,033,044,055,10101010");
+    let parsed = parse_packet(&telemetry).expect("telemetry should parse");
+    let AprsData::Telemetry(telemetry) = parsed.aprs_data() else {
+        panic!("expected telemetry");
+    };
+    assert_eq!(telemetry.analog_values(), Some([111, 222, 33, 44, 55]));
+}
+
+#[test]
+fn encoder_message_variants_and_metadata_round_trip() {
+    let ack = encode_ack(b"N0CALL", &[b"APRS".as_slice()], b"TARGET   ", b"42")
+        .expect("ack should encode");
+    assert_eq!(ack, b"N0CALL>APRS::TARGET   :ack42");
+    let parsed = parse_packet(&ack).expect("ack should parse");
+    let AprsData::Message(message) = parsed.aprs_data() else {
+        panic!("expected message");
+    };
+    assert_eq!(message.kind, MessageKind::Ack);
+
+    let rejection = encode_reject(b"N0CALL", &[b"APRS".as_slice()], b"TARGET   ", b"42")
+        .expect("rejection should encode");
+    assert_eq!(rejection, b"N0CALL>APRS::TARGET   :rej42");
+    let parsed = parse_packet(&rejection).expect("rejection should parse");
+    let AprsData::Message(message) = parsed.aprs_data() else {
+        panic!("expected message");
+    };
+    assert_eq!(message.kind, MessageKind::Reject);
+
+    let bulletin = encode_bulletin(b"N0CALL", &[b"APRS".as_slice()], b'1', b"bulletin")
+        .expect("bulletin should encode");
+    assert_eq!(bulletin, b"N0CALL>APRS::BLN1     :bulletin");
+    let parsed = parse_packet(&bulletin).expect("bulletin should parse");
+    let AprsData::Message(message) = parsed.aprs_data() else {
+        panic!("expected message");
+    };
+    assert_eq!(message.kind, MessageKind::Bulletin);
+
+    let announcement = encode_announcement(b"N0CALL", &[b"APRS".as_slice()], b'A', b"announce")
+        .expect("announcement should encode");
+    assert_eq!(announcement, b"N0CALL>APRS::BLNA     :announce");
+    let parsed = parse_packet(&announcement).expect("announcement should parse");
+    let AprsData::Message(message) = parsed.aprs_data() else {
+        panic!("expected message");
+    };
+    assert_eq!(message.kind, MessageKind::Announcement);
+
+    let metadata = encode_telemetry_metadata(
+        b"N0CALL",
+        &[b"APRS".as_slice()],
+        TelemetryMetadataEncodingKind::Parameters,
+        b"temp,volt",
+    )
+    .expect("telemetry metadata should encode");
+    assert_eq!(metadata, b"N0CALL>APRS::PARM.    :temp,volt");
+    let parsed = parse_packet(&metadata).expect("metadata should parse");
+    let AprsData::TelemetryMetadata(metadata) = parsed.aprs_data() else {
+        panic!("expected telemetry metadata");
+    };
+    assert_eq!(metadata.kind, TelemetryMetadataKind::ParameterNames);
+
+    assert_eq!(
+        encode_ack(b"N0CALL", &[b"APRS".as_slice()], b"TARGET   ", b""),
+        Err(EncodeError::InvalidField)
+    );
+    assert_eq!(
+        encode_message(
+            b"N0CALL",
+            &[b"APRS".as_slice()],
+            b"TARGET   ",
+            b"hello",
+            Some(b"bad\n")
+        ),
+        Err(EncodeError::InvalidField)
+    );
+}
+
+#[test]
+fn encoder_object_and_item_round_trip() {
+    let object = encode_object(
+        b"N0CALL",
+        &[b"APRS".as_slice()],
+        ObjectEncoding {
+            name: b"OBJECT   ",
+            live: true,
+            timestamp: b"092345z",
+            body: b"4903.50N/07201.75W-object",
+        },
+    )
+    .expect("object should encode");
+    assert_eq!(
+        object,
+        b"N0CALL>APRS:;OBJECT   *092345z4903.50N/07201.75W-object"
+    );
+    let parsed = parse_packet(&object).expect("object should parse");
+    assert!(matches!(parsed.aprs_data(), AprsData::Object(_)));
+
+    let item = encode_item(
+        b"N0CALL",
+        &[b"APRS".as_slice()],
+        ItemEncoding {
+            name: b"ITEM",
+            live: true,
+            body: b"4903.50N/07201.75W-item",
+        },
+    )
+    .expect("item should encode");
+    assert_eq!(item, b"N0CALL>APRS:)ITEM!4903.50N/07201.75W-item");
+    let parsed = parse_packet(&item).expect("item should parse");
+    assert!(matches!(parsed.aprs_data(), AprsData::Item(_)));
 }
 
 #[test]
