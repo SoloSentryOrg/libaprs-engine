@@ -55,19 +55,19 @@ fn aprs_is_profile_login_requires_uppercase_callsign_and_valid_filter() {
     let login = AprsIsLogin {
         callsign: "N0CALL-7",
         passcode: -1,
-        software: "libaprs-engine 2.1.0",
+        software: "libaprs-engine 2.5.0",
         filter: Some("r/49/-72/50 t/poimq"),
     };
 
     assert_eq!(
         login.profile_line().expect("profile login should encode"),
-        "user N0CALL-7 pass -1 vers libaprs-engine 2.1.0 filter r/49/-72/50 t/poimq\r\n"
+        "user N0CALL-7 pass -1 vers libaprs-engine 2.5.0 filter r/49/-72/50 t/poimq\r\n"
     );
 
     let lowercase = AprsIsLogin {
         callsign: "n0call",
         passcode: -1,
-        software: "libaprs-engine 2.1.0",
+        software: "libaprs-engine 2.5.0",
         filter: None,
     };
 

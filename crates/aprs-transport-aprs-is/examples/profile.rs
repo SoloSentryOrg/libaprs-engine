@@ -10,7 +10,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let login = AprsIsLogin {
         callsign: "N0CALL-7",
         passcode: -1,
-        software: "libaprs-engine 2.1.0",
+        software: "libaprs-engine 2.5.0",
         filter: Some(filter.as_str()),
     };
     assert!(login.profile_line()?.ends_with("\r\n"));

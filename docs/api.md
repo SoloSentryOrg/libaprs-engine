@@ -9,7 +9,7 @@ Use the package name `libaprs-engine` in `Cargo.toml` and the crate name
 
 ```toml
 [dependencies]
-libaprs-engine = "2.0.0"
+libaprs-engine = "2.5.0"
 ```
 
 For a local checkout:
@@ -497,7 +497,7 @@ raw bytes as byte arrays rather than assuming UTF-8.
 ```toml
 [dependencies]
 libaprs-engine = {
-  version = "2.0.0",
+  version = "2.5.0",
   features = ["serde"]
 }
 ```
@@ -529,8 +529,8 @@ growth. Network connection management remains application-owned.
 
 ```toml
 [dependencies]
-aprs-transport-aprs-is = "2.0.0"
-libaprs-engine = "2.0.0"
+aprs-transport-aprs-is = "2.5.0"
+libaprs-engine = "2.5.0"
 ```
 
 ```rust
@@ -544,7 +544,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let login = AprsIsLogin {
         callsign: "N0CALL",
         passcode: -1,
-        software: "libaprs-engine 2.0.0",
+        software: "libaprs-engine 2.5.0",
         filter: Some(filter.as_str()),
     };
     assert!(login.profile_line()?.ends_with("\r\n"));
@@ -583,8 +583,8 @@ bytes before handing packets to the core engine.
 
 ```toml
 [dependencies]
-aprs-transport-file = "2.0.0"
-libaprs-engine = "2.0.0"
+aprs-transport-file = "2.5.0"
+libaprs-engine = "2.5.0"
 ```
 
 ## TCP Transport Adapter
@@ -594,8 +594,8 @@ another `Read` implementation. This keeps network I/O outside the parser core.
 
 ```toml
 [dependencies]
-aprs-transport-tcp = "2.0.0"
-libaprs-engine = "2.0.0"
+aprs-transport-tcp = "2.5.0"
+libaprs-engine = "2.5.0"
 ```
 
 ```rust

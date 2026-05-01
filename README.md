@@ -16,10 +16,12 @@ telemetry, indexing, and diagnostics.
 - APRS engine with meaningful semantics, conformance fixtures,
   compatibility tests, examples, benchmark, optional transport adapters, and CLI
   inspector.
-- Current stable release: `v2.0.0`.
-- Previous release candidate: `v2.0.0-rc.2`; published to crates.io and marked
-  latest on GitHub Releases after secure review, local gates, remote CI, and
-  post-publication smoke checks passed.
+- Current stable release: `v2.5.0`.
+- `v2.5.0` publishes the additive APRS conformance, interoperability,
+  encoding, service-toolkit, and API-readiness work completed after `v2.0.0`.
+- Release publication requires clean secure review, local release gates, remote
+  CI, security gates, GitHub Release latest verification, and
+  post-publication smoke checks.
 - Public API is semver-protected from `1.0.0`. The public boundary is tracked in
   [Public API Boundary](docs/public-api.md).
 - Core runtime remains network-free and async-free. Optional `serde`
@@ -78,20 +80,20 @@ Use crates.io:
 
 ```toml
 [dependencies]
-libaprs-engine = "2.0.0"
-aprs-transport-file = "2.0.0"
-aprs-transport-tcp = "2.0.0"
-aprs-transport-aprs-is = "2.0.0"
-aprs-transport-kiss = "2.0.0"
-aprs-transport-serial = "2.0.0"
-aprs-transport-udp = "2.0.0"
-aprs-transport-http = "2.0.0"
-aprs-transport-file-watch = "2.0.0"
-aprs-transport-mqtt = "2.0.0"
-aprs-transport-ax25 = "2.0.0"
-aprs-transport-corpus = "2.0.0"
-aprs-transport-channel = "2.0.0"
-aprs-transport-async = "2.0.0"
+libaprs-engine = "2.5.0"
+aprs-transport-file = "2.5.0"
+aprs-transport-tcp = "2.5.0"
+aprs-transport-aprs-is = "2.5.0"
+aprs-transport-kiss = "2.5.0"
+aprs-transport-serial = "2.5.0"
+aprs-transport-udp = "2.5.0"
+aprs-transport-http = "2.5.0"
+aprs-transport-file-watch = "2.5.0"
+aprs-transport-mqtt = "2.5.0"
+aprs-transport-ax25 = "2.5.0"
+aprs-transport-corpus = "2.5.0"
+aprs-transport-channel = "2.5.0"
+aprs-transport-async = "2.5.0"
 ```
 
 Use a Git dependency when testing unreleased changes from this repository.
@@ -206,6 +208,8 @@ See [Security Model](docs/security.md) for details.
 - [Conformance Matrix](docs/conformance.md): APRS family support and known gaps.
 - [Verification](docs/verification.md): local checks and release gates.
 - [Release Checklist](docs/release.md): pre-release steps.
+- [`v2.5.0` Release Notes](docs/release-notes-v2.5.0.md): additive `2.x`
+  highlights and migration notes.
 - [Publishing](docs/publishing.md): crates.io package and publish workflow.
 - [Contributing](CONTRIBUTING.md): development rules, verification, and secure
   review checklist.

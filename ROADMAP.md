@@ -4,8 +4,8 @@
 
 - The next major version target is `v3.0.0`, but the project should earn it
   through production-focused `2.x` releases first.
-- Start with `v2.1.0` APRS conformance depth because it improves the product
-  immediately and creates evidence for later API decisions.
+- `v2.5.0` completed the planned `v2.1.0` through `v2.5.0` additive release
+  track in one published release.
 - Prioritise protocol coverage, interoperability, safe packet construction,
   production service building blocks, and release assurance before any breaking
   API cleanup.
@@ -34,11 +34,11 @@ last synced on 2026-05-01.
 | `v2.0.0-rc.1`: Breaking API Candidate | Done | Released 2026-04-30 |
 | `v2.0.0-rc.2`: Metadata And Org Migration Release Candidate | Done | Released 2026-05-01 |
 | `v2.0.0`: Final Major Release | Done | Released 2026-05-01 |
-| `v2.1.0`: APRS Conformance Depth | In progress | Not released |
-| `v2.2.0`: Interoperability Profiles | In progress | Implementation slice on feature branch; not released |
-| `v2.3.0`: Encoding And Packet Construction | In progress | Implementation slice on feature branch; not released |
-| `v2.4.0`: Production Service Toolkit | In progress | Implementation slice on feature branch; not released |
-| `v2.5.0`: Assurance And API Readiness | In progress | Implementation slice on feature branch; not released |
+| `v2.1.0`: APRS Conformance Depth | Done | Completed in `v2.5.0`; no standalone release |
+| `v2.2.0`: Interoperability Profiles | Done | Completed in `v2.5.0`; no standalone release |
+| `v2.3.0`: Encoding And Packet Construction | Done | Completed in `v2.5.0`; no standalone release |
+| `v2.4.0`: Production Service Toolkit | Done | Completed in `v2.5.0`; no standalone release |
+| `v2.5.0`: Assurance And API Readiness | Done | Released 2026-05-01 |
 | `v3.0.0-rc.1`: Breaking API Candidate | Todo | Not released |
 | `v3.0.0`: Final Major Release | Todo | Not released |
 
@@ -223,10 +223,10 @@ path and defensible release evidence.
 
 ## Recommended Execution Order
 
-- Start with `v2.1.0` because conformance depth improves product value and
-  creates better fixtures for all later releases.
-- Do not start breaking API work until `v2.5.0` records specific evidence that
-  an additive design is not enough.
+- `v2.5.0` completed the additive conformance, interoperability, encoding,
+  service-toolkit, and API-readiness track.
+- Do not start breaking API work until downstream feedback records specific
+  evidence that an additive design is not enough.
 - Keep each release independently reviewable and publishable.
 - Keep GitHub Project #3 as the live roadmap and update this file as its
   repository-backed snapshot.

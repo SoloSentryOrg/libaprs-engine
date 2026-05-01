@@ -4,105 +4,105 @@ version = 3
 
 [[package]]
 name = "aprs-cli"
-version = "2.0.0"
+version = "2.5.0"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-aprs-is"
-version = "2.0.0"
+version = "2.5.0"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-async"
-version = "2.0.0"
+version = "2.5.0"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-ax25"
-version = "2.0.0"
+version = "2.5.0"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-channel"
-version = "2.0.0"
+version = "2.5.0"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-corpus"
-version = "2.0.0"
+version = "2.5.0"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-file"
-version = "2.0.0"
+version = "2.5.0"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-file-watch"
-version = "2.0.0"
+version = "2.5.0"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-http"
-version = "2.0.0"
+version = "2.5.0"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-kiss"
-version = "2.0.0"
+version = "2.5.0"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-mqtt"
-version = "2.0.0"
+version = "2.5.0"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-serial"
-version = "2.0.0"
+version = "2.5.0"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-tcp"
-version = "2.0.0"
+version = "2.5.0"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "aprs-transport-udp"
-version = "2.0.0"
+version = "2.5.0"
 dependencies = [
  "libaprs-engine",
 ]
 
 [[package]]
 name = "libaprs-engine"
-version = "2.0.0"
+version = "2.5.0"
 dependencies = [
  "serde",
 ]
