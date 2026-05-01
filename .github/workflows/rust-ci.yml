@@ -131,16 +131,20 @@ jobs:
           rustup component add clippy rustfmt
           rustup component add clippy --toolchain 1.80.0
 
-      - name: Cache Cargo
+      - name: Cache Cargo registry
         uses: actions/cache@v5
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            target
           key: ${{ runner.os }}-cargo-release-script-${{ hashFiles('**/Cargo.lock', 'fuzz/Cargo.lock', 'examples/downstream-smoke/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-release-script-
+
+      - name: Cargo cache summary
+        if: always()
+        run: |
+          du -sh ~/.cargo/registry ~/.cargo/git 2>/dev/null || true
 
       - name: Compute advisory cache key
         id: advisory-cache
