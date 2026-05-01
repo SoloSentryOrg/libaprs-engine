@@ -13,6 +13,28 @@
   malformed packets, complete secure review, pass CI and security gates, publish
   crates.io packages, and create the GitHub Release.
 
+## Current Project Status
+
+GitHub Project
+[#3](https://github.com/orgs/SoloSentryOrg/projects/3) is the primary roadmap
+and project-management store. This table is the repository backup snapshot,
+last synced on 2026-05-01.
+
+| Version or epic | Project status | Release status |
+| --- | --- | --- |
+| `v1.1.0`: Production Ergonomics | Done | Released 2026-04-29 |
+| `v1.2.0`: APRS Conformance Expansion | Done | Completed in `v1.6.0`; no standalone release |
+| `v1.3.0`: Security And Abuse Resistance | Done | Completed in `v1.6.0`; no standalone release |
+| `v1.4.0`: Observability And Service Integration | Done | Completed in `v1.6.0`; no standalone release |
+| `v1.5.0`: Transport Maturity | Done | Completed in `v1.6.0`; no standalone release |
+| `v1.6.0`: Downstream Feedback And Deprecation Planning | Done | Released 2026-04-30 |
+| `v1.7.0`: Structured Packet Diagnostic API | Done | Released 2026-04-30 |
+| `v2.0.0-rc.1`: Breaking API Candidate | Done | Released 2026-04-30 |
+| `v2.0.0-rc.2`: Metadata And Org Migration Release Candidate | Done | Released 2026-05-01 |
+| `v2.0.0`: Final Major Release | In progress | Not released |
+
+Release evidence is recorded in [docs/release.md](docs/release.md).
+
 ## Release Principles
 
 - Protocol-first: callers pass bytes, accepted packets retain exact raw bytes,
