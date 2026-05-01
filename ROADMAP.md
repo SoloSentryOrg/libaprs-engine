@@ -31,7 +31,7 @@ last synced on 2026-05-01.
 | `v1.7.0`: Structured Packet Diagnostic API | Done | Released 2026-04-30 |
 | `v2.0.0-rc.1`: Breaking API Candidate | Done | Released 2026-04-30 |
 | `v2.0.0-rc.2`: Metadata And Org Migration Release Candidate | Done | Released 2026-05-01 |
-| `v2.0.0`: Final Major Release | In progress | Release preparation in progress |
+| `v2.0.0`: Final Major Release | Done | Released 2026-05-01 |
 
 Release evidence is recorded in [docs/release.md](docs/release.md).
 
