@@ -7,8 +7,8 @@
   diagnostic contracts instead.
 - Parser, policy, transport, and APRS semantic behavior are unchanged in this
   release candidate.
-- The final `v2.0.0` release must be promoted from a tested release candidate
-  after review time and clean gates.
+- The final `v2.0.0` release promotes the tested release-candidate line after
+  review time and clean gates.
 
 See [`v2.0.0` Breaking-Change Decision Record](v2-breaking-changes.md) for the
 current go/no-go status.
@@ -40,7 +40,7 @@ assert_eq!(diagnostic.semantic, "status");
 `to_diagnostic()` is available when the `serde` feature is enabled:
 
 ```toml
-libaprs-engine = { version = "2.0.0-rc.1", features = ["serde"] }
+libaprs-engine = { version = "2.0.0", features = ["serde"] }
 ```
 
 After, for application wire formats, define and version an application-owned
@@ -128,14 +128,14 @@ record marks it justified:
 - Rename broad parse, policy, or transport diagnostic names only when the old
   names cause real migration risk or ambiguity.
 
-## Release Candidate Gates
+## Final Release Gates
 
-Before publishing `v2.0.0-rc.1`:
+Before publishing final `v2.0.0`:
 
 - update this migration plan with exact breaking changes,
 - run `cargo-semver-checks` and record intentional breaks,
 - add compatibility tests for the replacement APIs,
-- run downstream smoke against the release-candidate crates,
+- run downstream smoke against the final crates after publication,
 - complete secure code review with no open findings,
 - pass local release gates and remote CI/security workflows, and
 - record release evidence in `docs/release.md`.
