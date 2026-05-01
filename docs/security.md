@@ -46,6 +46,14 @@ HTTP, corpus, file-watch, async, MQTT, UDP, KISS, and AX.25 helpers expose or
 use bounded variants for untrusted packet/frame input. Applications still own
 socket timeouts, cancellation, queue depth, retries, authentication, and TLS.
 
+Encoder helpers are not a transmit policy. They validate conservative packet
+shape and return owned bytes only; callers still own destination selection,
+authorization, rate limiting, logging, and transport transmission.
+
+Service toolkit helpers are also deliberately runtime-neutral. Duplicate
+suppression, packet-rate budgets, and semantic-family blocklists keep all
+storage, clocks, queues, and network behavior application-owned.
+
 ## Address Validation
 
 The codec accepts a conservative `source>path:payload` packet envelope:
@@ -62,6 +70,10 @@ The codec accepts a conservative `source>path:payload` packet envelope:
 This is intentionally conservative. Broader transport-specific decoding belongs
 outside the codec boundary and should hand validated packet bytes into this
 crate.
+
+The encoder module uses the same conservative address shape before emitting
+bytes. Lowercase address metadata fails before packet construction so callers do
+not accidentally transmit bytes the parser would reject.
 
 ## UTF-8 Handling
 

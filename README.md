@@ -23,23 +23,26 @@ telemetry, indexing, and diagnostics.
 - Public API is semver-protected from `1.0.0`. The public boundary is tracked in
   [Public API Boundary](docs/public-api.md).
 - Core runtime remains network-free and async-free. Optional `serde`
-  diagnostics, dependency-free `metrics` helpers, and separate transport
-  adapter crates are available.
+  diagnostics, dependency-free `metrics` helpers, owned-byte encoders,
+  runtime-neutral service helpers, and separate transport adapter crates are
+  available.
 - GitHub Actions workflow is active and checks Rust `1.80.0` plus stable,
   including formatting, tests, examples, metadata, docs, and clippy.
 
 ## Workspace Crates
 
 - `libaprs-engine`: library crate with packet types, parser, semantic views,
-  policy, engine orchestration, counters, structured diagnostics, shared transport
-  contracts, bounded-read helpers, and line transport.
+  policy, engine orchestration, counters, structured diagnostics, owned-byte
+  encoders, service helpers, shared transport contracts, bounded-read helpers,
+  and line transport.
 - `aprs-cli`: command-line packet inspector built on the library crate.
 - `aprs-transport-file`: optional file transport helper crate that reads packet
   files as bytes and returns newline-separated packet byte vectors.
 - `aprs-transport-tcp`: optional TCP transport helper crate that reads packet
   bytes from a reader or TCP address outside the parser core.
 - `aprs-transport-aprs-is`: optional APRS-IS helper crate for login line
-  framing and reader-backed packet splitting.
+  framing, profile validation, q-construct diagnostics, and reader-backed
+  packet splitting.
 - `aprs-transport-kiss`: optional KISS frame encode/decode helper crate.
 - `aprs-transport-serial`: optional serial-like reader helper crate.
 - `aprs-transport-udp`: optional UDP datagram helper crate.
@@ -174,6 +177,8 @@ See [Security Model](docs/security.md) for details.
 - [Examples](docs/examples.md): copyable integration patterns.
 - [Operations Guide](docs/operations.md): production deployment patterns,
   diagnostics, logging, limits, and safe defaults.
+- [Rust API Guidelines Audit](docs/api-guidelines-audit.md): public API audit
+  notes for current `2.x` development.
 - [JSON Schemas](docs/json-schemas.md): documented CLI and diagnostic JSON
   shapes for operational consumers.
 - [Transport Adapters](docs/transports.md): byte-preserving transport crate
@@ -181,14 +186,18 @@ See [Security Model](docs/security.md) for details.
 - [Transport Common Layer Review](docs/transport-common-layer.md): current
   shared transport trait decision and `v2.0.0` revisit criteria.
 - [Downstream Feedback](docs/downstream-feedback.md): integration pain points,
-  feedback intake, and evidence for `v2.0.0` planning.
+  feedback intake, and evidence for current-major planning.
 - [`v2.0.0` Migration Plan](docs/v2-migration.md): soft deprecations,
   migration guidance, and release-candidate gates.
-- [`v2.0.0` Breaking-Change Decisions](docs/v2-breaking-changes.md): current
-  go/no-go evidence for release-candidate API breaks.
+- [`v2.0.0` Breaking-Change Decisions](docs/v2-breaking-changes.md): completed
+  go/no-go evidence for the `v2.0.0` release-candidate API break.
+- [`v3.0.0` Breaking-Change Decisions](docs/v3-breaking-changes.md): current
+  go/no-go evidence for the next major release.
 - [Architecture](docs/architecture.md): boundaries, contracts, and pipeline.
 - [Security Model](docs/security.md): untrusted input handling and OWASP-aligned
   controls.
+- [Supply Chain Evidence](docs/supply-chain.md): dependency, SBOM, and release
+  evidence guidance.
 - [Threat Model](docs/threat-model.md): per-crate untrusted boundaries and
   abuse-resistance controls.
 - [Public API Boundary](docs/public-api.md): semver-protected public API surface,

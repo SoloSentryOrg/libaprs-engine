@@ -33,6 +33,46 @@ crates so the codec boundary stays deterministic and easy to review.
 - Preserve raw bytes in logs or evidence stores when investigating malformed
   input. Avoid UTF-8-only logging paths for packet payloads.
 
+## Service Toolkit Helpers
+
+The core crate exposes small runtime-neutral helpers for common ingestion
+policies:
+
+- `DuplicateWindow`: bounded exact-byte duplicate suppression for recent
+  packet bytes.
+- `PacketRateBudget`: caller-reset packet budget for simple rate limiting.
+- `SemanticBlocklist`: application-owned rejection helper for semantic
+  families such as unsupported or malformed packets.
+
+These helpers intentionally do not own clocks, queues, storage, network
+connections, or async runtimes.
+
+```rust
+use libaprs_engine::{
+    parse_packet,
+    service::{
+        DuplicateDecision, DuplicateWindow, PacketRateBudget, RateLimitDecision,
+        SemanticBlocklist, SemanticFamily,
+    },
+};
+
+fn main() -> Result<(), libaprs_engine::ParseError> {
+    let packet_bytes = b"N0CALL>APRS:>ops";
+    let mut duplicate_window = DuplicateWindow::new(1024);
+    let mut rate_budget = PacketRateBudget::new(500);
+    let blocked = SemanticBlocklist::new(&[SemanticFamily::Unsupported]);
+
+    if rate_budget.try_consume() == RateLimitDecision::Allowed
+        && duplicate_window.observe(packet_bytes) == DuplicateDecision::New
+    {
+        let packet = parse_packet(packet_bytes)?;
+        assert!(!blocked.rejects(&packet.aprs_data()));
+    }
+
+    Ok(())
+}
+```
+
 ## Diagnostics
 
 Structured diagnostics are available from:

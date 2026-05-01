@@ -178,6 +178,65 @@ Known unsupported semantic edge cases in the current `2.x` line include:
 - semantic validation of third-party nested packet policy beyond the nested
   codec envelope
 
+## Packet Encoding
+
+Use `libaprs_engine::encoder` when an application needs to construct APRS packet
+bytes before handing them to caller-owned transport code. Encoder helpers return
+owned `Vec<u8>` values and validate the same conservative address envelope used
+by the parser. They do not transmit, log, lowercase, trim, or otherwise
+normalize packet bytes.
+
+```rust
+use libaprs_engine::{
+    encoder::{
+        encode_ack, encode_status, encode_telemetry_metadata,
+        encode_uncompressed_position, TelemetryMetadataEncodingKind,
+        UncompressedPositionEncoding,
+    },
+    parse_packet,
+};
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let path = [b"APRS".as_slice(), b"WIDE1-1".as_slice()];
+
+    let status = encode_status(b"N0CALL", &path, b"hello")?;
+    assert_eq!(status, b"N0CALL>APRS,WIDE1-1:>hello");
+    assert_eq!(parse_packet(&status)?.summary().semantic, "status");
+
+    let position = encode_uncompressed_position(
+        b"N0CALL",
+        &path,
+        UncompressedPositionEncoding {
+            messaging: false,
+            latitude: b"4903.50N",
+            symbol_table: b'/',
+            longitude: b"07201.75W",
+            symbol_code: b'-',
+            comment: b"encoded",
+        },
+    )?;
+    assert_eq!(parse_packet(&position)?.summary().semantic, "position");
+
+    let ack = encode_ack(b"N0CALL", &path, b"TARGET   ", b"42")?;
+    assert_eq!(parse_packet(&ack)?.summary().semantic, "message");
+
+    let metadata = encode_telemetry_metadata(
+        b"N0CALL",
+        &path,
+        TelemetryMetadataEncodingKind::Parameters,
+        b"Vbat,Temp",
+    )?;
+    assert_eq!(parse_packet(&metadata)?.summary().semantic, "telemetry_metadata");
+
+    Ok(())
+}
+```
+
+Current encoder helpers cover generic payloads, status, uncompressed position,
+message, acknowledgement, rejection, bulletin, announcement, telemetry,
+telemetry metadata, object, and item packets. Use `aprs-transport-kiss` for KISS
+frame encoding because that framing boundary lives in the transport crate.
+
 ## Engine And Policy
 
 `Engine` combines codec parsing, semantic classification, policy decisions, and
@@ -236,6 +295,38 @@ let permissive = libaprs_engine::Policy::permissive();
 assert!(!strict.allow_unsupported);
 assert!(strict.reject_invalid_nmea_checksum);
 assert!(permissive.allow_unsupported);
+```
+
+## Service Toolkit
+
+Use `libaprs_engine::service` for small runtime-neutral helpers in long-running
+ingestion services. These helpers do not own clocks, storage, threads, sockets,
+or queues.
+
+```rust
+use libaprs_engine::{
+    parse_packet,
+    service::{
+        DuplicateDecision, DuplicateWindow, PacketRateBudget, RateLimitDecision,
+        SemanticBlocklist, SemanticFamily,
+    },
+};
+
+fn main() -> Result<(), libaprs_engine::ParseError> {
+    let packet_bytes = b"N0CALL>APRS:>service";
+    let mut duplicates = DuplicateWindow::new(128);
+    let mut budget = PacketRateBudget::new(100);
+    let blocked = SemanticBlocklist::new(&[SemanticFamily::Unsupported]);
+
+    if budget.try_consume() == RateLimitDecision::Allowed
+        && duplicates.observe(packet_bytes) == DuplicateDecision::New
+    {
+        let packet = parse_packet(packet_bytes)?;
+        assert!(!blocked.rejects(&packet.aprs_data()));
+    }
+
+    Ok(())
+}
 ```
 
 ## Line Transport
@@ -430,11 +521,11 @@ fn main() -> Result<(), libaprs_engine::ParseError> {
 
 ## APRS-IS Transport Adapter
 
-Use `aprs-transport-aprs-is` for APRS-IS login framing and reader-backed packet
-splitting. APRS-IS server comment lines beginning with `#` are ignored, packet
-bytes are preserved exactly, and reader-backed input is capped by default to
-avoid unbounded memory growth. Network connection management remains
-application-owned.
+Use `aprs-transport-aprs-is` for APRS-IS login framing, profile validation,
+q-construct diagnostics, and reader-backed packet splitting. APRS-IS server
+comment lines beginning with `#` are ignored, packet bytes are preserved
+exactly, and reader-backed input is capped by default to avoid unbounded memory
+growth. Network connection management remains application-owned.
 
 ```toml
 [dependencies]
@@ -443,22 +534,31 @@ libaprs-engine = "2.0.0"
 ```
 
 ```rust
-use aprs_transport_aprs_is::{read_packet_lines_from_reader, AprsIsLogin};
+use aprs_transport_aprs_is::{
+    q_construct_from_tnc2, read_packet_lines_from_reader, AprsIsFilter, AprsIsLogin,
+};
 use libaprs_engine::parse_packet;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let filter = AprsIsFilter::new("r/49/-72/50")?;
     let login = AprsIsLogin {
         callsign: "N0CALL",
         passcode: -1,
         software: "libaprs-engine 2.0.0",
-        filter: Some("r/49/-72/50"),
+        filter: Some(filter.as_str()),
     };
-    assert!(login.line()?.ends_with("\r\n"));
+    assert!(login.profile_line()?.ends_with("\r\n"));
 
-    let input = std::io::Cursor::new(b"# banner\r\nN0CALL>APRS:>hello\n");
+    let input = std::io::Cursor::new(b"# banner\r\nN0CALL>APRS,TCPIP*,qAC,T2SERVER:>hello\n");
     for line in read_packet_lines_from_reader(input)? {
-        let packet = parse_packet(&line).map_err(|error| error.code())?;
-        println!("{}", packet.aprs_data().kind_name());
+        if let Some(q) = q_construct_from_tnc2(&line) {
+            println!("q_construct={}", q.kind.code());
+        }
+
+        // APRS-IS q constructs are transport metadata. Parse a packet only
+        // after the application has chosen how to handle that metadata.
+        let packet = parse_packet(b"N0CALL>APRS:>hello").map_err(|error| error.code())?;
+        println!("semantic={}", packet.aprs_data().kind_name());
     }
 
     Ok(())

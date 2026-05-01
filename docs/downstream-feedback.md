@@ -53,7 +53,10 @@ Observed needs:
   paths,
 - saturating counters for telemetry,
 - bounded malformed raw-byte evidence, and
-- dependency-free metric helpers that do not choose a runtime.
+- dependency-free metric helpers that do not choose a runtime,
+- small runtime-neutral helpers for duplicate suppression, rate budgets, and
+  semantic-family rejection without pulling storage or async choices into the
+  crate.
 
 ### Transport Adapter Integrations
 
@@ -66,8 +69,22 @@ Observed needs:
 - byte-preserving packet/frame boundaries,
 - explicit read and packet-size limits,
 - caller-owned timeout, retry, reconnect, and backpressure decisions, and
+- profile helpers for APRS-IS filters, q constructs, and login validation
+  without requiring the parser core to accept transport-only path metadata,
 - narrow options structs instead of a broad transport framework in the current
   major release.
+
+### Packet Construction Integrations
+
+Applications that inspect or bridge APRS traffic also need safe packet
+construction for common packet families.
+
+Observed needs:
+
+- owned bytes that callers can choose to transmit, store, or discard,
+- parser-compatible address and length validation before bytes are emitted,
+- no implicit transport side effects, normalization, or logging, and
+- round-trip tests for packet families already supported by the parser.
 
 ## Pain Points And Current Decisions
 
@@ -76,6 +93,8 @@ Observed needs:
 | Diagnostic JSON | `ParsedPacket::to_json()` was convenient but could look like a stable wire schema. | Removed in `v2.0.0-rc.1` after `ParsedPacket::to_diagnostic()` shipped in `1.7.0`. | Keep CLI JSON as CLI-owned diagnostics and use structured Rust diagnostics or application-owned schemas for integrations. |
 | Semantic APIs | `AprsData` is useful but still expanding as APRS coverage deepens. | Keep additions source-compatible and preserve raw bytes. | Split stable envelope views from evolving semantic interpretations if field growth becomes awkward. |
 | Transport abstractions | Adapters share byte-oriented behavior but differ in runtime and failure ownership. | Keep `PacketSource`, `PacketSink`, `LineTransport`, and adapter-specific options. | Introduce stronger traits only if multiple downstream users need the same receive-loop contract. |
+| Encoding APIs | Encoders can be mistaken for a transmit framework. | Keep encoders as owned-byte constructors only; transport, auth, logging, and policy remain caller-owned. | Split encoder modules further only if additive growth becomes confusing. |
+| Service helpers | Long-running services need common policy building blocks but not a framework. | Add runtime-neutral duplicate, budget, and blocklist helpers. | Introduce richer policy composition only if downstream reports show repeated safe-use problems. |
 | Error taxonomy | Parse, policy, and transport diagnostics are structured, but some names may remain broader than future users want. | Keep codes stable and add detail additively. | Rename or split confusing codes only with migration evidence. |
 | Compatibility proof | Stable core APIs have tests, but transport option surfaces need explicit tripwires as adapters mature. | Expand compatibility tests with additive coverage. | Use semver checks plus downstream smoke before any release candidate. |
 

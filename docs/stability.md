@@ -78,6 +78,11 @@ change:
 - `PacketSink`
 - `TransportErrorCode::code`
 - `aprs-transport-tcp::TcpReadOptions`
+- `encoder` owned-byte packet construction helpers
+- `service` runtime-neutral duplicate, rate-budget, and semantic blocklist
+  helpers
+- `aprs-transport-aprs-is` profile helpers for login validation, filters, and
+  q-construct diagnostics
 - `DEFAULT_TRANSPORT_READ_LIMIT`
 - `read_all_with_limit`
 - `oversized_input_error`
