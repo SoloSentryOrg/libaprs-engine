@@ -88,6 +88,34 @@ Before running `scripts/publish-release.sh`, record or verify:
   only if GitHub Releases are unavailable and release evidence records the
   reason.
 
+## v2.0.0 Release Evidence
+
+- Tag: `v2.0.0`.
+- Commit: `6db0ce951f28a87de80cf67e1dc6d9c3614fa828`.
+- Scope: promotes the tested `v2.0.0-rc.2` release-candidate line to the final
+  `v2.0.0` major release, refreshes package versions, updates release notes,
+  and keeps parser, policy, transport, and CLI behavior unchanged from the
+  candidate.
+- Secure review: clean before PR creation, merge, tagging, and publication; no
+  open findings.
+- Local pre-publish gate:
+  `env -u CARGO_HOME scripts/verify-release.sh` passed on release-prep commit
+  `060f9b5cb207bf1d0b4ea0854b58145129bce5d2`, which had the same release tree
+  before merge.
+- Remote GitHub Actions: release PR #43 Rust CI run `25228101545`, security run
+  `25228101532`, docs run `25228101610`, and merge-gate run `25228101575`
+  passed; `main` push Rust CI run `25228146156`, security run `25228146208`,
+  and docs run `25228146184` passed for the release commit.
+- crates.io publication: all workspace crates published as `2.0.0`.
+- GitHub Release: `v2.0.0` created, marked latest, and verified at
+  <https://github.com/SoloSentryOrg/libaprs-engine/releases/tag/v2.0.0>.
+- Post-publication downstream smoke and package validation:
+  `env -u CARGO_HOME LIBAPRS_RUN_DOWNSTREAM_SMOKE=1 LIBAPRS_PACKAGE_ALL=1 scripts/verify-release.sh`
+  passed against crates.io and refreshed
+  `examples/downstream-smoke/Cargo.lock` with `2.0.0` checksums.
+- Notes: the release used the default Cargo home; the benchmark gate was skipped
+  because this release does not change parser performance-sensitive behavior.
+
 ## v2.0.0-rc.2 Release Evidence
 
 - Tag: `v2.0.0-rc.2`.
