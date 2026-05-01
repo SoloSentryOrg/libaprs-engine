@@ -114,6 +114,37 @@ scripts/verify-docs.sh
 git diff --check
 ```
 
+## v2.5.0 Release Evidence
+
+- Tag: `v2.5.0`.
+- Commit: `19ac3d819280c44cc646f81e271eada151670db9`.
+- Scope: publishes the additive `v2.1.0` through `v2.5.0` roadmap track in one
+  release, including compressed-position weather coverage, APRS-IS profile
+  helpers, owned-byte encoders, service helpers, interoperability fixtures,
+  API-guidelines audit evidence, supply-chain notes, and `v3.0.0` decision
+  records.
+- Release PR: <https://github.com/SoloSentryOrg/libaprs-engine/pull/48>.
+- Secure review: clean before PR creation, merge, tagging, and publication; no
+  open findings.
+- Local pre-publish gate: `scripts/verify-release.sh` passed on release-prep
+  commit `169d60f5aad2b8c6691d50ef40eb37f07502ec88`, which had the same
+  release tree before merge.
+- Remote GitHub Actions: release PR #48 Rust CI run `25232478540`, security run
+  `25232478560`, docs run `25232478536`, and merge-gate run `25232478552`
+  passed; `main` push Rust CI run `25232525074`, security run `25232525068`,
+  and docs run `25232525077` passed for the release commit.
+- crates.io publication: all workspace crates published as `2.5.0`.
+- GitHub Release: `v2.5.0` created, marked latest, and verified at
+  <https://github.com/SoloSentryOrg/libaprs-engine/releases/tag/v2.5.0>.
+- Post-publication downstream smoke and package validation:
+  `LIBAPRS_RUN_DOWNSTREAM_SMOKE=1 LIBAPRS_PACKAGE_ALL=1 scripts/verify-release.sh`
+  passed against crates.io and refreshed
+  `examples/downstream-smoke/Cargo.lock` with `2.5.0` checksums.
+- GitHub Project #3: `v2.1.0` through `v2.5.0` items marked `Done`, target date
+  set to 2026-05-01, and release evidence added to each item.
+- Notes: the release used the default Cargo home; the benchmark gate was skipped
+  because this release does not change parser performance-sensitive behavior.
+
 ## v2.0.0 Release Evidence
 
 - Tag: `v2.0.0`.
