@@ -2,7 +2,9 @@
 
 ## Unreleased
 
-- Started `v2.1.0` APRS conformance work by exposing compressed-position
+## 2.5.0 - 2026-05-01
+
+- Added `v2.1.0` APRS conformance depth by exposing compressed-position
   weather reports through `CompressedPosition::weather()` and through
   object/item embedded weather helpers when their bodies start with compressed
   weather-symbol positions.
@@ -23,6 +25,7 @@
   through `v3.0.0` release series.
 - Documented the release-process rule that GitHub Project #3 and the
   `ROADMAP.md` backup must be updated after every release.
+- Bumped all workspace crates to `2.5.0`.
 
 ## 2.0.0 - 2026-05-01
 
