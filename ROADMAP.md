@@ -31,7 +31,7 @@ last synced on 2026-05-01.
 | `v1.7.0`: Structured Packet Diagnostic API | Done | Released 2026-04-30 |
 | `v2.0.0-rc.1`: Breaking API Candidate | Done | Released 2026-04-30 |
 | `v2.0.0-rc.2`: Metadata And Org Migration Release Candidate | Done | Released 2026-05-01 |
-| `v2.0.0`: Final Major Release | In progress | Not released |
+| `v2.0.0`: Final Major Release | In progress | Release preparation in progress |
 
 Release evidence is recorded in [docs/release.md](docs/release.md).
 
@@ -166,9 +166,9 @@ not speculative cleanup.
 Priority: gated by `v1.6.0`. This release candidate should include only
 justified breaking changes.
 
-Current status: not approved for publication. The current decision record in
-`docs/v2-breaking-changes.md` found no concrete downstream issue evidence that
-justifies breaking `1.x` APIs yet.
+Current status: released as `v2.0.0-rc.1` on 2026-04-30. The decision record in
+`docs/v2-breaking-changes.md` approved one narrow breaking change and found no
+evidence justifying additional breaking changes.
 
 Possible breaking-change candidates:
 
@@ -196,7 +196,7 @@ fresh unproven build.
 Priority: final. Publish only after the release candidate has clean evidence and
 downstream review time.
 
-- Promote the tested release candidate.
+- Promote the tested `v2.0.0-rc.2` release candidate.
 - Publish crates in guarded dependency order.
 - Create or update the GitHub Release through `scripts/publish-release.sh`.
 - Keep the `1.x` to `2.0.0` migration guide prominent.

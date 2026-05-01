@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.0 - 2026-05-01
+
+- Promoted the tested `2.0.0-rc.2` release candidate to final `2.0.0`.
+- Kept the final major release scope narrow: the only intentional breaking
+  change remains the `ParsedPacket::to_json()` removal introduced and tested in
+  `2.0.0-rc.1`.
+- Updated README, API examples, transport examples, publishing guidance, and
+  downstream smoke dependencies to target `2.0.0`.
+- Bumped all workspace crates to `2.0.0`.
+
 ## 2.0.0-rc.2 - 2026-05-01
 
 - Refreshed package metadata after migrating the repository from the personal

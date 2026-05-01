@@ -13,13 +13,13 @@ mkdir -p "$tmp/crates/libaprs-engine" "$tmp/examples/downstream-smoke"
 cat >"$tmp/crates/libaprs-engine/Cargo.toml" <<'EOF'
 [package]
 name = "libaprs-engine"
-version = "2.0.0-rc.2"
+version = "2.0.0"
 EOF
 
 cat >"$tmp/examples/downstream-smoke/Cargo.toml" <<'EOF'
 [dependencies]
-libaprs-engine = { version = "2.0.0-rc.2", features = ["serde"] }
-aprs-transport-file = "2.0.0-rc.2"
+libaprs-engine = { version = "2.0.0", features = ["serde"] }
+aprs-transport-file = "2.0.0"
 EOF
 
 scripts/check-downstream-smoke-versions.sh \
@@ -28,7 +28,7 @@ scripts/check-downstream-smoke-versions.sh \
 
 cat >"$tmp/examples/downstream-smoke/Cargo.toml" <<'EOF'
 [dependencies]
-libaprs-engine = { version = "2.0.0-rc.2", features = ["serde"] }
+libaprs-engine = { version = "2.0.0", features = ["serde"] }
 aprs-transport-file = "1.7.0"
 EOF
 

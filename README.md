@@ -16,8 +16,8 @@ telemetry, indexing, and diagnostics.
 - APRS engine with meaningful semantics, conformance fixtures,
   compatibility tests, examples, benchmark, optional transport adapters, and CLI
   inspector.
-- Current tagged stable release: `v1.7.0`.
-- Current release candidate: `v2.0.0-rc.2`; published to crates.io and marked
+- Current stable release: `v2.0.0`.
+- Previous release candidate: `v2.0.0-rc.2`; published to crates.io and marked
   latest on GitHub Releases after secure review, local gates, remote CI, and
   post-publication smoke checks passed.
 - Public API is semver-protected from `1.0.0`. The public boundary is tracked in
@@ -75,20 +75,20 @@ Use crates.io:
 
 ```toml
 [dependencies]
-libaprs-engine = "2.0.0-rc.2"
-aprs-transport-file = "2.0.0-rc.2"
-aprs-transport-tcp = "2.0.0-rc.2"
-aprs-transport-aprs-is = "2.0.0-rc.2"
-aprs-transport-kiss = "2.0.0-rc.2"
-aprs-transport-serial = "2.0.0-rc.2"
-aprs-transport-udp = "2.0.0-rc.2"
-aprs-transport-http = "2.0.0-rc.2"
-aprs-transport-file-watch = "2.0.0-rc.2"
-aprs-transport-mqtt = "2.0.0-rc.2"
-aprs-transport-ax25 = "2.0.0-rc.2"
-aprs-transport-corpus = "2.0.0-rc.2"
-aprs-transport-channel = "2.0.0-rc.2"
-aprs-transport-async = "2.0.0-rc.2"
+libaprs-engine = "2.0.0"
+aprs-transport-file = "2.0.0"
+aprs-transport-tcp = "2.0.0"
+aprs-transport-aprs-is = "2.0.0"
+aprs-transport-kiss = "2.0.0"
+aprs-transport-serial = "2.0.0"
+aprs-transport-udp = "2.0.0"
+aprs-transport-http = "2.0.0"
+aprs-transport-file-watch = "2.0.0"
+aprs-transport-mqtt = "2.0.0"
+aprs-transport-ax25 = "2.0.0"
+aprs-transport-corpus = "2.0.0"
+aprs-transport-channel = "2.0.0"
+aprs-transport-async = "2.0.0"
 ```
 
 Use a Git dependency when testing unreleased changes from this repository.
