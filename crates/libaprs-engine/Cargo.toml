@@ -6,7 +6,7 @@ rust-version = "1.80"
 license = "MIT"
 description = "Protocol-first APRS engine core primitives"
 readme = "../../README.md"
-repository = "https://github.com/elodiejmirza/libaprs-engine"
+repository = "https://github.com/SoloSentryOrg/libaprs-engine"
 keywords = ["aprs", "packet", "radio", "parser", "protocol"]
 categories = ["parser-implementations", "encoding"]
 

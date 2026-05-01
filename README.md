@@ -2,7 +2,7 @@
 
 [![Crates.io](https://img.shields.io/crates/v/libaprs-engine.svg)](https://crates.io/crates/libaprs-engine)
 [![Docs.rs](https://docs.rs/libaprs-engine/badge.svg)](https://docs.rs/libaprs-engine)
-[![Rust CI](https://github.com/elodiejmirza/libaprs-engine/actions/workflows/rust-ci.yml/badge.svg)](https://github.com/elodiejmirza/libaprs-engine/actions/workflows/rust-ci.yml)
+[![Rust CI](https://github.com/SoloSentryOrg/libaprs-engine/actions/workflows/rust-ci.yml/badge.svg)](https://github.com/SoloSentryOrg/libaprs-engine/actions/workflows/rust-ci.yml)
 
 Protocol-first APRS parsing and inspection for Rust.
 
@@ -95,7 +95,7 @@ Use a Git dependency when testing unreleased changes from this repository.
 
 ```toml
 [dependencies]
-libaprs-engine = { git = "https://github.com/elodiejmirza/libaprs-engine", package = "libaprs-engine", branch = "main" }
+libaprs-engine = { git = "https://github.com/SoloSentryOrg/libaprs-engine", package = "libaprs-engine", branch = "main" }
 ```
 
 For local development from a checkout:

@@ -85,7 +85,7 @@ LIBAPRS_SECURITY_GATE=passed \
 LIBAPRS_REMOTE_CI=passed \
 LIBAPRS_GITHUB_RELEASE=publish \
 LIBAPRS_RELEASE_TAG=v1.0.1 \
-LIBAPRS_GITHUB_REPO=elodiejmirza/libaprs-engine \
+LIBAPRS_GITHUB_REPO=SoloSentryOrg/libaprs-engine \
 LIBAPRS_RELEASE_COMMIT="$(git rev-parse HEAD)" \
   scripts/publish-release.sh
 ```
@@ -114,7 +114,7 @@ CARGO_HOME=/tmp/libaprs-cargo-home \
   LIBAPRS_REMOTE_CI=passed \
   LIBAPRS_GITHUB_RELEASE=publish \
   LIBAPRS_RELEASE_TAG=v1.0.1 \
-  LIBAPRS_GITHUB_REPO=elodiejmirza/libaprs-engine \
+  LIBAPRS_GITHUB_REPO=SoloSentryOrg/libaprs-engine \
   LIBAPRS_RELEASE_COMMIT="$(git rev-parse HEAD)" \
   scripts/publish-release.sh
 ```
