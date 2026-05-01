@@ -6,6 +6,9 @@ Run local verification before using a new revision or submitting a change.
 
 Pull-request CI is optimized for fast feedback:
 
+- The `Merge Gate` workflow runs on every pull request and waits for the
+  checks required by the changed files, making it safe to use as the stable
+  required branch-protection check.
 - Rust `stable` runs formatting, tests, examples, metadata, docs, package
   validation, and clippy.
 - Rust `1.80.0` runs the MSRV compatibility checks that matter for this

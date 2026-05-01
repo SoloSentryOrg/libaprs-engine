@@ -3,6 +3,7 @@ set -eu
 
 workflow=".github/workflows/rust-ci.yml"
 docs_workflow=".github/workflows/docs.yml"
+merge_gate_workflow=".github/workflows/merge-gate.yml"
 failures=0
 
 note_failure() {
@@ -46,6 +47,9 @@ require_text "paths-ignore:" "Rust CI should skip docs-only pull requests and pu
 require_file "$docs_workflow" "docs-only fast-lane workflow should exist"
 require_text_in_file "$docs_workflow" "name: Docs" "docs workflow should have a stable name"
 require_text_in_file "$docs_workflow" "scripts/verify-docs.sh" "docs workflow should run the docs verifier"
+require_file "$merge_gate_workflow" "merge-gate workflow should exist for branch protection"
+require_text_in_file "$merge_gate_workflow" "name: Merge Gate" "merge-gate workflow should have a stable required-check name"
+require_text_in_file "$merge_gate_workflow" "scripts/check-merge-gate.sh" "merge-gate workflow should run the merge-gate verifier"
 
 release_cache_block="$(
   awk '
