@@ -1,0 +1,38 @@
+name: Docs
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths:
+      - "**/*.md"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/workflows/docs.yml"
+      - "scripts/verify-docs.sh"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "**/*.md"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/workflows/docs.yml"
+      - "scripts/verify-docs.sh"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docs:
+    name: Docs
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Verify docs
+        run: scripts/verify-docs.sh

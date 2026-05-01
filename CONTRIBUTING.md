@@ -21,6 +21,19 @@ Run the release gate before submitting changes:
 scripts/verify-release.sh
 ```
 
+For smaller pull requests, use focused checks first. Docs-only changes can run:
+
+```sh
+scripts/verify-docs.sh
+```
+
+Workflow or CI changes should also run:
+
+```sh
+scripts/check-workflow-optimizations.sh
+actionlint .github/workflows/*.yml
+```
+
 Use the default Cargo home for normal local development. When the default Cargo
 home is not writable, use a temporary Cargo home:
 

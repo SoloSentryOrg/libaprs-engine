@@ -6,6 +6,8 @@
 - Run `scripts/test-publish-release-guards.sh`.
 - Run `scripts/test-fuzz-corpus-guard.sh` and `scripts/check-fuzz-corpus.sh`
   when fuzz corpus entries or fuzz targets changed.
+- Run `scripts/check-workflow-optimizations.sh` and `scripts/verify-docs.sh`
+  when workflow, release-gate, or documentation behavior changes.
 - Complete a secure code review and fix all findings before publishing.
 - After `libaprs-engine` is published to crates.io, run package validation for
   dependent crates with `LIBAPRS_PACKAGE_ALL=1 scripts/verify-release.sh`.
@@ -20,6 +22,9 @@
   pinned `cargo-audit` and `cargo-deny` versions with
   `scripts/install-release-tools.sh` and runs both checks through
   `scripts/verify-release.sh`.
+- The release-script job is intentionally skipped for pull requests and runs on
+  `main` pushes or manual dispatch. Pull requests use the Rust matrix and docs
+  fast-lane checks for quicker feedback.
 - Security workflows install pinned prebuilt release/security tools instead of
   compiling them during each run. Tool archives are SHA256 verified before use.
 - GitHub Actions caches `~/.cargo/advisory-db` with a weekly key and older

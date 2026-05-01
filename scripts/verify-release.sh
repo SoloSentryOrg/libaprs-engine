@@ -30,6 +30,8 @@ LIBAPRS_MSRV="${LIBAPRS_MSRV:-1.80.0}"
 run scripts/test-publish-release-guards.sh
 run scripts/test-fuzz-corpus-guard.sh
 run scripts/test-downstream-smoke-version-guard.sh
+run scripts/check-workflow-optimizations.sh
+run scripts/verify-docs.sh
 run scripts/check-fuzz-corpus.sh
 run cargo fmt --all --check
 run cargo fmt --manifest-path fuzz/Cargo.toml --all --check
