@@ -100,8 +100,8 @@ override for a normal release. Set `LIBAPRS_GITHUB_RELEASE_NOTES_FILE=<path>`
 to publish curated release notes; otherwise the script asks GitHub to generate
 notes for the tag.
 
-In restricted environments where `~/.cargo` is not writable, keep Cargo state
-outside the repository:
+Use the default Cargo home for normal publication. In restricted environments
+where `~/.cargo` is not writable, keep Cargo state outside the repository:
 
 ```sh
 mkdir -p /tmp/libaprs-cargo-home

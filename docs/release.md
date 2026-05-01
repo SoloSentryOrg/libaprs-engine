@@ -36,10 +36,10 @@
   Releases; it encodes the crate publish order from `docs/publishing.md` and
   refuses to publish without explicit clean secure-review, gate, release-tag,
   and GitHub Release evidence.
-- In restricted environments where `~/.cargo` is not writable, use
-  `CARGO_HOME=/tmp/libaprs-cargo-home` for audit, deny, semver, package, and
-  publish commands. Copy crates.io credentials into that temporary Cargo home
-  only at runtime when publishing.
+- Use the default Cargo home for normal audit, deny, semver, package, and
+  publish commands. In restricted environments where `~/.cargo` is not
+  writable, use `CARGO_HOME=/tmp/libaprs-cargo-home` and copy crates.io
+  credentials into that temporary Cargo home only at runtime when publishing.
 
 ## Remote Gate
 

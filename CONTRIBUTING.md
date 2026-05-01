@@ -21,7 +21,8 @@ Run the release gate before submitting changes:
 scripts/verify-release.sh
 ```
 
-When the default Cargo home is not writable, use a temporary Cargo home:
+Use the default Cargo home for normal local development. When the default Cargo
+home is not writable, use a temporary Cargo home:
 
 ```sh
 mkdir -p /tmp/libaprs-cargo-home
