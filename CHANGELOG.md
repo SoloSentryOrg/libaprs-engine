@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.0-rc.2 - 2026-05-01
+
+- Refreshed package metadata after migrating the repository from
+  `elodiejmirza/libaprs-engine` to `SoloSentryOrg/libaprs-engine`.
+- Updated README, API examples, transport examples, publishing guidance, and
+  downstream smoke dependencies to target `2.0.0-rc.2`.
+- Bumped all workspace crates to `2.0.0-rc.2`.
+
 ## 2.0.0-rc.1 - 2026-04-30
 
 - Removed `ParsedPacket::to_json()` from the library public API. Use
