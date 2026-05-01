@@ -157,6 +157,7 @@ scripts/check-fuzz-corpus.sh
 
 ## Restricted Cargo Home
 
+Use the default Cargo home for normal local verification and release checks.
 Some sandboxed development environments can read `~/.cargo` but cannot write
 registry, package-cache, advisory, or lock files there. In those environments,
 use a writable temporary Cargo home outside the repository:
@@ -167,10 +168,10 @@ CARGO_HOME=/tmp/libaprs-cargo-home scripts/verify-release.sh
 ```
 
 For publishing from a restricted environment, copy crates.io credentials into
-that temporary Cargo home at runtime only, then run `cargo publish` with
-`CARGO_HOME=/tmp/libaprs-cargo-home`. Do not store Cargo credentials, registry
-caches, package caches, advisory databases, or temporary Cargo homes inside the
-repository.
+that temporary Cargo home at runtime only, then run `cargo publish` or
+`scripts/publish-release.sh` with `CARGO_HOME=/tmp/libaprs-cargo-home`. Do not
+store Cargo credentials, registry caches, package caches, advisory databases,
+or temporary Cargo homes inside the repository.
 
 ## Current Remote CI Status
 

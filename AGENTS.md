@@ -17,8 +17,11 @@
 ## Workflow
 
 - Use feature branches with the `codex/` prefix.
-- Use `CARGO_HOME=/tmp/libaprs-cargo-home` for Cargo commands that write
-  registry, advisory, package, or cache state.
+- Use the default Cargo home for normal local verification, packaging, audit,
+  deny, semver, and publish commands.
+- Use `CARGO_HOME=/tmp/libaprs-cargo-home` only when the default `~/.cargo`
+  path is not writable or Cargo registry, advisory, package, or cache writes
+  fail.
 - Prefer `scripts/verify-release.sh` for full local release verification.
 - Do not commit Cargo credentials, registry caches, package caches, advisory
   databases, or temporary Cargo homes.
