@@ -76,7 +76,7 @@ Before running `scripts/publish-release.sh`, record or verify:
 - `LIBAPRS_GITHUB_RELEASE=publish`: create or update the GitHub Release after
   crates.io publication and verify it is marked latest.
 - `LIBAPRS_RELEASE_TAG=<tag>`: the pushed release tag, for example `v1.0.1`.
-- `LIBAPRS_GITHUB_REPO=elodiejmirza/libaprs-engine`: the repository where the
+- `LIBAPRS_GITHUB_REPO=SoloSentryOrg/libaprs-engine`: the repository where the
   GitHub Release must be created. Use `LIBAPRS_GITHUB_RELEASE=skipped-documented`
   only if GitHub Releases are unavailable and release evidence records the
   reason.
@@ -99,7 +99,7 @@ Before running `scripts/publish-release.sh`, record or verify:
   run `25189100182` passed for the release commit.
 - crates.io publication: all workspace crates published as `2.0.0-rc.1`.
 - GitHub Release: `v2.0.0-rc.1` created, marked latest, and verified at
-  <https://github.com/elodiejmirza/libaprs-engine/releases/tag/v2.0.0-rc.1>.
+  <https://github.com/SoloSentryOrg/libaprs-engine/releases/tag/v2.0.0-rc.1>.
 - Post-publication downstream smoke:
   `CARGO_HOME=/tmp/libaprs-cargo-home LIBAPRS_RUN_DOWNSTREAM_SMOKE=1 LIBAPRS_PACKAGE_ALL=1 scripts/verify-release.sh`
   passed after refreshing the smoke project to target `2.0.0-rc.1`.
@@ -118,7 +118,7 @@ Before running `scripts/publish-release.sh`, record or verify:
   `25187254024` passed for the merge commit.
 - crates.io publication: all workspace crates published as `1.7.0`.
 - GitHub Release: `v1.7.0` created, marked latest, and verified at
-  <https://github.com/elodiejmirza/libaprs-engine/releases/tag/v1.7.0>.
+  <https://github.com/SoloSentryOrg/libaprs-engine/releases/tag/v1.7.0>.
 - Post-publication downstream smoke:
   `CARGO_HOME=/tmp/libaprs-cargo-home LIBAPRS_RUN_DOWNSTREAM_SMOKE=1 LIBAPRS_PACKAGE_ALL=1 scripts/verify-release.sh`
   passed against crates.io and refreshed
@@ -138,7 +138,7 @@ Before running `scripts/publish-release.sh`, record or verify:
   `25185287223` passed for the merge commit.
 - crates.io publication: all workspace crates published as `1.6.0`.
 - GitHub Release: `v1.6.0` created, marked latest, and verified at
-  <https://github.com/elodiejmirza/libaprs-engine/releases/tag/v1.6.0>.
+  <https://github.com/SoloSentryOrg/libaprs-engine/releases/tag/v1.6.0>.
 - Post-publication downstream smoke:
   `CARGO_HOME=/tmp/libaprs-cargo-home LIBAPRS_RUN_DOWNSTREAM_SMOKE=1 LIBAPRS_PACKAGE_ALL=1 scripts/verify-release.sh`
   passed against crates.io and refreshed
@@ -159,7 +159,7 @@ Before running `scripts/publish-release.sh`, record or verify:
   `25125723586` passed for the merge commit.
 - crates.io publication: all workspace crates published as `1.1.0`.
 - GitHub Release: `v1.1.0` created, marked latest, and verified at
-  <https://github.com/elodiejmirza/libaprs-engine/releases/tag/v1.1.0>.
+  <https://github.com/SoloSentryOrg/libaprs-engine/releases/tag/v1.1.0>.
 - Post-publication downstream smoke:
   `CARGO_HOME=/tmp/libaprs-cargo-home LIBAPRS_RUN_DOWNSTREAM_SMOKE=1 LIBAPRS_PACKAGE_ALL=1 scripts/verify-release.sh`
   passed against crates.io and refreshed
@@ -300,7 +300,7 @@ Before running `scripts/publish-release.sh`, record or verify:
 - Commit: release tag target (`git rev-list -n 1 v0.1.1`).
 - Local gate: passed on 2026-04-25.
 - Remote GitHub Actions: passed on 2026-04-25:
-  <https://github.com/elodiejmirza/libaprs-engine/actions/runs/24937390267>.
+  <https://github.com/SoloSentryOrg/libaprs-engine/actions/runs/24937390267>.
 - Notes: supersedes `v0.1.0` with MSRV clippy compatibility and Node.js
   24-compatible checkout action. Superseded by `v0.1.2`, `v0.1.3`,
   `v0.1.4`, and `v0.1.5`.
