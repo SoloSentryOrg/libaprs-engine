@@ -13,8 +13,14 @@ on:
           - "true"
   push:
     branches: ["main"]
+    paths-ignore:
+      - "**/*.md"
+      - ".github/ISSUE_TEMPLATE/**"
   pull_request:
     branches: ["main"]
+    paths-ignore:
+      - "**/*.md"
+      - ".github/ISSUE_TEMPLATE/**"
 
 permissions:
   contents: read
@@ -49,43 +55,54 @@ jobs:
       - name: Install components
         run: rustup component add clippy rustfmt
 
-      - name: Cache Cargo
+      - name: Cache Cargo registry
         uses: actions/cache@v5
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            target
           key: ${{ runner.os }}-cargo-${{ matrix.toolchain }}-${{ hashFiles('**/Cargo.lock', 'fuzz/Cargo.lock', 'examples/downstream-smoke/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-${{ matrix.toolchain }}-
 
+      - name: Cargo cache summary
+        if: always()
+        run: |
+          du -sh ~/.cargo/registry ~/.cargo/git 2>/dev/null || true
+
       - name: Format
+        if: ${{ matrix.toolchain == 'stable' }}
         run: cargo fmt --all --check
 
       - name: Format fuzz workspace
+        if: ${{ matrix.toolchain == 'stable' }}
         run: cargo fmt --manifest-path fuzz/Cargo.toml --all --check
 
       - name: Test
+        if: ${{ matrix.toolchain == 'stable' }}
         run: cargo test
 
       - name: Test all features
         run: cargo test --all-features
 
       - name: Test examples
+        if: ${{ matrix.toolchain == 'stable' }}
         run: cargo test --examples
 
       - name: Metadata
+        if: ${{ matrix.toolchain == 'stable' }}
         run: cargo metadata --no-deps --format-version 1
 
       - name: Docs
+        if: ${{ matrix.toolchain == 'stable' }}
         run: cargo doc --no-deps --all-features
 
       - name: Package
+        if: ${{ matrix.toolchain == 'stable' }}
         run: cargo package -p libaprs-engine
 
       - name: Downstream smoke
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.downstream_smoke == 'true' }}
+        if: ${{ matrix.toolchain == 'stable' && github.event_name == 'workflow_dispatch' && inputs.downstream_smoke == 'true' }}
         run: cargo check --manifest-path examples/downstream-smoke/Cargo.toml
 
       - name: Clippy
@@ -93,6 +110,7 @@ jobs:
 
   release-script:
     name: Release script
+    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
 

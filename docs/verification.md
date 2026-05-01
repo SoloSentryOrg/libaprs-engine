@@ -2,6 +2,47 @@
 
 Run local verification before using a new revision or submitting a change.
 
+## Quick PR Verification
+
+Pull-request CI is optimized for fast feedback:
+
+- Rust `stable` runs formatting, tests, examples, metadata, docs, package
+  validation, and clippy.
+- Rust `1.80.0` runs the MSRV compatibility checks that matter for this
+  workspace: all-features tests and clippy.
+- The release-script job does not run on pull requests; it remains a full
+  release gate for `main` pushes and manual dispatch.
+- Docs-only pull requests skip Rust CI and run the `Docs` workflow, which calls
+  `scripts/verify-docs.sh`.
+
+For a quick local pre-PR check, run the focused commands for the files you
+changed, plus the relevant guard scripts:
+
+```sh
+scripts/check-workflow-optimizations.sh
+scripts/verify-docs.sh
+cargo test
+cargo clippy --all-targets --all-features -- -D warnings
+```
+
+## Full Release Verification
+
+Use the full release gate before tagging, publishing, or merging release
+preparation work:
+
+```sh
+scripts/verify-release.sh
+```
+
+The release gate runs the workflow, docs, fuzz-corpus, publish-guard, parser,
+transport, package, MSRV, semver, audit, deny, and fuzz compile checks when the
+corresponding tools are installed. Post-publication checks can enable
+crates.io downstream smoke and all dependent package validation:
+
+```sh
+LIBAPRS_RUN_DOWNSTREAM_SMOKE=1 LIBAPRS_PACKAGE_ALL=1 scripts/verify-release.sh
+```
+
 ## Required Local Checks
 
 ```sh
@@ -154,6 +195,21 @@ Run corpus hygiene before committing new seeds:
 ```sh
 scripts/check-fuzz-corpus.sh
 ```
+
+## Codex Environment Startup
+
+The local Codex environment startup script uses the default Cargo home and
+skips already-installed release/security tools when the expected versions are
+available. It installs or verifies:
+
+- Rust `stable`, `1.80.0`, and `nightly`.
+- `rustfmt` and `clippy` on stable.
+- `clippy` on `1.80.0` for the MSRV clippy gate.
+- `cargo-audit`, `cargo-deny`, `cargo-semver-checks`, and `cargo-fuzz`.
+
+If rustup reports permission errors under `~/.rustup`, repair local Rustup
+directory ownership outside the repository before rerunning setup. Do not store
+toolchains, Cargo caches, advisory databases, or credentials in the repository.
 
 ## Restricted Cargo Home
 
