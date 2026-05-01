@@ -165,3 +165,5 @@ creation or documented GitHub Release skip.
 - Tag only after package validation and CI both pass.
 - Confirm the GitHub Release for the release tag is marked latest before
   closing the release.
+- Update GitHub Project #3 and the `ROADMAP.md` backup snapshot after every
+  release before treating the release as complete.

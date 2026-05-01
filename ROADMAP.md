@@ -12,7 +12,8 @@
 - Reserve `v3.0.0` for deliberate, evidence-backed breaking changes only.
 - Every release must preserve raw bytes, fail closed on malformed packet shape,
   complete secure review, pass local and remote gates, publish crates.io
-  packages, and create GitHub Release evidence.
+  packages, create GitHub Release evidence, update GitHub Project #3, and sync
+  this roadmap backup.
 
 ## Current Project Status
 
@@ -229,6 +230,8 @@ path and defensible release evidence.
 - Keep each release independently reviewable and publishable.
 - Keep GitHub Project #3 as the live roadmap and update this file as its
   repository-backed snapshot.
+- After each release, update GitHub Project #3 first and then sync this file
+  with the release date, project status, release status, and evidence links.
 - Do not publish any release unless secure review, local gates, security gates,
   remote CI, crates.io publication, GitHub Release evidence, and post-publication
   smoke checks are complete.

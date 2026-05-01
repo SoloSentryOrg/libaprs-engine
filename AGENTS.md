@@ -35,3 +35,6 @@
   security gates, and GitHub Release evidence are clean.
 - Use `scripts/publish-release.sh` for crates.io publication so GitHub Release
   publication and latest-release verification are enforced.
+- After each release, update GitHub Project #3 as the primary roadmap store and
+  update `ROADMAP.md` as the repository backup before treating the release as
+  closed.
