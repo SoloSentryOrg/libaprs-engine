@@ -8,7 +8,7 @@ semantic coverage and known gaps for APRS101 packet families.
 | Status | Supported | Byte-preserving text | Invalid UTF-8 allowed |
 | Uncompressed position | Supported | Decimal coordinates, embedded weather report when symbol code is `_` | Conservative coordinate validation |
 | Timestamped position | Supported | Timestamp bytes, decimal coordinates, embedded weather report when symbol code is `_` | Timestamp shape validated |
-| Compressed position | Supported | Decimal coordinates | Extension bytes preserved |
+| Compressed position | Supported | Decimal coordinates, embedded weather report when symbol code is `_` | Extension bytes preserved |
 | Message | Supported | Kind classification, message ID | Addressee content remains bytes |
 | Bulletin | Supported | Message kind | Classified via addressee |
 | Announcement | Supported | Message kind | Classified via addressee |
@@ -16,7 +16,7 @@ semantic coverage and known gaps for APRS101 packet families.
 | Reject | Supported | Message kind | `rej` prefix |
 | Object | Supported | Name, liveness, timestamp, body, coordinates/weather when body starts with a supported position | Timestamp shape validated; body preserved |
 | Item | Supported | Name, liveness, body, coordinates/weather when body starts with a supported position | Body preserved |
-| Weather | Supported | Positionless and weather-symbol position reports, common numeric fields, luminosity, snow, raw rain counter | Empty reports are malformed; invalid optional fields are ignored |
+| Weather | Supported | Positionless, uncompressed weather-symbol, and compressed weather-symbol reports, common numeric fields, luminosity, snow, raw rain counter | Empty reports are malformed; invalid optional fields are ignored |
 | Telemetry | Supported | Sequence, analog, digital bits | Report values preserved and numerically decoded when safe |
 | Telemetry metadata | Supported | Parameter names, units, equations, bit sense | `PARM.`, `UNIT.`, `EQNS.`, and `BITS.` message packets |
 | Query | Supported | Query bytes | Query body preserved |
@@ -39,7 +39,6 @@ semantic coverage and known gaps for APRS101 packet families.
 
 ## Known Unsupported Edge Cases
 
-- Compressed-position weather extraction is not exposed yet.
 - Mic-E altitude, ambiguity, and telemetry extension decoding are not exposed
   yet.
 - Capability body fields remain byte-preserving and are not split into typed

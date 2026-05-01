@@ -146,12 +146,13 @@ Current semantic families include:
 Semantic helper methods include:
 
 - `Position::coordinates()` and `CompressedPosition::coordinates()`
-- `Position::weather()` and `TimestampedPosition::weather()` when the symbol
-  code is `_` and the position comment carries weather bytes
+- `Position::weather()`, `TimestampedPosition::weather()`, and
+  `CompressedPosition::weather()` when the symbol code is `_` and the position
+  comment carries weather bytes
 - `Object::coordinates()` and `Item::coordinates()` when their bodies start
   with supported APRS position encodings
 - `Object::weather()` and `Item::weather()` when their bodies start with an
-  uncompressed weather-symbol position
+  uncompressed or compressed weather-symbol position
 - `Weather::fields()` for wind, temperature, rain, humidity, pressure,
   luminosity, snow, and raw rain counter values
 - `Telemetry::sequence_number()`, `Telemetry::analog_values()`, and
@@ -170,9 +171,8 @@ Semantic malformed handling is explicit and byte-preserving:
 - unsupported identifiers remain `AprsData::Unsupported` instead of being
   guessed as another packet family
 
-Known unsupported semantic edge cases in the current `1.x` line include:
+Known unsupported semantic edge cases in the current `2.x` line include:
 
-- compressed-position weather extraction
 - Mic-E altitude, ambiguity, and telemetry extension decoding
 - capability body field splitting
 - semantic validation of third-party nested packet policy beyond the nested

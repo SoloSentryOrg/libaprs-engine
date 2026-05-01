@@ -2,16 +2,17 @@
 
 ## BLUF
 
-- The next major version target is `v2.0.0`, but the project should earn it
-  through production-focused `1.x` releases first.
-- Reserve `v2.0.0` for deliberate breaking changes: API cleanup, stronger type
-  contracts, and clearer transport/runtime boundaries.
-- Prioritise production usability, conformance depth, security assurance,
-  observability, then API redesign.
-- Do not break `1.x` APIs until there is real evidence from downstream use.
-- Every release must keep the current rules: preserve raw bytes, fail closed on
-  malformed packets, complete secure review, pass CI and security gates, publish
-  crates.io packages, and create the GitHub Release.
+- The next major version target is `v3.0.0`, but the project should earn it
+  through production-focused `2.x` releases first.
+- Start with `v2.1.0` APRS conformance depth because it improves the product
+  immediately and creates evidence for later API decisions.
+- Prioritise protocol coverage, interoperability, safe packet construction,
+  production service building blocks, and release assurance before any breaking
+  API cleanup.
+- Reserve `v3.0.0` for deliberate, evidence-backed breaking changes only.
+- Every release must preserve raw bytes, fail closed on malformed packet shape,
+  complete secure review, pass local and remote gates, publish crates.io
+  packages, and create GitHub Release evidence.
 
 ## Current Project Status
 
@@ -32,6 +33,13 @@ last synced on 2026-05-01.
 | `v2.0.0-rc.1`: Breaking API Candidate | Done | Released 2026-04-30 |
 | `v2.0.0-rc.2`: Metadata And Org Migration Release Candidate | Done | Released 2026-05-01 |
 | `v2.0.0`: Final Major Release | Done | Released 2026-05-01 |
+| `v2.1.0`: APRS Conformance Depth | In progress | Not released |
+| `v2.2.0`: Interoperability Profiles | Todo | Not released |
+| `v2.3.0`: Encoding And Packet Construction | Todo | Not released |
+| `v2.4.0`: Production Service Toolkit | Todo | Not released |
+| `v2.5.0`: Assurance And API Readiness | Todo | Not released |
+| `v3.0.0-rc.1`: Breaking API Candidate | Todo | Not released |
+| `v3.0.0`: Final Major Release | Todo | Not released |
 
 Release evidence is recorded in [docs/release.md](docs/release.md).
 
@@ -40,180 +48,187 @@ Release evidence is recorded in [docs/release.md](docs/release.md).
 - Protocol-first: callers pass bytes, accepted packets retain exact raw bytes,
   and malformed packet shape fails closed.
 - Security-first: treat every packet and transport input as untrusted.
-- Semver-discipline: keep `1.x` additive unless a security issue requires a
+- Semver discipline: keep `2.x` additive unless a security issue requires a
   documented exception.
 - Evidence-based: require conformance fixtures, compatibility tests, release
   gates, and release evidence for each published version.
 - Runtime isolation: keep the core parser network-free and async-free; put
   integration concerns in optional crates or examples.
+- Major-version restraint: do not break `2.x` APIs until there is real
+  downstream or maintenance evidence that an additive design is not enough.
 
-## 1. `v1.1.0`: Production Ergonomics
+## Research Signals
 
-Priority: highest. This release should make the existing `1.0.0` API easier to
-operate without changing its compatibility contract.
+- APRS 1.0, 1.1, and 1.2 remain the primary protocol references. The `1.2`
+  proposal list highlights telemetry range updates, `!DAO!`, frequency
+  extension, Mic-E type-code work, weather extensions, and message variants.
+- APRS-IS interoperability depends on TNC2 monitor format, server-side filters,
+  q-construct handling, uppercase callsign expectations, and TCP/WebSocket
+  connection modes.
+- Existing parser ecosystems set expectations for broad semantic extraction
+  across normal and compressed positions, Mic-E, NMEA, objects, items, messages,
+  telemetry, and weather packets.
+- LoRa APRS deployments commonly expose KISS over TCP or serial, so KISS and
+  byte-preserving TNC boundaries should remain prominent.
+- Rust API maturity should continue to follow the Rust API Guidelines:
+  documented public APIs, meaningful errors, common traits, caller control,
+  type-safe options, and future-proof struct boundaries.
 
-- Add richer structured diagnostics for parser, policy, and transport errors.
-- Add machine-readable support matrix output from the CLI.
-- Improve examples for common integrations:
-  - APRS-IS reader
-  - KISS stream
-  - file corpus replay
-  - service ingestion
-- Add operator-focused documentation for deployment patterns, logging, limits,
-  and safe defaults.
-- Keep API changes additive only.
+## 1. `v2.1.0`: APRS Conformance Depth
 
-Target outcome: downstream developers can adopt `libaprs-engine` in production
-workflows with clearer diagnostics and fewer integration decisions.
+Priority: highest. This release should close known semantic gaps and make the
+support matrix more defensible without breaking the `2.x` API.
 
-## 2. `v1.2.0`: APRS Conformance Expansion
+- Add conformance tests and fixtures for currently partial or documented gaps:
+  - compressed-position weather extraction,
+  - Mic-E altitude, ambiguity, and telemetry extensions,
+  - third-party nested packet helper behavior,
+  - `!DAO!` high-precision position extension,
+  - PHG, range, altitude, and frequency comment extensions,
+  - telemetry values in the `000-999` range, and
+  - APRS message variants from the `1.2` proposal list where they can be
+    represented additively.
+- Keep malformed semantic payloads visible to policy instead of panicking or
+  lossy-decoding.
+- Update `docs/conformance.md`, `docs/api.md`, and the support matrix as
+  semantic gaps close.
+- Add fixtures before implementation and preserve exact packet bytes in every
+  accepted case.
 
-Priority: high. This release should deepen protocol coverage and make the
-support matrix more defensible.
+Target outcome: `libaprs-engine` has materially broader APRS semantic coverage
+and clearer evidence for what is supported, partial, malformed, and unsupported.
 
-- Expand APRS101 fixture coverage with more real-world packet families.
-- Add malformed semantic fixtures for:
-  - weather
-  - Mic-E
-  - telemetry
-  - object and item packets
-  - third-party packets
-- Add conformance matrix tests proving every documented family has valid and
-  invalid coverage.
-- Improve semantic field extraction where current support is intentionally
-  partial.
-- Publish known unsupported edge cases explicitly.
+## 2. `v2.2.0`: Interoperability Profiles
 
-Target outcome: documentation, tests, and parser behavior stay aligned as APRS
-semantic support grows.
+Priority: high. This release should prove the crate works well with common APRS
+network and TNC-style deployments.
 
-## 3. `v1.3.0`: Security And Abuse Resistance
+- Add APRS-IS profile helpers and tests for:
+  - login line validation,
+  - filter string construction and validation,
+  - q-construct diagnostics,
+  - uppercase callsign expectations, and
+  - documented TCP/WebSocket integration boundaries.
+- Add KISS TCP and serial examples that map cleanly to Dire Wolf and LoRa APRS
+  TNC use cases.
+- Add an interoperability fixture corpus for APRS-IS, KISS, and LoRa APRS
+  packet captures that are safe to publish.
+- Keep authentication, reconnect loops, TLS, and runtime ownership outside the
+  core parser.
 
-Priority: high. This release should raise confidence for hostile or malformed
-input at scale.
+Target outcome: downstream users can wire the project into common APRS-IS,
+KISS, and LoRa APRS deployments without guessing at safe byte boundaries.
 
-- Add deeper fuzz campaigns and minimized regression corpus management.
-- Add resource-exhaustion tests across parser and transport boundaries.
-- Add threat-model documentation for each crate.
-- Strengthen dependency policy gates:
-  - license allowlist
-  - advisory checks
-  - duplicate crate review
-  - source allowlist
-- Add release evidence requirements for fuzz and security review results.
+## 3. `v2.3.0`: Encoding And Packet Construction
 
-Target outcome: the project has stronger OWASP-aligned evidence for untrusted
-packet handling, dependency hygiene, and parser resilience.
+Priority: medium-high. This release should add safe packet construction while
+preserving the parser's byte-first contract.
 
-## 4. `v1.4.0`: Observability And Service Integration
+- Add additive encoder APIs for:
+  - status packets,
+  - uncompressed position packets,
+  - object and item packets,
+  - messages, acknowledgements, bulletins, and announcements,
+  - telemetry reports and metadata packets,
+  - APRS-IS login lines, and
+  - KISS frames where the transport crate already owns the framing boundary.
+- Return owned bytes from encoders and make callers choose when to transmit,
+  log, or normalize display text.
+- Validate callsigns, paths, lengths, and packet fields before emitting bytes.
+- Add round-trip tests where parse support already exists.
 
-Priority: medium-high. This release should make long-running integrations easier
-to monitor without weakening parser boundaries.
+Target outcome: the project moves from parser-only to bidirectional protocol
+tooling without adding unsafe transmit policy or network side effects.
 
-- Add stable diagnostic and event structs for:
-  - accepted packets
-  - policy-rejected packets
-  - malformed packets
-  - transport failures
-- Add optional metrics adapters behind feature flags, without forcing runtime
-  dependencies into the core crate.
-- Add structured JSON schema documentation for CLI output.
-- Add examples for long-running process integration.
-- Keep counters monotonic and saturating.
+## 4. `v2.4.0`: Production Service Toolkit
 
-Target outcome: operators can monitor ingestion quality, malformed-packet
-volume, and policy decisions without scraping unstable text output.
+Priority: medium. This release should make long-running services easier to
+build without turning the project into a monolithic iGate framework.
 
-## 5. `v1.5.0`: Transport Maturity
+- Add reusable examples for ingestion pipelines, bounded replay, and structured
+  event handling.
+- Add optional policy helpers for duplicate suppression, rate limiting, and
+  known-bad packet families.
+- Add metrics adapter examples that remain feature-gated and runtime-neutral.
+- Add operational playbooks for APRS-IS collectors, KISS/TNC readers, corpus
+  replay, and service health checks.
+- Keep service orchestration, storage, TLS, and authentication choices
+  application-owned.
 
-Priority: medium. This release should harden transport adapters while preserving
-the core parser's runtime neutrality.
+Target outcome: users can build inspectors, collectors, gateways, and monitoring
+services from safe building blocks instead of copying ad hoc glue code.
 
-- Harden transport adapters with clearer timeout, backpressure, reconnect, and
-  bounded-buffer guidance.
-- Add integration tests for transport failure modes.
-- Add APRS-IS reconnect and session examples without moving network behavior
-  into the core parser.
-- Review whether transport crates should share a stronger common trait layer.
-- Keep runtime-specific behavior optional and isolated.
+## 5. `v2.5.0`: Assurance And API Readiness
 
-Target outcome: transport crates remain safe byte-preserving boundaries for
-real deployments, while the parser core stays small and stable.
+Priority: medium. This release should decide whether `v3.0.0` is justified and
+make that decision evidence-based.
 
-## 6. `v1.6.0`: Downstream Feedback And Deprecation Planning
+- Add differential fixture comparisons against established parser behavior
+  where licensing and fixture sources allow it.
+- Expand fuzz campaigns and minimized regression corpora for semantic families
+  touched in `v2.1.0` through `v2.4.0`.
+- Run a Rust API Guidelines audit of public names, traits, constructors,
+  options, error types, feature flags, and documentation examples.
+- Add supply-chain evidence improvements such as auditable binary guidance or
+  SBOM documentation where useful.
+- Update `docs/downstream-feedback.md` and the `v3.0.0` breaking-change decision
+  record before any release candidate work starts.
 
-Priority: medium. This release should convert real usage into a concrete
-`v2.0.0` migration plan.
+Target outcome: the project either approves a narrow `v3.0.0` breaking list or
+continues additively in `2.x`.
 
-- Review downstream use cases and pain points.
-- Deprecate weak API names or confusing patterns without removing them.
-- Add migration notes for anything likely to change in `v2.0.0`.
-- Add compile-time compatibility tests for intended `1.x` stable APIs.
-- Decide the final `v2.0.0` breaking-change list.
+## 6. `v3.0.0-rc.1`: Breaking API Candidate
 
-Implementation notes:
-
-- Record downstream evidence in `docs/downstream-feedback.md`.
-- Track soft deprecations and migration guidance in `docs/v2-migration.md`.
-- Keep deprecations documentation-level during `1.x` unless the release gate is
-  explicitly changed to allow expected Rust deprecation warnings.
-
-Target outcome: the project enters `v2.0.0` planning with measured evidence,
-not speculative cleanup.
-
-## 7. `v2.0.0-rc.1`: Breaking API Candidate
-
-Priority: gated by `v1.6.0`. This release candidate should include only
-justified breaking changes.
-
-Current status: released as `v2.0.0-rc.1` on 2026-04-30. The decision record in
-`docs/v2-breaking-changes.md` approved one narrow breaking change and found no
-evidence justifying additional breaking changes.
+Priority: gated by `v2.5.0`. This release candidate should include only
+justified breaking changes with migration evidence.
 
 Possible breaking-change candidates:
 
-- Stronger typed packet views.
-- Clearer separation between codec, semantic interpretation, policy, and
-  diagnostics.
-- Refined transport trait contracts.
-- Stable diagnostic JSON schema.
-- Cleaned-up names for ambiguous public APIs.
+- Clearer separation of codec, semantic decoder, policy, diagnostics, and
+  encoder modules.
+- Stronger typed semantic views where additive growth in `AprsData` becomes
+  awkward for downstream users.
+- Stable trait contracts for packet sources, sinks, and transport receive loops.
+- Renamed APIs only where downstream evidence shows confusion.
+- Stricter feature organization if optional crate or feature behavior becomes
+  hard to reason about.
 
 Required gates:
 
 - Run semver checks and document every intentional break.
 - Publish a migration guide before the release candidate.
-- Run downstream smoke against `v2.0.0-rc.1`.
+- Run downstream smoke against `v3.0.0-rc.1`.
 - Keep release-candidate evidence in `docs/release.md`.
 - Fix any secure review, CI, conformance, or downstream findings before final
-  `v2.0.0`.
+  `v3.0.0`.
 
-Target outcome: `v2.0.0` is a promotion of a tested release candidate, not a
+Target outcome: `v3.0.0` is a promotion of a tested release candidate, not a
 fresh unproven build.
 
-## 8. `v2.0.0`: Final Major Release
+## 7. `v3.0.0`: Final Major Release
 
 Priority: final. Publish only after the release candidate has clean evidence and
 downstream review time.
 
-- Promote the tested `v2.0.0-rc.2` release candidate.
+- Promote the tested release candidate.
 - Publish crates in guarded dependency order.
 - Create or update the GitHub Release through `scripts/publish-release.sh`.
-- Keep the `1.x` to `2.0.0` migration guide prominent.
+- Keep the `2.x` to `3.0.0` migration guide prominent.
 - Tag only after local release gates, remote CI, security gates, and secure
   review pass for the exact release commit.
 
-Target outcome: `v2.0.0` is a controlled major release with a clear migration
+Target outcome: `v3.0.0` is a controlled major release with a clear migration
 path and defensible release evidence.
 
 ## Recommended Execution Order
 
-- Start with `v1.1.0` because it improves usability without destabilising the
-  new `1.0.0` API.
-- Avoid starting `v2.0.0` breaking work until at least `v1.3.0` provides enough
-  conformance and security feedback.
-- Treat `v1.6.0` as the formal decision point for what deserves a major-version
-  break.
-- Keep each release batch independently reviewable and publishable.
+- Start with `v2.1.0` because conformance depth improves product value and
+  creates better fixtures for all later releases.
+- Do not start breaking API work until `v2.5.0` records specific evidence that
+  an additive design is not enough.
+- Keep each release independently reviewable and publishable.
+- Keep GitHub Project #3 as the live roadmap and update this file as its
+  repository-backed snapshot.
 - Do not publish any release unless secure review, local gates, security gates,
-  remote CI, crates.io publication, and GitHub Release evidence are complete.
+  remote CI, crates.io publication, GitHub Release evidence, and post-publication
+  smoke checks are complete.

@@ -381,7 +381,7 @@ const SEMANTIC_SUPPORT: &[SupportItem] = &[
     SupportItem {
         kind: "position",
         status: SupportStatus::Supported,
-        notes: "uncompressed and compressed coordinates are decoded where valid",
+        notes: "uncompressed and compressed coordinates are decoded; weather-symbol positions expose weather reports",
     },
     SupportItem {
         kind: "message",
@@ -392,17 +392,18 @@ const SEMANTIC_SUPPORT: &[SupportItem] = &[
     SupportItem {
         kind: "object",
         status: SupportStatus::Supported,
-        notes: "object name, liveness, timestamp, body, and supported coordinates are exposed",
+        notes: "object name, liveness, timestamp, body, coordinates, and supported weather are exposed",
     },
     SupportItem {
         kind: "item",
         status: SupportStatus::Supported,
-        notes: "item name, liveness, body, and supported coordinates are exposed",
+        notes: "item name, liveness, body, coordinates, and supported weather are exposed",
     },
     SupportItem {
         kind: "weather",
-        status: SupportStatus::Partial,
-        notes: "positionless and weather-symbol position reports expose common weather fields",
+        status: SupportStatus::Supported,
+        notes:
+            "positionless, uncompressed, and compressed weather-symbol reports expose common fields",
     },
     SupportItem {
         kind: "telemetry",
@@ -1126,7 +1127,7 @@ pub struct CompressedPosition<'a> {
     pub comment: &'a [u8],
 }
 
-impl CompressedPosition<'_> {
+impl<'a> CompressedPosition<'a> {
     /// Returns decoded compressed-position coordinates.
     #[must_use]
     pub fn coordinates(&self) -> Option<Coordinates> {
@@ -1137,6 +1138,14 @@ impl CompressedPosition<'_> {
             latitude: 90.0 - (y as f64 / 380_926.0),
             longitude: -180.0 + (x as f64 / 190_463.0),
         })
+    }
+
+    /// Returns embedded weather fields when this compressed position uses the
+    /// weather station symbol and carries a non-empty weather report in its
+    /// comment.
+    #[must_use]
+    pub fn weather(&self) -> Option<Weather<'a>> {
+        weather_from_compressed_position(self)
     }
 }
 
@@ -1190,7 +1199,7 @@ impl<'a> Object<'a> {
     }
 
     /// Returns embedded weather fields when the object body starts with a
-    /// weather-symbol uncompressed position.
+    /// weather-symbol uncompressed or compressed position.
     #[must_use]
     pub fn weather(&self) -> Option<Weather<'a>> {
         weather_from_position_body(self.body)
@@ -1217,7 +1226,7 @@ impl<'a> Item<'a> {
     }
 
     /// Returns embedded weather fields when the item body starts with a
-    /// weather-symbol uncompressed position.
+    /// weather-symbol uncompressed or compressed position.
     #[must_use]
     pub fn weather(&self) -> Option<Weather<'a>> {
         weather_from_position_body(self.body)
@@ -1859,12 +1868,22 @@ fn weather_from_uncompressed_position<'a>(position: &Position<'a>) -> Option<Wea
     None
 }
 
-fn weather_from_position_body(body: &[u8]) -> Option<Weather<'_>> {
-    let AprsData::Position(position) = parse_position(false, b'!', body) else {
-        return None;
-    };
+fn weather_from_compressed_position<'a>(position: &CompressedPosition<'a>) -> Option<Weather<'a>> {
+    if position.symbol_code == b'_' && !position.comment.is_empty() {
+        return Some(Weather {
+            report: position.comment,
+        });
+    }
 
-    position.weather()
+    None
+}
+
+fn weather_from_position_body(body: &[u8]) -> Option<Weather<'_>> {
+    match parse_position(false, b'!', body) {
+        AprsData::Position(position) => position.weather(),
+        AprsData::CompressedPosition(position) => position.weather(),
+        _ => None,
+    }
 }
 
 fn parse_timestamped_position(messaging: bool, identifier: u8, information: &[u8]) -> AprsData<'_> {
