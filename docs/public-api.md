@@ -2,20 +2,20 @@
 
 ## BLUF
 
-- `libaprs-engine` has reached `1.0.0`; the core API below is the
+- `libaprs-engine` has reached `2.0.0`; the core API below is the
   semver-protected public contract.
 - The stable boundary is byte-first: callers pass `&[u8]`, successful parses
   retain exact raw bytes, and malformed packet shape fails closed.
 - Parser, policy, engine, counters, packet accessors, and shared transport
   contracts are the API surface downstream applications should build on now.
 - APRS semantic variants are usable. Field-level semantic expansion should be
-  additive within the `1.x` release line.
+  additive within the `2.x` release line.
 - Internal parser helpers, decoder helpers, diagnostic internals, and module
   layout are not part of the public compatibility contract.
 
 ## Stable API
 
-These APIs are intended to remain source-compatible through the `1.x` release
+These APIs are intended to remain source-compatible through the `2.x` release
 line unless a secure code review finds a safety issue that requires a breaking
 change:
 

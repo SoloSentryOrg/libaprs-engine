@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Started `v2.1.0` APRS conformance work by exposing compressed-position
+  weather reports through `CompressedPosition::weather()` and through
+  object/item embedded weather helpers when their bodies start with compressed
+  weather-symbol positions.
+- Updated the roadmap backup and GitHub Project #3 with the accepted `v2.1.0`
+  through `v3.0.0` release series.
+
 ## 2.0.0 - 2026-05-01
 
 - Promoted the tested `2.0.0-rc.2` release candidate to final `2.0.0`.

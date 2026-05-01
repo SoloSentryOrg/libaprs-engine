@@ -2,12 +2,13 @@
 
 ## BLUF
 
-- Treat this file as the evidence log for `1.x` API stability and `v2.0.0`
-  planning.
+- Treat this file as the evidence log for current-major API stability and future
+  major-version planning.
 - Do not break public APIs based on preference alone; record downstream pain
   first.
 - Current feedback is inferred from repository integration patterns, release
-  gates, examples, and documented operator workflows.
+  gates, examples, documented operator workflows, and the completed `v2.0.0`
+  release cycle.
 - New user reports should be converted into tests, docs, or migration notes
   before they influence a breaking change.
 - Raw-byte preservation and fail-closed parsing are non-negotiable constraints
@@ -26,7 +27,7 @@ Observed needs:
 - exact raw-byte access for accepted packets,
 - no UTF-8 precondition on payloads,
 - additive semantic field extraction, and
-- clear guidance on which APIs are stable through `1.x`.
+- clear guidance on which APIs are stable through the current major release.
 
 ### Operational Inspection And Corpus Replay
 
@@ -65,11 +66,12 @@ Observed needs:
 - byte-preserving packet/frame boundaries,
 - explicit read and packet-size limits,
 - caller-owned timeout, retry, reconnect, and backpressure decisions, and
-- narrow options structs instead of a broad transport framework in `1.x`.
+- narrow options structs instead of a broad transport framework in the current
+  major release.
 
 ## Pain Points And Current Decisions
 
-| Area | Pain point | `1.x` decision | `v2.0.0` consideration |
+| Area | Pain point | Current decision | Future major consideration |
 | --- | --- | --- | --- |
 | Diagnostic JSON | `ParsedPacket::to_json()` was convenient but could look like a stable wire schema. | Removed in `v2.0.0-rc.1` after `ParsedPacket::to_diagnostic()` shipped in `1.7.0`. | Keep CLI JSON as CLI-owned diagnostics and use structured Rust diagnostics or application-owned schemas for integrations. |
 | Semantic APIs | `AprsData` is useful but still expanding as APRS coverage deepens. | Keep additions source-compatible and preserve raw bytes. | Split stable envelope views from evolving semantic interpretations if field growth becomes awkward. |
@@ -110,12 +112,13 @@ Record downstream issues with:
 - whether malformed input failed closed,
 - API name or behavior that caused confusion,
 - reproduction packet or minimized fixture, if publishable, and
-- proposed compatible `1.x` fix or justified `v2.0.0` break.
+- proposed compatible current-major fix or justified future-major break.
 
 ## Required Follow-Up For Accepted Feedback
 
 - Add or update a regression test before changing behavior.
 - Update `docs/public-api.md` when a public API changes.
 - Update `docs/stability.md` when the stability tier changes.
-- Update `docs/v2-migration.md` when a future breaking change is identified.
+- Update or create the relevant migration plan when a future breaking change is
+  identified.
 - Add release evidence to `docs/release.md` before publishing.

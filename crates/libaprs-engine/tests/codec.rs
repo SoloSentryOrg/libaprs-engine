@@ -399,6 +399,26 @@ fn compressed_position_interprets_decimal_coordinates() {
 }
 
 #[test]
+fn compressed_position_weather_symbol_exposes_weather_report_from_comment() {
+    let parsed = parse_packet(b"N0CALL>APRS:!/5L!!<*e7_7P[c220s004g010t077r001p002P003h50")
+        .expect("compressed weather position should parse");
+    let AprsData::CompressedPosition(position) = parsed.aprs_data() else {
+        panic!("expected compressed position");
+    };
+
+    let weather = position
+        .weather()
+        .expect("compressed weather symbol position should expose weather report");
+
+    assert_eq!(
+        weather.report,
+        b"c220s004g010t077r001p002P003h50".as_slice()
+    );
+    assert_eq!(weather.fields().temperature_fahrenheit, Some(77));
+    assert_eq!(weather.fields().wind_direction_degrees, Some(220));
+}
+
+#[test]
 fn short_uncompressed_position_is_malformed_not_panic() {
     let parsed = parse_packet(b"N0CALL>APRS:!4903.50N/07201.75W")
         .expect("framed packet should parse at codec boundary");
@@ -543,6 +563,37 @@ fn timestamped_position_object_and_item_expose_embedded_weather_reports() {
     assert_eq!(
         item.weather()
             .expect("item weather")
+            .fields()
+            .temperature_fahrenheit,
+        Some(60)
+    );
+}
+
+#[test]
+fn object_and_item_expose_compressed_embedded_weather_reports() {
+    let object = parse_packet(b"N0CALL>APRS:;CWXOBJ   *092345z/5L!!<*e7_7P[c180s002t055")
+        .expect("compressed weather object should parse");
+    let item = parse_packet(b"N0CALL>APRS:)CWXITEM!/5L!!<*e7_7P[c090s001t060")
+        .expect("compressed weather item should parse");
+
+    let AprsData::Object(object) = object.aprs_data() else {
+        panic!("expected object");
+    };
+    let AprsData::Item(item) = item.aprs_data() else {
+        panic!("expected item");
+    };
+
+    assert_eq!(
+        object
+            .weather()
+            .expect("compressed object weather")
+            .fields()
+            .temperature_fahrenheit,
+        Some(55)
+    );
+    assert_eq!(
+        item.weather()
+            .expect("compressed item weather")
             .fields()
             .temperature_fahrenheit,
         Some(60)

@@ -281,6 +281,20 @@ fn documented_semantic_helpers_remain_usable() {
         Some(77)
     );
 
+    let compressed_weather = parse_packet(b"N0CALL>APRS:!/5L!!<*e7_7P[c220s004t077")
+        .expect("compressed weather position should parse");
+    let AprsData::CompressedPosition(compressed) = compressed_weather.aprs_data() else {
+        panic!("expected compressed position");
+    };
+    assert_eq!(
+        compressed
+            .weather()
+            .expect("compressed weather report")
+            .fields()
+            .temperature_fahrenheit,
+        Some(77)
+    );
+
     let mic_e = parse_packet(b"N0CALL>ABC123:`abcde").expect("Mic-E should parse");
     let AprsData::MicE(mic_e) = mic_e.aprs_data() else {
         panic!("expected Mic-E");

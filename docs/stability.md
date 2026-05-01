@@ -1,6 +1,6 @@
 # Stability
 
-This project has reached `1.0.0`. The public APIs listed in
+This project has reached `2.0.0`. The public APIs listed in
 [Public API Boundary](public-api.md) are semver-protected integration
 contracts for the current major release line.
 
@@ -21,10 +21,10 @@ contracts for the current major release line.
 - Library diagnostic JSON is not a compatibility-stable wire schema.
   `ParsedPacket::to_json()` was removed in `v2.0.0-rc.1` after an explicit
   replacement path was added.
-- Soft deprecations for new integrations are tracked in
-  [`v2.0.0` Migration Plan](v2-migration.md). They do not remove `1.x` support
-  and do not use Rust `#[deprecated]` attributes unless the release gate is
-  updated to handle expected warnings.
+- Soft deprecations for new integrations are tracked in release-specific
+  migration plans. Historical `v2.0.0` guidance remains in
+  [`v2.0.0` Migration Plan](v2-migration.md); any future `v3.0.0` guidance must
+  be evidence-backed before release-candidate work starts.
 
 ## Release Maintenance Criteria
 
@@ -45,7 +45,7 @@ Release maintenance keeps these gates true:
 
 ## Stable APIs
 
-These APIs are intended to remain source-compatible through the `1.x` release
+These APIs are intended to remain source-compatible through the `2.x` release
 line unless a secure code review finds a safety issue that requires a breaking
 change:
 
@@ -144,7 +144,7 @@ future split explicit without promising current `no_std` compatibility.
 The project records deprecation evidence before changing stable APIs:
 
 - integration pain points belong in [Downstream Feedback](downstream-feedback.md),
-- migration guidance belongs in [`v2.0.0` Migration Plan](v2-migration.md),
+- migration guidance belongs in a release-specific migration plan,
 - stable replacements must have compatibility tests before a release candidate,
   and
 - any breaking removal or rename waits for a major-version release candidate.
