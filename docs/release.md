@@ -34,6 +34,8 @@
   audit step, so restored stale cache data is refreshed before results are
   evaluated.
 - Confirm `CHANGELOG.md` describes the release.
+- Identify the matching GitHub Project #3 release item before publication so
+  it can be updated immediately after publication.
 - Review `docs/public-api.md` and `crates/libaprs-engine/tests/api_compat.rs`
   when the release changes exported library APIs.
 - Review `docs/downstream-feedback.md` and `docs/v2-migration.md` before any
@@ -87,6 +89,30 @@ Before running `scripts/publish-release.sh`, record or verify:
   GitHub Release must be created. Use `LIBAPRS_GITHUB_RELEASE=skipped-documented`
   only if GitHub Releases are unavailable and release evidence records the
   reason.
+
+## Post-Release Project Status
+
+After crates.io publication, GitHub Release publication, latest-release
+verification, and post-publication smoke checks:
+
+- Update GitHub Project #3 first because it is the primary roadmap and
+  project-management store.
+- Mark the released version item `Done`, record the release date, and add links
+  to the GitHub Release, crates.io version, release PR, and release commit.
+- Move the next planned release item to `In progress` when development should
+  continue immediately.
+- Update `ROADMAP.md` as the repository backup snapshot, including the sync
+  date, project status, release status, and any changed release ordering.
+- Confirm `docs/release.md` contains the release evidence before closing the
+  release thread.
+
+Useful checks:
+
+```bash
+gh project item-list 3 --owner SoloSentryOrg --limit 50
+scripts/verify-docs.sh
+git diff --check
+```
 
 ## v2.0.0 Release Evidence
 

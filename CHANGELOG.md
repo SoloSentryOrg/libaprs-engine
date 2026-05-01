@@ -8,6 +8,8 @@
   weather-symbol positions.
 - Updated the roadmap backup and GitHub Project #3 with the accepted `v2.1.0`
   through `v3.0.0` release series.
+- Documented the release-process rule that GitHub Project #3 and the
+  `ROADMAP.md` backup must be updated after every release.
 
 ## 2.0.0 - 2026-05-01
 
