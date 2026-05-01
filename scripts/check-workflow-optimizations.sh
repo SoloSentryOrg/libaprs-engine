@@ -47,6 +47,21 @@ require_file "$docs_workflow" "docs-only fast-lane workflow should exist"
 require_text_in_file "$docs_workflow" "name: Docs" "docs workflow should have a stable name"
 require_text_in_file "$docs_workflow" "scripts/verify-docs.sh" "docs workflow should run the docs verifier"
 
+release_cache_block="$(
+  awk '
+    /^  release-script:/ { in_release_job = 1 }
+    in_release_job && /^  [A-Za-z0-9_-]+:/ && $0 !~ /^  release-script:/ { in_release_job = 0 }
+    in_release_job && /^      - name: Cache Cargo/ { in_cache_step = 1; next }
+    in_cache_step && /^      - name:/ { exit }
+    in_cache_step { print }
+  ' "$workflow"
+)"
+if [ -z "$release_cache_block" ]; then
+  note_failure "release-script should cache Cargo registry/git state"
+elif printf '%s\n' "$release_cache_block" | grep -Fx "            target" >/dev/null 2>&1; then
+  note_failure "release-script cache should not include target build artifacts"
+fi
+
 stable_only_count="$(grep -F -c "matrix.toolchain == 'stable'" "$workflow" || true)"
 if [ "$stable_only_count" -lt 5 ]; then
   note_failure "stable-only checks should avoid duplicating docs/package/default tests on MSRV"

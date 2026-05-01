@@ -25,6 +25,8 @@
 - The release-script job is intentionally skipped for pull requests and runs on
   `main` pushes or manual dispatch. Pull requests use the Rust matrix and docs
   fast-lane checks for quicker feedback.
+- GitHub Actions Cargo caches intentionally include registry and git state, not
+  `target`, to avoid runner disk exhaustion during post-job cache compression.
 - Security workflows install pinned prebuilt release/security tools instead of
   compiling them during each run. Tool archives are SHA256 verified before use.
 - GitHub Actions caches `~/.cargo/advisory-db` with a weekly key and older
