@@ -9,7 +9,7 @@ Use the package name `libaprs-engine` in `Cargo.toml` and the crate name
 
 ```toml
 [dependencies]
-libaprs-engine = "2.0.0-rc.1"
+libaprs-engine = "2.0.0-rc.2"
 ```
 
 For a local checkout:
@@ -291,7 +291,8 @@ an `InvalidData` I/O error whose message is the stable code
 
 ## JSON Diagnostics
 
-The library no longer exposes `ParsedPacket::to_json()` in `v2.0.0-rc.1`.
+The library no longer exposes `ParsedPacket::to_json()` starting in
+`v2.0.0-rc.1`.
 Rust integrations should use structured diagnostics, event structs, or an
 application-owned schema. The CLI still provides `aprs-cli --json` as
 diagnostic output for operators.
@@ -405,7 +406,7 @@ raw bytes as byte arrays rather than assuming UTF-8.
 ```toml
 [dependencies]
 libaprs-engine = {
-  version = "2.0.0-rc.1",
+  version = "2.0.0-rc.2",
   features = ["serde"]
 }
 ```
@@ -437,8 +438,8 @@ application-owned.
 
 ```toml
 [dependencies]
-aprs-transport-aprs-is = "2.0.0-rc.1"
-libaprs-engine = "2.0.0-rc.1"
+aprs-transport-aprs-is = "2.0.0-rc.2"
+libaprs-engine = "2.0.0-rc.2"
 ```
 
 ```rust
@@ -449,7 +450,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let login = AprsIsLogin {
         callsign: "N0CALL",
         passcode: -1,
-        software: "libaprs-engine 2.0.0-rc.1",
+        software: "libaprs-engine 2.0.0-rc.2",
         filter: Some("r/49/-72/50"),
     };
     assert!(login.line()?.ends_with("\r\n"));
@@ -482,8 +483,8 @@ bytes before handing packets to the core engine.
 
 ```toml
 [dependencies]
-aprs-transport-file = "2.0.0-rc.1"
-libaprs-engine = "2.0.0-rc.1"
+aprs-transport-file = "2.0.0-rc.2"
+libaprs-engine = "2.0.0-rc.2"
 ```
 
 ## TCP Transport Adapter
@@ -493,8 +494,8 @@ another `Read` implementation. This keeps network I/O outside the parser core.
 
 ```toml
 [dependencies]
-aprs-transport-tcp = "2.0.0-rc.1"
-libaprs-engine = "2.0.0-rc.1"
+aprs-transport-tcp = "2.0.0-rc.2"
+libaprs-engine = "2.0.0-rc.2"
 ```
 
 ```rust
