@@ -2,8 +2,8 @@
 
 ## 2.0.0-rc.2 - 2026-05-01
 
-- Refreshed package metadata after migrating the repository from
-  `elodiejmirza/libaprs-engine` to `SoloSentryOrg/libaprs-engine`.
+- Refreshed package metadata after migrating the repository from the personal
+  namespace to `SoloSentryOrg/libaprs-engine`.
 - Updated README, API examples, transport examples, publishing guidance, and
   downstream smoke dependencies to target `2.0.0-rc.2`.
 - Bumped all workspace crates to `2.0.0-rc.2`.

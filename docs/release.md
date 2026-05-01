@@ -81,6 +81,30 @@ Before running `scripts/publish-release.sh`, record or verify:
   only if GitHub Releases are unavailable and release evidence records the
   reason.
 
+## v2.0.0-rc.2 Release Evidence
+
+- Tag: `v2.0.0-rc.2`.
+- Commit: `33beabc8f699b5b747def04a543466492884f81c`.
+- Scope: refreshes package metadata and downstream examples after the repository
+  migration to `SoloSentryOrg/libaprs-engine`.
+- Secure review: clean before tagging and publication; no open findings.
+- Local gate:
+  `CARGO_HOME=/tmp/libaprs-cargo-home scripts/verify-release.sh` passed after
+  refreshing the stale temporary advisory cache at
+  `/tmp/libaprs-cargo-home/advisory-db`.
+- Remote GitHub Actions: release PR Rust CI run `25211638944` and security run
+  `25211638864` passed; `main` push Rust CI run `25211688133` and security run
+  `25211688144` passed for the release commit.
+- crates.io publication: all workspace crates published as `2.0.0-rc.2`.
+- GitHub Release: `v2.0.0-rc.2` created, marked latest, and verified at
+  <https://github.com/SoloSentryOrg/libaprs-engine/releases/tag/v2.0.0-rc.2>.
+- Post-publication downstream smoke:
+  `CARGO_HOME=/tmp/libaprs-cargo-home LIBAPRS_RUN_DOWNSTREAM_SMOKE=1 LIBAPRS_PACKAGE_ALL=1 scripts/verify-release.sh`
+  passed against crates.io and refreshed
+  `examples/downstream-smoke/Cargo.lock` with `2.0.0-rc.2` checksums.
+- Notes: crates.io metadata for the core crate, transport crates, and CLI now
+  advertises the organization repository URL.
+
 ## v2.0.0-rc.1 Release Evidence
 
 - Tag: `v2.0.0-rc.1`.
