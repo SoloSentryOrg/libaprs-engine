@@ -1,5 +1,7 @@
 # CLI Guide
 
+![libaprs-engine documentation header](assets/brand/docs-header.svg)
+
 `aprs-cli` is a small packet inspector for newline-separated APRS packets. It is
 designed to exercise the same byte-preserving parser and policy engine used by
 the library.

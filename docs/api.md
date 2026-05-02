@@ -1,5 +1,7 @@
 # API Guide
 
+![libaprs-engine documentation header](assets/brand/docs-header.svg)
+
 This guide shows how to use `libaprs-engine` from another Rust project.
 
 ## Dependency

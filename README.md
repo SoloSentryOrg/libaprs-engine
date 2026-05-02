@@ -1,5 +1,7 @@
 # libaprs-engine
 
+![libaprs-engine README banner](docs/assets/brand/readme-banner.svg)
+
 [![Crates.io](https://img.shields.io/crates/v/libaprs-engine.svg)](https://crates.io/crates/libaprs-engine)
 [![Docs.rs](https://docs.rs/libaprs-engine/badge.svg)](https://docs.rs/libaprs-engine)
 [![Rust CI](https://github.com/SoloSentryOrg/libaprs-engine/actions/workflows/rust-ci.yml/badge.svg)](https://github.com/SoloSentryOrg/libaprs-engine/actions/workflows/rust-ci.yml)
@@ -172,6 +174,7 @@ See [Security Model](docs/security.md) for details.
 
 ## Documentation
 
+- [Brand Assets](docs/brand.md): logo, mark, banner, palette, and usage notes.
 - [API Guide](docs/api.md): library types, parser, engine, policy, and semantic
   variants.
 - [CLI Guide](docs/cli.md): command-line input, output, exit behavior, and

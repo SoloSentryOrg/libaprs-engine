@@ -1,5 +1,7 @@
 # Transport Common Layer Review
 
+![libaprs-engine documentation header](assets/brand/docs-header.svg)
+
 ## BLUF
 
 - Keep the shared `PacketSource` and `PacketSink` traits in `libaprs-engine`.

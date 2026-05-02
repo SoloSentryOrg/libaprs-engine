@@ -1,5 +1,7 @@
 # Transport Adapters
 
+![libaprs-engine documentation header](assets/brand/docs-header.svg)
+
 Transport crates keep I/O and protocol framing outside `libaprs-engine`. They
 return packet bytes or frame payload bytes that callers pass into the core
 parser, preserving the protocol-first boundary.

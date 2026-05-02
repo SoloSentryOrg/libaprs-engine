@@ -1,5 +1,7 @@
 # Operations Guide
 
+![libaprs-engine documentation header](assets/brand/docs-header.svg)
+
 ## BLUF
 
 - Treat all packet and transport bytes as untrusted input.

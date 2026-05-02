@@ -1,5 +1,7 @@
 # Stability
 
+![libaprs-engine documentation header](assets/brand/docs-header.svg)
+
 This project has reached `2.0.0`. The public APIs listed in
 [Public API Boundary](public-api.md) are semver-protected integration
 contracts for the current major release line.

@@ -1,5 +1,7 @@
 # Publishing
 
+![libaprs-engine documentation header](assets/brand/docs-header.svg)
+
 This repository is ready for crates.io package validation, but publishing
 requires a crates.io account token and must be done only from a clean, verified
 release commit after secure review has passed with no findings.

@@ -1,5 +1,7 @@
 # Release Checklist
 
+![libaprs-engine documentation header](assets/brand/docs-header.svg)
+
 ## Local Gate
 
 - Run `scripts/verify-release.sh`.

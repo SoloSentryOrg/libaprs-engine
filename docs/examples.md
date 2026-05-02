@@ -1,5 +1,7 @@
 # Examples
 
+![libaprs-engine documentation header](assets/brand/docs-header.svg)
+
 These examples are intentionally small and copyable.
 
 ## Parse One Packet
