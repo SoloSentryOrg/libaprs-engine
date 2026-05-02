@@ -24,37 +24,37 @@ expect_checks() {
 }
 
 expect_checks \
-  "docs-only changes require only Docs" \
+  "docs-only changes require secret scan and Docs" \
   "README.md
 docs/release.md
 .github/ISSUE_TEMPLATE/bug_report.md" \
-  "Docs"
+  "Secret Scan,Docs"
 
 expect_checks \
-  "source changes require Rust checks" \
+  "source changes require secret scan and Rust checks" \
   "crates/libaprs-engine/src/lib.rs" \
-  "Rust stable,Rust 1.80.0"
+  "Secret Scan,Rust stable,Rust 1.80.0"
 
 expect_checks \
-  "docs verifier changes require Docs and Rust checks" \
+  "docs verifier changes require secret scan, Docs, and Rust checks" \
   "scripts/verify-docs.sh" \
-  "Docs,Rust stable,Rust 1.80.0"
+  "Secret Scan,Docs,Rust stable,Rust 1.80.0"
 
 expect_checks \
-  "security-sensitive changes require Rust and security checks" \
+  "security-sensitive changes require secret scan, Rust, and security checks" \
   "Cargo.lock" \
-  "Rust stable,Rust 1.80.0,cargo-security"
+  "Secret Scan,Rust stable,Rust 1.80.0,cargo-security"
 
 expect_checks \
-  "mixed docs and security changes require all relevant checks" \
+  "mixed docs and security changes require all relevant checks including secret scan" \
   "README.md
 Cargo.toml" \
-  "Docs,Rust stable,Rust 1.80.0,cargo-security"
+  "Secret Scan,Docs,Rust stable,Rust 1.80.0,cargo-security"
 
 expect_checks \
-  "empty file list falls back to Rust checks" \
+  "empty file list falls back to secret scan and Rust checks" \
   "" \
-  "Rust stable,Rust 1.80.0"
+  "Secret Scan,Rust stable,Rust 1.80.0"
 
 if [ "$failures" -ne 0 ]; then
   exit 1
