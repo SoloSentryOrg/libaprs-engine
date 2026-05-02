@@ -102,6 +102,7 @@ required_checks() {
     needs_rust=1
   fi
 
+  echo "Secret Scan"
   if [ "$needs_docs" -eq 1 ]; then
     echo "Docs"
   fi
