@@ -34,6 +34,11 @@ run scripts/test-merge-gate-guard.sh
 run scripts/check-workflow-optimizations.sh
 run scripts/verify-docs.sh
 run scripts/check-fuzz-corpus.sh
+if has_tool gitleaks; then
+  run scripts/check-secrets.sh
+else
+  echo "gitleaks not installed; skipping secret-history scan" >&2
+fi
 run cargo fmt --all --check
 run cargo fmt --manifest-path fuzz/Cargo.toml --all --check
 run cargo test
