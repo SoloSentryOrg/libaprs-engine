@@ -175,8 +175,6 @@ See [Security Model](docs/security.md) for details.
 ## Documentation
 
 - [Brand Assets](docs/brand.md): logo, mark, banner, palette, and usage notes.
-- [Public Repository Readiness](docs/public-readiness.md): public-launch
-  checks, Gitleaks usage, and GitHub setting reminders.
 - [API Guide](docs/api.md): library types, parser, engine, policy, and semantic
   variants.
 - [CLI Guide](docs/cli.md): command-line input, output, exit behavior, and
