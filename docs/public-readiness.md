@@ -37,6 +37,9 @@ Run before public visibility changes:
 scripts/check-secrets.sh
 ```
 
+The `Secret Scan` workflow runs the same wrapper in GitHub Actions using a
+pinned Gitleaks binary installed by `scripts/install-release-tools.sh`.
+
 If findings are real, rotate the exposed secret first, then remove or rewrite
 the leaked material before making the repository public. Rewriting public git
 history is disruptive, so complete this scan while the repository is still
