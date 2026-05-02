@@ -40,6 +40,16 @@ require_text_in_file() {
   fi
 }
 
+reject_text_in_file() {
+  file="$1"
+  pattern="$2"
+  description="$3"
+
+  if [ -f "$file" ] && grep -F "$pattern" "$file" >/dev/null 2>&1; then
+    note_failure "$description"
+  fi
+}
+
 require_text "Release script" "Rust CI should keep the release-script job"
 require_text "if: \${{ github.event_name != 'pull_request' }}" "release-script job should not run on pull requests"
 require_text "Cache Cargo registry" "Rust matrix should cache registry/git state separately from target"
@@ -50,6 +60,7 @@ require_text_in_file "$docs_workflow" "name: Docs" "docs workflow should have a 
 require_text_in_file "$docs_workflow" "scripts/verify-docs.sh" "docs workflow should run the docs verifier"
 require_file "$merge_gate_workflow" "merge-gate workflow should exist for branch protection"
 require_text_in_file "$merge_gate_workflow" "name: Merge Gate" "merge-gate workflow should have a stable required-check name"
+reject_text_in_file "$merge_gate_workflow" "pull_request:" "merge-gate workflow should not run untrusted PR-head workflow definitions"
 require_text_in_file "$merge_gate_workflow" "pull_request_target:" "merge-gate workflow should run from trusted base context"
 require_text_in_file "$merge_gate_workflow" "ref: \${{ github.event.repository.default_branch }}" "merge-gate checkout should use the trusted default branch"
 require_text_in_file "$merge_gate_workflow" "persist-credentials: false" "merge-gate checkout should not persist credentials"
