@@ -1,5 +1,7 @@
 # Threat Model
 
+![libaprs-engine documentation header](assets/brand/docs-header.svg)
+
 This project treats APRS packets, transport frames, files, network payloads,
 and command-line input as untrusted bytes. The core security goals are raw-byte
 preservation, bounded resource use, fail-closed malformed input handling, and

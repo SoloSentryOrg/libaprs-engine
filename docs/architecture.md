@@ -1,5 +1,7 @@
 # Architecture
 
+![libaprs-engine documentation header](assets/brand/docs-header.svg)
+
 The engine is protocol-first and byte-preserving. Every boundary that accepts
 external packet data treats it as untrusted bytes and fails closed when the
 packet is malformed.

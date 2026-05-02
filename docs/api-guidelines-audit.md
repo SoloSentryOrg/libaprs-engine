@@ -1,5 +1,7 @@
 # Rust API Guidelines Audit
 
+![libaprs-engine documentation header](assets/brand/docs-header.svg)
+
 ## BLUF
 
 - Current `2.x` development remains additive and source-compatible.

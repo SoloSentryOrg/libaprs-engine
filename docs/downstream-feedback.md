@@ -1,5 +1,7 @@
 # Downstream Feedback
 
+![libaprs-engine documentation header](assets/brand/docs-header.svg)
+
 ## BLUF
 
 - Treat this file as the evidence log for current-major API stability and future

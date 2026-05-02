@@ -1,5 +1,7 @@
 # Verification
 
+![libaprs-engine documentation header](assets/brand/docs-header.svg)
+
 Run local verification before using a new revision or submitting a change.
 
 ## Quick PR Verification

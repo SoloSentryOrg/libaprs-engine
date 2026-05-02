@@ -1,5 +1,7 @@
 # JSON Schemas
 
+![libaprs-engine documentation header](assets/brand/docs-header.svg)
+
 ## BLUF
 
 - JSON output is for diagnostics and operations, not for replacing the Rust API.

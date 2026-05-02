@@ -1,5 +1,7 @@
 # APRS Conformance Matrix
 
+![libaprs-engine documentation header](assets/brand/docs-header.svg)
+
 The parser is protocol-first and byte-preserving. This matrix tracks current
 semantic coverage and known gaps for APRS101 packet families.
 

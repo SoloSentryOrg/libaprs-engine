@@ -1,5 +1,7 @@
 # Public API Boundary
 
+![libaprs-engine documentation header](assets/brand/docs-header.svg)
+
 ## BLUF
 
 - `libaprs-engine` has reached `2.0.0`; the core API below is the

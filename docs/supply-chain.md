@@ -1,5 +1,7 @@
 # Supply Chain Evidence
 
+![libaprs-engine documentation header](assets/brand/docs-header.svg)
+
 ## BLUF
 
 - The core parser path remains dependency-light and network-free.

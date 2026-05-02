@@ -1,5 +1,7 @@
 # Security Model
 
+![libaprs-engine documentation header](assets/brand/docs-header.svg)
+
 `libaprs-engine` is designed around untrusted packet input. The project follows
 OWASP-aligned principles for validation, least surprise at trust boundaries, and
 fail-closed behavior.

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title desc">
+  <title id="title">libaprs-engine social preview</title>
+  <desc id="desc">Social preview for libaprs-engine, a protocol-first byte-preserving APRS parser for Rust.</desc>
+  <rect width="1280" height="640" fill="#11151b"/>
+  <rect x="56" y="56" width="1168" height="528" rx="36" fill="#f5f7fa"/>
+  <g transform="translate(132 142)">
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M90 0H24C11 0 0 11 0 24v236c0 13 11 24 24 24h66" stroke="#15191f" stroke-width="26"/>
+      <path d="M330 0h66c13 0 24 11 24 24v236c0 13-11 24-24 24h-66" stroke="#15191f" stroke-width="26"/>
+      <path d="M136 142c36-54 84-54 120 0s84 54 120 0" stroke="#3b82f6" stroke-width="26"/>
+      <path d="M180 142c22-32 50-32 72 0s50 32 72 0" stroke="#22c55e" stroke-width="16"/>
+    </g>
+    <circle cx="210" cy="142" r="18" fill="#f59e0b"/>
+  </g>
+  <text x="612" y="240" font-family="ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="78" font-weight="800" fill="#15191f">libaprs-engine</text>
+  <text x="616" y="300" font-family="ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="34" font-weight="650" fill="#475569">Protocol-first APRS parsing for Rust</text>
+  <text x="616" y="380" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, monospace" font-size="30" font-weight="700" fill="#1d4ed8">2E0MZA&gt;APRS:&gt;hello</text>
+  <text x="616" y="438" font-family="ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="26" font-weight="700" fill="#15803d">byte-preserving</text>
+  <text x="830" y="438" font-family="ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="26" font-weight="700" fill="#b45309">fail-closed</text>
+  <text x="990" y="438" font-family="ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="26" font-weight="700" fill="#1d4ed8">semver stable</text>
+</svg>
