@@ -17,6 +17,10 @@
 ## Workflow
 
 - Use feature branches with the `codex/` prefix.
+- Treat this as a solo-maintainer repository unless the user says otherwise.
+- Do not recommend or apply branch-protection rules that require an
+  independent approval when no second reviewer has been configured; that blocks
+  solo-maintainer merges. Prefer PR-required plus `Merge Gate`-required rules.
 - Use the default Cargo home for normal local verification, packaging, audit,
   deny, semver, and publish commands.
 - Use `CARGO_HOME=/tmp/libaprs-cargo-home` only when the default `~/.cargo`
