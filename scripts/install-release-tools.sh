@@ -9,7 +9,7 @@ usage() {
 Usage: scripts/install-release-tools.sh [tool...]
 
 Installs pinned prebuilt release/security tools with SHA256 verification.
-Supported tools: cargo-semver-checks, cargo-audit, cargo-deny
+Supported tools: cargo-semver-checks, cargo-audit, cargo-deny, gitleaks
 
 When no tools are listed, all supported tools are installed.
 USAGE
@@ -44,6 +44,10 @@ install_release_tool() {
     cargo-deny)
       url="https://github.com/EmbarkStudios/cargo-deny/releases/download/0.19.4/cargo-deny-0.19.4-x86_64-unknown-linux-musl.tar.gz"
       sha256="3bd58b784e83715b86ddbc9deac591890372ec77fda5741bb0826970b958506f"
+      ;;
+    gitleaks)
+      url="https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz"
+      sha256="551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb"
       ;;
     -h|--help)
       usage
@@ -90,7 +94,7 @@ if [ "$(uname -s)" != "Linux" ]; then
 fi
 
 if [ "$#" -eq 0 ]; then
-  set -- cargo-semver-checks cargo-audit cargo-deny
+  set -- cargo-semver-checks cargo-audit cargo-deny gitleaks
 fi
 
 for tool in "$@"; do

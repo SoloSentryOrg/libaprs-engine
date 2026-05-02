@@ -4,6 +4,7 @@ set -eu
 workflow=".github/workflows/rust-ci.yml"
 docs_workflow=".github/workflows/docs.yml"
 merge_gate_workflow=".github/workflows/merge-gate.yml"
+secret_scan_workflow=".github/workflows/secret-scan.yml"
 failures=0
 
 note_failure() {
@@ -50,6 +51,12 @@ require_text_in_file "$docs_workflow" "scripts/verify-docs.sh" "docs workflow sh
 require_file "$merge_gate_workflow" "merge-gate workflow should exist for branch protection"
 require_text_in_file "$merge_gate_workflow" "name: Merge Gate" "merge-gate workflow should have a stable required-check name"
 require_text_in_file "$merge_gate_workflow" "scripts/check-merge-gate.sh" "merge-gate workflow should run the merge-gate verifier"
+require_file "$secret_scan_workflow" "secret-scan workflow should exist for repository-wide secret scanning"
+require_text_in_file "$secret_scan_workflow" "name: Secret Scan" "secret-scan workflow should have a stable name"
+require_text_in_file "$secret_scan_workflow" "fetch-depth: 0" "secret-scan workflow should scan full git history"
+require_text_in_file "$secret_scan_workflow" "scripts/install-release-tools.sh gitleaks" "secret-scan workflow should install pinned Gitleaks"
+require_text_in_file "$secret_scan_workflow" "scripts/check-secrets.sh" "secret-scan workflow should run the local Gitleaks wrapper"
+require_text_in_file "scripts/install-release-tools.sh" "gitleaks)" "release-tool installer should support pinned Gitleaks"
 
 release_cache_block="$(
   awk '
