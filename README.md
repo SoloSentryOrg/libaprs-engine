@@ -175,6 +175,8 @@ See [Security Model](docs/security.md) for details.
 ## Documentation
 
 - [Brand Assets](docs/brand.md): logo, mark, banner, palette, and usage notes.
+- [Public Repository Readiness](docs/public-readiness.md): public-launch
+  checks, Gitleaks usage, and GitHub setting reminders.
 - [API Guide](docs/api.md): library types, parser, engine, policy, and semantic
   variants.
 - [CLI Guide](docs/cli.md): command-line input, output, exit behavior, and
@@ -211,6 +213,8 @@ See [Security Model](docs/security.md) for details.
 - [Conformance Matrix](docs/conformance.md): APRS family support and known gaps.
 - [Verification](docs/verification.md): local checks and release gates.
 - [Release Checklist](docs/release.md): pre-release steps.
+- [Security Policy](SECURITY.md): vulnerability reporting and supported
+  versions.
 - [`v2.5.0` Release Notes](docs/release-notes-v2.5.0.md): additive `2.x`
   highlights and migration notes.
 - [Publishing](docs/publishing.md): crates.io package and publish workflow.

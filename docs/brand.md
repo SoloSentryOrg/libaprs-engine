@@ -17,6 +17,7 @@
 - [`readme-banner.svg`](assets/brand/readme-banner.svg): README header banner.
 - [`docs-header.svg`](assets/brand/docs-header.svg): compact guide header.
 - [`social-preview.svg`](assets/brand/social-preview.svg): GitHub social preview source.
+- [`social-preview.png`](assets/brand/social-preview.png): GitHub social preview upload asset.
 
 ## Palette
 
