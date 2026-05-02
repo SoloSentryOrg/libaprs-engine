@@ -6,7 +6,9 @@
 
 - Run a full secret-history scan before changing repository visibility.
 - Keep security reports private; do not use public issues for vulnerabilities.
-- Keep `main` protected with one approving review and required status checks.
+- Keep `main` protected with pull requests and required status checks.
+- Do not require an approving review for a solo-maintainer repo unless a second
+  reviewer is available.
 - Disable blank issues so public intake uses safe templates.
 - Set repository topics, homepage, and social preview before launch.
 
@@ -47,6 +49,8 @@ private.
 - [ ] `scripts/verify-release.sh` completes, or skipped optional gates are
       explicitly documented.
 - [ ] Remote CI and security workflows are green on `main`.
+- [ ] Branch protection requires pull requests and `Merge Gate`, but does not
+      require an approving review unless a second reviewer can approve PRs.
 - [ ] `SECURITY.md`, `SUPPORT.md`, `CODE_OF_CONDUCT.md`,
       `.github/CODEOWNERS`, and `.github/PULL_REQUEST_TEMPLATE.md` exist.
 - [ ] GitHub private vulnerability reporting is enabled after the repository is
