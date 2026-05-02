@@ -5,6 +5,7 @@ workflow=".github/workflows/rust-ci.yml"
 docs_workflow=".github/workflows/docs.yml"
 merge_gate_workflow=".github/workflows/merge-gate.yml"
 secret_scan_workflow=".github/workflows/secret-scan.yml"
+dependabot_config=".github/dependabot.yml"
 failures=0
 
 note_failure() {
@@ -71,6 +72,10 @@ require_text_in_file "$secret_scan_workflow" "fetch-depth: 0" "secret-scan workf
 require_text_in_file "$secret_scan_workflow" "scripts/install-release-tools.sh gitleaks" "secret-scan workflow should install pinned Gitleaks"
 require_text_in_file "$secret_scan_workflow" "scripts/check-secrets.sh" "secret-scan workflow should run the local Gitleaks wrapper"
 require_text_in_file "scripts/install-release-tools.sh" "gitleaks)" "release-tool installer should support pinned Gitleaks"
+require_file "$dependabot_config" "Dependabot config should exist for scheduled dependency maintenance"
+require_text_in_file "$dependabot_config" 'package-ecosystem: "cargo"' "Dependabot should track Cargo dependencies"
+require_text_in_file "$dependabot_config" 'package-ecosystem: "github-actions"' "Dependabot should track GitHub Actions"
+require_text_in_file "$dependabot_config" 'interval: "weekly"' "Dependabot updates should be scheduled weekly"
 
 release_cache_block="$(
   awk '
