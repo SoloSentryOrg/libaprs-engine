@@ -7,17 +7,17 @@ publish = false
 [workspace]
 
 [dependencies]
-libaprs-engine = { version = "2.5.0", features = ["serde"] }
-aprs-transport-file = "2.5.0"
-aprs-transport-tcp = "2.5.0"
-aprs-transport-aprs-is = "2.5.0"
-aprs-transport-async = "2.5.0"
-aprs-transport-ax25 = "2.5.0"
-aprs-transport-channel = "2.5.0"
-aprs-transport-corpus = "2.5.0"
-aprs-transport-file-watch = "2.5.0"
-aprs-transport-http = "2.5.0"
-aprs-transport-kiss = "2.5.0"
-aprs-transport-mqtt = "2.5.0"
-aprs-transport-serial = "2.5.0"
-aprs-transport-udp = "2.5.0"
+libaprs-engine = { version = "2.6.0", features = ["serde"] }
+aprs-transport-file = "2.6.0"
+aprs-transport-tcp = "2.6.0"
+aprs-transport-aprs-is = "2.6.0"
+aprs-transport-async = "2.6.0"
+aprs-transport-ax25 = "2.6.0"
+aprs-transport-channel = "2.6.0"
+aprs-transport-corpus = "2.6.0"
+aprs-transport-file-watch = "2.6.0"
+aprs-transport-http = "2.6.0"
+aprs-transport-kiss = "2.6.0"
+aprs-transport-mqtt = "2.6.0"
+aprs-transport-serial = "2.6.0"
+aprs-transport-udp = "2.6.0"

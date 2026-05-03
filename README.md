@@ -18,9 +18,9 @@ telemetry, indexing, and diagnostics.
 - APRS engine with meaningful semantics, conformance fixtures,
   compatibility tests, examples, benchmark, optional transport adapters, and CLI
   inspector.
-- Current stable release: `v2.5.0`.
-- `v2.5.0` publishes the additive APRS conformance, interoperability,
-  encoding, service-toolkit, and API-readiness work completed after `v2.0.0`.
+- Current stable release: `v2.6.0`.
+- `v2.6.0` publishes the additive evidence-first readiness work completed
+  after `v2.5.0`.
 - Release publication requires clean secure review, local release gates, remote
   CI, security gates, GitHub Release latest verification, and
   post-publication smoke checks.
@@ -82,20 +82,20 @@ Use crates.io:
 
 ```toml
 [dependencies]
-libaprs-engine = "2.5.0"
-aprs-transport-file = "2.5.0"
-aprs-transport-tcp = "2.5.0"
-aprs-transport-aprs-is = "2.5.0"
-aprs-transport-kiss = "2.5.0"
-aprs-transport-serial = "2.5.0"
-aprs-transport-udp = "2.5.0"
-aprs-transport-http = "2.5.0"
-aprs-transport-file-watch = "2.5.0"
-aprs-transport-mqtt = "2.5.0"
-aprs-transport-ax25 = "2.5.0"
-aprs-transport-corpus = "2.5.0"
-aprs-transport-channel = "2.5.0"
-aprs-transport-async = "2.5.0"
+libaprs-engine = "2.6.0"
+aprs-transport-file = "2.6.0"
+aprs-transport-tcp = "2.6.0"
+aprs-transport-aprs-is = "2.6.0"
+aprs-transport-kiss = "2.6.0"
+aprs-transport-serial = "2.6.0"
+aprs-transport-udp = "2.6.0"
+aprs-transport-http = "2.6.0"
+aprs-transport-file-watch = "2.6.0"
+aprs-transport-mqtt = "2.6.0"
+aprs-transport-ax25 = "2.6.0"
+aprs-transport-corpus = "2.6.0"
+aprs-transport-channel = "2.6.0"
+aprs-transport-async = "2.6.0"
 ```
 
 Use a Git dependency when testing unreleased changes from this repository.
@@ -211,8 +211,8 @@ See [Security Model](docs/security.md) for details.
 - [Release Checklist](docs/release.md): pre-release steps.
 - [Security Policy](SECURITY.md): vulnerability reporting and supported
   versions.
-- [`v2.5.0` Release Notes](docs/release-notes-v2.5.0.md): additive `2.x`
-  highlights and migration notes.
+- [`v2.6.0` Release Notes](docs/release-notes-v2.6.0.md): evidence-first
+  readiness highlights and migration notes.
 - [Publishing](docs/publishing.md): crates.io package and publish workflow.
 - [Contributing](CONTRIBUTING.md): development rules, verification, and secure
   review checklist.

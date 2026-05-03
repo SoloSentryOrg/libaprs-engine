@@ -1,6 +1,6 @@
 [package]
 name = "aprs-transport-mqtt"
-version = "2.5.0"
+version = "2.6.0"
 edition = "2021"
 rust-version = "1.80"
 license = "MIT"
@@ -11,4 +11,4 @@ keywords = ["aprs", "mqtt", "packet", "transport"]
 categories = ["parser-implementations", "encoding"]
 
 [dependencies]
-libaprs-engine = { version = "2.5.0", path = "../libaprs-engine" }
+libaprs-engine = { version = "2.6.0", path = "../libaprs-engine" }
