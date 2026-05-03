@@ -9,7 +9,7 @@
   not breaking API replacements.
 - Any future break must have a concrete downstream report, migration path,
   compatibility test update, release-note entry, and secure review.
-- `v3.0.0-rc.1` should not start until `v2.5.0` records specific evidence.
+- `v3.0.0-rc.1` should not start until `v2.6.0` records specific evidence.
 
 ## Current Candidate Areas
 
@@ -34,5 +34,5 @@ Before any candidate can move to approved:
 
 ## Current Decision
 
-Continue on the additive `2.x` track through `v2.5.0`. Prepare `v3.0.0-rc.1`
+Continue on the additive `2.x` track through `v2.6.0`. Prepare `v3.0.0-rc.1`
 only if this record changes from evidence, not preference.

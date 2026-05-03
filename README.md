@@ -190,8 +190,6 @@ See [Security Model](docs/security.md) for details.
   boundaries and integration examples.
 - [Transport Common Layer Review](docs/transport-common-layer.md): current
   shared transport trait decision and `v2.0.0` revisit criteria.
-- [Downstream Feedback](docs/downstream-feedback.md): integration pain points,
-  feedback intake, and evidence for current-major planning.
 - [`v2.0.0` Migration Plan](docs/v2-migration.md): soft deprecations,
   migration guidance, and release-candidate gates.
 - [`v2.0.0` Breaking-Change Decisions](docs/v2-breaking-changes.md): completed

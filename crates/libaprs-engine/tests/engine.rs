@@ -107,6 +107,21 @@ fn engine_process_event_emits_stable_observability_events() {
 }
 
 #[test]
+fn accepted_event_preserves_invalid_utf8_status_bytes_exactly() {
+    let mut engine = Engine::default();
+    let input = b"N0CALL>APRS:>operator note \xff";
+
+    let EngineEvent::Accepted(accepted) = engine.process_event(input) else {
+        panic!("invalid UTF-8 in opaque status text should still be accepted");
+    };
+
+    assert_eq!(accepted.packet.raw().as_bytes(), input);
+    assert_eq!(accepted.packet.information(), b"operator note \xff");
+    assert_eq!(engine.counters().accepted, 1);
+    assert_eq!(engine.counters().malformed, 0);
+}
+
+#[test]
 fn malformed_event_raw_bytes_are_bounded_for_oversized_input() {
     let mut engine = Engine::default();
     let oversized = vec![b'X'; EVENT_RAW_BYTE_LIMIT + 64];
@@ -118,6 +133,20 @@ fn malformed_event_raw_bytes_are_bounded_for_oversized_input() {
     assert_eq!(malformed.diagnostic.code, "parse.oversized");
     assert_eq!(malformed.raw.len(), EVENT_RAW_BYTE_LIMIT);
     assert!(malformed.raw_truncated);
+}
+
+#[test]
+fn malformed_event_preserves_invalid_utf8_evidence_until_byte_limit() {
+    let mut engine = Engine::default();
+    let malformed_input = b"not a packet \xff";
+
+    let EngineEvent::Malformed(malformed) = engine.process_event(malformed_input) else {
+        panic!("malformed invalid UTF-8 input should emit malformed evidence");
+    };
+
+    assert_eq!(malformed.raw, malformed_input);
+    assert!(!malformed.raw_truncated);
+    assert_eq!(malformed.diagnostic.code, "parse.missing_separator");
 }
 
 #[test]

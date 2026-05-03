@@ -4,6 +4,8 @@
 
 ## BLUF
 
+- This is the internal downstream evidence log; do not link it from public
+  navigation, public issue templates, or public-facing docs indexes.
 - Treat this file as the evidence log for current-major API stability and future
   major-version planning.
 - Do not break public APIs based on preference alone; record downstream pain
