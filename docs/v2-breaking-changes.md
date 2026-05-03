@@ -25,7 +25,7 @@
 - Local public API audit: `crates/*/src` public declarations, `docs/api.md`,
   `docs/public-api.md`, `docs/stability.md`, compatibility tests, transport
   tests, and CLI tests.
-- Downstream evidence log: `docs/downstream-feedback.md`.
+- Internal downstream evidence log.
 - Migration guidance: `docs/v2-migration.md`.
 - Release evidence: `docs/release.md`.
 
@@ -33,7 +33,7 @@
 
 Start a narrow `v2.0.0-rc.1` implementation branch for the diagnostic JSON API
 boundary only. The accepted evidence is an internal secure-review and
-compatibility-test finding recorded in `docs/downstream-feedback.md`: the
+compatibility-test finding recorded in the internal downstream evidence log: the
 library method name `ParsedPacket::to_json()` continued to look like a stable
 serialization contract after a safer structured replacement was available.
 
@@ -45,7 +45,7 @@ or diagnostic taxonomy renames unless new evidence justifies them.
 
 | Candidate | Decision | Evidence | Required before an RC |
 | --- | --- | --- | --- |
-| Rename or replace `ParsedPacket::to_json()` | Approved for `v2.0.0-rc.1`. Remove the library method and keep CLI JSON as CLI-owned diagnostic output. | Internal secure-review and compatibility-test finding recorded in `docs/downstream-feedback.md`; `ParsedPacket::to_diagnostic()`, `serde_support::PacketDiagnostic`, `PacketSummary`, `EngineEvent`, and application-owned schemas provide safer alternatives. | Add compatibility tests for `to_diagnostic()`, add `schema_version` to `PacketDiagnostic`, update docs and changelog, and review `cargo-semver-checks` output. |
+| Rename or replace `ParsedPacket::to_json()` | Approved for `v2.0.0-rc.1`. Remove the library method and keep CLI JSON as CLI-owned diagnostic output. | Internal secure-review and compatibility-test finding recorded in the internal downstream evidence log; `ParsedPacket::to_diagnostic()`, `serde_support::PacketDiagnostic`, `PacketSummary`, `EngineEvent`, and application-owned schemas provide safer alternatives. | Add compatibility tests for `to_diagnostic()`, add `schema_version` to `PacketDiagnostic`, update docs and changelog, and review `cargo-semver-checks` output. |
 | Split stable packet envelope APIs from evolving semantic interpretation APIs | Not approved as a breaking change yet. Continue additive semantic expansion. | `AprsData` is documented as evolving, and tests cover current semantic helpers. No issue shows the visible enum/struct surface blocking adoption. | Identify specific unstable semantic fields or variants that downstream code cannot absorb additively; add migration examples and semver evidence for the narrower envelope API. |
 | Refine transport trait contracts around receive loops | Not approved as a breaking change yet. Keep adapter-specific options and shared byte traits. | Transport docs explicitly defer a stronger common layer until repeated downstream integrations need it. Existing adapters preserve bytes and expose bounded helpers. | Record multiple transport integrations needing the same runtime-neutral receive-loop trait; prove the trait does not force async, network, or runtime dependencies into the core crate. |
 | Stabilize diagnostic or event serialization under explicit schema versions | Not approved as a breaking change yet. Keep stable event structs and versioned support-matrix JSON. | Operational docs warn that packet JSON is diagnostic. There is no downstream report requiring first-class event JSON as a crate-owned wire protocol. | Add additive schema types first; document schema versioning and rejection behavior; add tests proving unsupported schema versions fail closed in consumers or examples. |
@@ -96,9 +96,8 @@ For this release candidate, the approved break is:
   as the structured diagnostic path.
 - Maintain compatibility tests around replacement APIs before considering any
   further public API removals.
-- Convert every downstream report into an issue, fixture, test, or migration
-  note before changing stable APIs; use the downstream feedback issue template
-  for API or migration reports.
+- Convert every downstream report into an internal evidence entry, fixture,
+  test, or migration note before changing stable APIs.
 - Revisit common transport traits only after the criteria in
   `docs/transport-common-layer.md` are met.
 - Continue publishing `1.x` releases until a non-empty breaking-change list is

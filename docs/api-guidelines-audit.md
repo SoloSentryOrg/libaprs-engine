@@ -50,5 +50,5 @@ This audit covers public APIs added or expanded after `v2.0.0`:
 
 ## Future Major Decision
 
-Keep `v3.0.0` gated. Revisit only if downstream feedback shows that additive
-modules are no longer enough for safe integrations.
+Keep `v3.0.0` gated. Revisit only if internal downstream evidence shows that
+additive modules are no longer enough for safe integrations.

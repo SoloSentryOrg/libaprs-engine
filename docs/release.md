@@ -40,8 +40,8 @@
   it can be updated immediately after publication.
 - Review `docs/public-api.md` and `crates/libaprs-engine/tests/api_compat.rs`
   when the release changes exported library APIs.
-- Review `docs/downstream-feedback.md` and `docs/v2-migration.md` before any
-  release that adds a soft deprecation, replacement API, or `v2.0.0`
+- Review the internal downstream evidence log and migration docs before any
+  release that adds a soft deprecation, replacement API, or major-version
   breaking-change candidate.
 - Use `scripts/publish-release.sh` when publishing to crates.io and GitHub
   Releases; it encodes the crate publish order from `docs/publishing.md` and
@@ -243,7 +243,9 @@ git diff --check
   `examples/downstream-smoke/Cargo.lock` with `1.7.0` checksums.
 - Notes: adds `ParsedPacket::to_diagnostic()` behind the `serde` feature as an
   explicitly structured diagnostic alternative to convenience JSON, expands API
-  compatibility tests, and adds a downstream feedback issue template.
+  compatibility tests, and added a downstream feedback issue template at the
+  time. That template was removed during the `v2.6.0` evidence-first track
+  when downstream feedback was moved to internal-only handling.
 
 ## v1.6.0 Release Evidence
 

@@ -150,7 +150,7 @@ future split explicit without promising current `no_std` compatibility.
 
 The project records deprecation evidence before changing stable APIs:
 
-- integration pain points belong in [Downstream Feedback](downstream-feedback.md),
+- integration pain points belong in the internal downstream evidence log,
 - migration guidance belongs in a release-specific migration plan,
 - stable replacements must have compatibility tests before a release candidate,
   and

@@ -6,9 +6,11 @@
   through production-focused `2.x` releases first.
 - `v2.5.0` completed the planned `v2.1.0` through `v2.5.0` additive release
   track in one published release.
+- `v2.6.0` is the pre-`v3.0.0` evidence-first readiness track: keep it
+  additive, harden gates, and collect proof before any breaking API cleanup.
 - Prioritise protocol coverage, interoperability, safe packet construction,
-  production service building blocks, and release assurance before any breaking
-  API cleanup.
+  production service building blocks, release assurance, and evidence gates
+  before any breaking API cleanup.
 - Reserve `v3.0.0` for deliberate, evidence-backed breaking changes only.
 - Every release must preserve raw bytes, fail closed on malformed packet shape,
   complete secure review, pass local and remote gates, publish crates.io
@@ -39,6 +41,7 @@ last synced on 2026-05-01.
 | `v2.3.0`: Encoding And Packet Construction | Done | Completed in `v2.5.0`; no standalone release |
 | `v2.4.0`: Production Service Toolkit | Done | Completed in `v2.5.0`; no standalone release |
 | `v2.5.0`: Assurance And API Readiness | Done | Released 2026-05-01 |
+| `v2.6.0`: Evidence-First Readiness | Todo | Not released |
 | `v3.0.0-rc.1`: Breaking API Candidate | Todo | Not released |
 | `v3.0.0`: Final Major Release | Todo | Not released |
 
@@ -172,15 +175,38 @@ make that decision evidence-based.
   options, error types, feature flags, and documentation examples.
 - Add supply-chain evidence improvements such as auditable binary guidance or
   SBOM documentation where useful.
-- Update `docs/downstream-feedback.md` and the `v3.0.0` breaking-change decision
+- Update the internal downstream evidence log and the `v3.0.0` breaking-change decision
   record before any release candidate work starts.
 
 Target outcome: the project either approves a narrow `v3.0.0` breaking list or
 continues additively in `2.x`.
 
-## 6. `v3.0.0-rc.1`: Breaking API Candidate
+## 6. `v2.6.0`: Evidence-First Readiness
 
-Priority: gated by `v2.5.0`. This release candidate should include only
+Priority: high. This release should complete the pre-`v3.0.0` evidence track
+without approving a major-version break.
+
+- Keep the downstream feedback record as an internal evidence log, not a public
+  navigation target or public issue-template workflow.
+- Add repository gates that fail when internal evidence docs become
+  public-facing by accident.
+- Add repository gates that require the `v2.6.0` evidence milestone,
+  unreleased release notes, internal evidence marker, and gated `v3.0.0`
+  decision record to stay in sync.
+- Expand abuse-resistance regression tests for untrusted packet input,
+  malformed semantic floods, invalid UTF-8, nested third-party packets, and
+  oversized transport boundaries.
+- Keep all work additive; if evidence reveals a possible break, record it first
+  and continue fixing forward in `2.x` unless a security issue requires a
+  separate reviewed exception.
+
+Target outcome: the project has enforceable evidence gates and stronger
+security regression coverage before deciding whether `v3.0.0-rc.1` is
+justified.
+
+## 7. `v3.0.0-rc.1`: Breaking API Candidate
+
+Priority: gated by `v2.6.0`. This release candidate should include only
 justified breaking changes with migration evidence.
 
 Possible breaking-change candidates:
@@ -206,7 +232,7 @@ Required gates:
 Target outcome: `v3.0.0` is a promotion of a tested release candidate, not a
 fresh unproven build.
 
-## 7. `v3.0.0`: Final Major Release
+## 8. `v3.0.0`: Final Major Release
 
 Priority: final. Publish only after the release candidate has clean evidence and
 downstream review time.
@@ -225,7 +251,7 @@ path and defensible release evidence.
 
 - `v2.5.0` completed the additive conformance, interoperability, encoding,
   service-toolkit, and API-readiness track.
-- Do not start breaking API work until downstream feedback records specific
+- Do not start breaking API work until internal downstream evidence records specific
   evidence that an additive design is not enough.
 - Keep each release independently reviewable and publishable.
 - Keep GitHub Project #3 as the live roadmap and update this file as its

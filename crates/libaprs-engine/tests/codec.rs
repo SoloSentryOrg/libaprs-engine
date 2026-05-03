@@ -1092,6 +1092,43 @@ fn third_party_semantics_can_parse_nested_packet_explicitly() {
 }
 
 #[test]
+fn third_party_nested_malformed_packet_is_policy_visible_without_repair() {
+    let parsed = parse_packet(b"N0CALL>APRS:}not a nested packet")
+        .expect("outer third-party packet should parse at codec boundary");
+
+    let AprsData::Malformed {
+        identifier,
+        information,
+    } = parsed.aprs_data()
+    else {
+        panic!("expected malformed third-party semantics");
+    };
+
+    assert_eq!(identifier, b'}');
+    assert_eq!(information, b"not a nested packet");
+    assert_eq!(parsed.raw().as_bytes(), b"N0CALL>APRS:}not a nested packet");
+}
+
+#[test]
+fn malformed_semantic_flood_remains_policy_visible_without_panics() {
+    for input in [
+        b"N0CALL>APRS:!".as_slice(),
+        b"N0CALL>APRS:/bad".as_slice(),
+        b"N0CALL>APRS:;SHORT".as_slice(),
+        b"N0CALL>APRS:)".as_slice(),
+        b"N0CALL>APRS:T#001,abc".as_slice(),
+    ] {
+        let parsed = parse_packet(input).expect("codec-valid packet should parse");
+
+        assert!(
+            matches!(parsed.aprs_data(), AprsData::Malformed { .. }),
+            "expected malformed semantic payload for {input:?}"
+        );
+        assert_eq!(parsed.raw().as_bytes(), input);
+    }
+}
+
+#[test]
 fn malformed_semantic_payloads_remain_policy_visible_without_partial_success() {
     let cases = [
         (b"N0CALL>APRS:!9903.50N/07201.75W-".as_slice(), b'!'),
