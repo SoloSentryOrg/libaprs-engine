@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+## 2.6.0 - 2026-05-03
+
+- Added evidence-first `v2.6.0` readiness gates before any `v3.0.0`
+  release-candidate work.
+- Treated the downstream feedback log as internal-only by removing public
+  README navigation and the public GitHub issue template.
+- Added docs verification for internal evidence handling, the `v2.6.0`
+  roadmap milestone, release notes, and gated `v3.0.0` decision record.
+- Added abuse-resistance regression coverage for invalid UTF-8 preservation,
+  bounded malformed-event evidence, malformed semantic floods, and nested
+  third-party packet handling.
+- Updated README, current API, transport, publishing, APRS-IS profile, and
+  downstream-smoke examples to target `2.6.0`.
+- Bumped all workspace crates to `2.6.0`.
+
 ## 2.5.0 - 2026-05-01
 
 - Added `v2.1.0` APRS conformance depth by exposing compressed-position
