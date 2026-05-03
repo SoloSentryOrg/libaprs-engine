@@ -6,8 +6,8 @@
   through production-focused `2.x` releases first.
 - `v2.5.0` completed the planned `v2.1.0` through `v2.5.0` additive release
   track in one published release.
-- `v2.6.0` is the pre-`v3.0.0` evidence-first readiness track: keep it
-  additive, harden gates, and collect proof before any breaking API cleanup.
+- `v2.6.0` completed the pre-`v3.0.0` evidence-first readiness track: it stayed
+  additive, hardened gates, and collected proof before any breaking API cleanup.
 - Prioritise protocol coverage, interoperability, safe packet construction,
   production service building blocks, release assurance, and evidence gates
   before any breaking API cleanup.
@@ -22,7 +22,7 @@
 GitHub Project
 [#3](https://github.com/orgs/SoloSentryOrg/projects/3) is the primary roadmap
 and project-management store. This table is the repository backup snapshot,
-last synced on 2026-05-01.
+last synced on 2026-05-03.
 
 | Version or epic | Project status | Release status |
 | --- | --- | --- |
@@ -41,7 +41,7 @@ last synced on 2026-05-01.
 | `v2.3.0`: Encoding And Packet Construction | Done | Completed in `v2.5.0`; no standalone release |
 | `v2.4.0`: Production Service Toolkit | Done | Completed in `v2.5.0`; no standalone release |
 | `v2.5.0`: Assurance And API Readiness | Done | Released 2026-05-01 |
-| `v2.6.0`: Evidence-First Readiness | Todo | Not released |
+| `v2.6.0`: Evidence-First Readiness | Done | Released 2026-05-03 |
 | `v3.0.0-rc.1`: Breaking API Candidate | Todo | Not released |
 | `v3.0.0`: Final Major Release | Todo | Not released |
 
@@ -182,6 +182,8 @@ Target outcome: the project either approves a narrow `v3.0.0` breaking list or
 continues additively in `2.x`.
 
 ## 6. `v2.6.0`: Evidence-First Readiness
+
+Status: completed and released on 2026-05-03.
 
 Priority: high. This release should complete the pre-`v3.0.0` evidence track
 without approving a major-version break.
