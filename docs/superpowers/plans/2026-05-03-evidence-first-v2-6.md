@@ -92,7 +92,7 @@ Expected: PASS.
 **Files:**
 - Review the full diff.
 
-- [ ] **Step 1: Run local gates**
+- [x] **Step 1: Run local gates**
 
 ```sh
 scripts/verify-docs.sh
@@ -104,10 +104,10 @@ cargo clippy --all-targets --all-features -- -D warnings
 
 Expected: PASS.
 
-- [ ] **Step 2: Secure code review**
+- [x] **Step 2: Secure code review**
 
 Review the diff for OWASP-aligned input handling, raw-byte preservation, fail-closed behavior, public exposure of internal evidence, and release-gate bypasses.
 
-- [ ] **Step 3: Publish draft PR**
+- [x] **Step 3: Publish draft PR**
 
 Stage only intended files, commit, push `codex/evidence-first-v2-6`, and open a draft PR targeting `main`.
