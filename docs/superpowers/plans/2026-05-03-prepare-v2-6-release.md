@@ -110,6 +110,6 @@ Commit message:
 Prepare v2.6.0 release
 ```
 
-- [ ] **Step 2: Push and open draft PR**
+- [x] **Step 2: Push and open PR**
 
-Push `codex/prepare-v2-6-release` and open a draft PR targeting `main` with release-prep scope and verification evidence.
+Push `codex/prepare-v2-6-release` and open a PR targeting `main` with release-prep scope and verification evidence.

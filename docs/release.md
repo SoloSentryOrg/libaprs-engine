@@ -116,6 +116,40 @@ scripts/verify-docs.sh
 git diff --check
 ```
 
+## v2.6.0 Release Evidence
+
+- Tag: `v2.6.0`.
+- Commit: `6ae6fa8e848672fa69db6e69001db00d6f97ea49`.
+- Scope: publishes the additive evidence-first readiness track before any
+  `v3.0.0` release-candidate work, including internal-only downstream feedback
+  handling, docs evidence gates, release notes, roadmap evidence, and
+  abuse-resistance regression coverage.
+- Release PR: <https://github.com/SoloSentryOrg/libaprs-engine/pull/61>.
+- Secure review: clean before PR creation, merge, tagging, and publication; no
+  open findings.
+- Local pre-publish gate: `scripts/verify-release.sh` passed on release-prep
+  commit `eb0d8905a94012037a45041c149055c61607b7a1`, which had the same
+  release tree before merge. Dependent crate package validation is not
+  resolvable before `libaprs-engine 2.6.0` exists on crates.io; Cargo verified
+  each crate during guarded publication after the core crate was published.
+- Remote GitHub Actions: release PR #61 Rust CI run `25289877531`, security run
+  `25289877544`, docs run `25289877527`, and merge-gate run `25289877533`
+  passed; `main` push Rust CI run `25289905608`, security run `25289905613`,
+  docs run `25289905610`, and secret-scan run `25289905622` passed for the
+  release commit.
+- crates.io publication: all workspace crates published as `2.6.0`.
+- GitHub Release: `v2.6.0` created, marked latest, and verified at
+  <https://github.com/SoloSentryOrg/libaprs-engine/releases/tag/v2.6.0>.
+- Post-publication downstream smoke and package validation:
+  `LIBAPRS_RUN_DOWNSTREAM_SMOKE=1 LIBAPRS_PACKAGE_ALL=1 scripts/verify-release.sh`
+  passed against crates.io and refreshed
+  `examples/downstream-smoke/Cargo.lock` with `2.6.0` checksums.
+- GitHub Project #3: `v2.6.0: Evidence-First Readiness` marked `Done`, target
+  date set to 2026-05-03, and release evidence added to the item.
+- Notes: the release used the default Cargo home; the benchmark gate was
+  skipped because this release does not change parser performance-sensitive
+  behavior.
+
 ## v2.5.0 Release Evidence
 
 - Tag: `v2.5.0`.
