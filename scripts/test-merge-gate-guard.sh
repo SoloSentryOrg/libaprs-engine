@@ -64,6 +64,12 @@ expect_checks \
   "Secret Scan,Docs,Rust stable,Rust 1.80.0,Supply Chain"
 
 expect_checks \
+  "Dependabot and YAML workflow changes require the Supply Chain check" \
+  ".github/dependabot.yml
+.github/workflows/example.yaml" \
+  "Secret Scan,Rust stable,Rust 1.80.0,Supply Chain"
+
+expect_checks \
   "empty file list falls back to secret scan and Rust checks" \
   "" \
   "Secret Scan,Rust stable,Rust 1.80.0"

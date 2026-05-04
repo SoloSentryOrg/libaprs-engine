@@ -79,8 +79,8 @@ is_supply_chain_path() {
   case "$1" in
     Cargo.toml | Cargo.lock | crates/*/Cargo.toml | examples/downstream-smoke/Cargo.toml | \
       examples/downstream-smoke/Cargo.lock | fuzz/Cargo.toml | fuzz/Cargo.lock | deny.toml | \
-      docs/release.md | docs/supply-chain.md | supply-chain/* | supply-chain/sbom/* | \
-      scripts/*.sh | .github/workflows/*.yml)
+      .github/dependabot.yml | docs/release.md | docs/supply-chain.md | supply-chain/* | \
+      scripts/*.sh | .github/workflows/*.yml | .github/workflows/*.yaml)
       return 0
       ;;
     *)

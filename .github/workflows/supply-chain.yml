@@ -7,6 +7,7 @@ on:
     paths:
       - "Cargo.toml"
       - "Cargo.lock"
+      - ".github/dependabot.yml"
       - "crates/**/Cargo.toml"
       - "examples/downstream-smoke/Cargo.toml"
       - "examples/downstream-smoke/Cargo.lock"
@@ -18,11 +19,13 @@ on:
       - "supply-chain/**"
       - "scripts/*.sh"
       - ".github/workflows/*.yml"
+      - ".github/workflows/*.yaml"
   pull_request:
     branches: ["main"]
     paths:
       - "Cargo.toml"
       - "Cargo.lock"
+      - ".github/dependabot.yml"
       - "crates/**/Cargo.toml"
       - "examples/downstream-smoke/Cargo.toml"
       - "examples/downstream-smoke/Cargo.lock"
@@ -34,6 +37,7 @@ on:
       - "supply-chain/**"
       - "scripts/*.sh"
       - ".github/workflows/*.yml"
+      - ".github/workflows/*.yaml"
   schedule:
     - cron: "29 3 * * 1"
 

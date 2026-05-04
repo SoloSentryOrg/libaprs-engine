@@ -80,6 +80,8 @@ require_text_in_file "$supply_chain_workflow" "cargo install cargo-cyclonedx --v
 require_text_in_file "$supply_chain_workflow" "scripts/test-supply-chain-evidence.sh" "supply-chain workflow should run the local evidence guard"
 require_text_in_file "$supply_chain_workflow" '"scripts/*.sh"' "supply-chain workflow should run when hashed scripts change"
 require_text_in_file "$supply_chain_workflow" '".github/workflows/*.yml"' "supply-chain workflow should run when hashed workflows change"
+require_text_in_file "$supply_chain_workflow" '".github/workflows/*.yaml"' "supply-chain workflow should run when YAML workflows change"
+require_text_in_file "$supply_chain_workflow" '".github/dependabot.yml"' "supply-chain workflow should run when Dependabot config changes"
 reject_text_in_file "$supply_chain_workflow" "            target" "supply-chain workflow should not cache target build artifacts"
 require_text_in_file "scripts/install-release-tools.sh" "gitleaks)" "release-tool installer should support pinned Gitleaks"
 require_file "$dependabot_config" "Dependabot config should exist for scheduled dependency maintenance"

@@ -21,16 +21,22 @@ grep -q '  Cargo.lock$' supply-chain/SHA256SUMS ||
 grep -q '  supply-chain/sbom/libaprs-engine.cdx.json$' supply-chain/SHA256SUMS ||
   fail "libaprs-engine SBOM is not covered by SHA256SUMS"
 
+grep -q '  .github/dependabot.yml$' supply-chain/SHA256SUMS ||
+  fail "Dependabot config is not covered by SHA256SUMS"
+
 if grep -Eq '  (crates|fuzz|examples)/.*\.rs$' supply-chain/SHA256SUMS; then
   fail "Rust source files must be identified by Git commit, not duplicated in SHA256SUMS"
 fi
 
-if find crates -type f -name '.*.supply-chain.*.json' | grep -q .; then
-  fail "generator left temporary SBOM files under crates/"
+if find . \( -path './.git' -o -path './target' \) -prune -o \
+  -type f -name '.*.supply-chain.*.json' -print | grep -q .; then
+  fail "generator left temporary SBOM files in the workspace"
 fi
 
-if find crates -mindepth 2 -maxdepth 2 -type f \
+if find . \( -path './.git' -o -path './target' -o -path './supply-chain' \) -prune -o \
+  -type f \
   \( -name '*.cdx.json' -o -name 'sbom.json' -o -name '*-sbom.json' -o -name 'test-sbom.json' \) \
+  -print \
   | grep -q .; then
   fail "SBOM files must only be written under supply-chain/sbom/"
 fi

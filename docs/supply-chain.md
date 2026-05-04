@@ -40,8 +40,8 @@ The tracked supply-chain evidence is:
 - `supply-chain/sbom/*.cdx.json`: deterministic CycloneDX 1.5 SBOMs for each
   workspace crate, generated with all features and all target dependencies.
 - `supply-chain/SHA256SUMS`: SHA-256 hashes for supply-chain control files,
-  dependency manifests, lockfiles, workflows, scripts, policy files, supply
-  chain documentation, and tracked SBOMs.
+  dependency manifests, lockfiles, dependency-management config, workflows,
+  scripts, policy files, supply-chain documentation, and tracked SBOMs.
 
 Regenerate and check evidence with:
 
