@@ -23,7 +23,7 @@ telemetry, indexing, and diagnostics.
 - `v3.0.0-rc.1` carries the `v2.6.0` evidence-first readiness work into the
   next major release line without an intentional public API break.
 - Release publication requires clean secure review, local release gates, remote
-  CI, security gates, GitHub Release latest verification, and
+  CI, security gates, GitHub Release latest or prerelease verification, and
   post-publication smoke checks.
 - Public API is semver-protected from `1.0.0`. The public boundary is tracked in
   [Public API Boundary](docs/public-api.md).

@@ -93,7 +93,10 @@ Before running `scripts/publish-release.sh`, record or verify:
 - `LIBAPRS_RELEASE_COMMIT="$(git rev-parse HEAD)"`: the publish target matches
   the checked-out commit.
 - `LIBAPRS_GITHUB_RELEASE=publish`: create or update the GitHub Release after
-  crates.io publication and verify it is marked latest.
+  crates.io publication. Stable releases must be verified as latest.
+- `LIBAPRS_GITHUB_RELEASE_PRERELEASE=1`: required for release-candidate or
+  other prerelease tags; verifies the GitHub Release is marked prerelease and
+  did not replace the stable latest release.
 - `LIBAPRS_RELEASE_TAG=<tag>`: the pushed release tag, for example `v1.0.1`.
 - `LIBAPRS_GITHUB_REPO=SoloSentryOrg/libaprs-engine`: the repository where the
   GitHub Release must be created. Use `LIBAPRS_GITHUB_RELEASE=skipped-documented`
@@ -102,7 +105,7 @@ Before running `scripts/publish-release.sh`, record or verify:
 
 ## Post-Release Project Status
 
-After crates.io publication, GitHub Release publication, latest-release
+After crates.io publication, GitHub Release publication, latest or prerelease
 verification, and post-publication smoke checks:
 
 - Update GitHub Project #3 first because it is the primary roadmap and

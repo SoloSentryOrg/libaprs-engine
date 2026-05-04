@@ -77,7 +77,7 @@ The repository provides a guarded publish script that refuses to run unless
 publishing is explicitly confirmed, the working tree is clean, the release
 commit is identified, and pre-publish evidence confirms clean secure review and
 passing release/security gates. The same script also creates or updates the
-GitHub Release and verifies that the release tag is marked latest:
+GitHub Release. Stable releases are marked latest and verified as latest:
 
 ```sh
 LIBAPRS_CONFIRM_PUBLISH=1 \
@@ -101,6 +101,26 @@ unavailable and the release evidence records the reason. Do not use that
 override for a normal release. Set `LIBAPRS_GITHUB_RELEASE_NOTES_FILE=<path>`
 to publish curated release notes; otherwise the script asks GitHub to generate
 notes for the tag.
+
+For release-candidate or other prerelease tags, set
+`LIBAPRS_GITHUB_RELEASE_PRERELEASE=1`. The script marks the GitHub Release as a
+prerelease, passes `--latest=false` when creating it, and verifies the tag did
+not replace the stable latest release:
+
+```sh
+LIBAPRS_CONFIRM_PUBLISH=1 \
+LIBAPRS_SECURE_REVIEW=clean \
+LIBAPRS_LOCAL_RELEASE_GATE=passed \
+LIBAPRS_SECURITY_GATE=passed \
+LIBAPRS_REMOTE_CI=passed \
+LIBAPRS_GITHUB_RELEASE=publish \
+LIBAPRS_GITHUB_RELEASE_PRERELEASE=1 \
+LIBAPRS_RELEASE_TAG=v3.0.0-rc.1 \
+LIBAPRS_GITHUB_REPO=SoloSentryOrg/libaprs-engine \
+LIBAPRS_RELEASE_COMMIT="$(git rev-parse HEAD)" \
+LIBAPRS_GITHUB_RELEASE_NOTES_FILE=docs/release-notes-v3.0.0-rc.1.md \
+  scripts/publish-release.sh
+```
 
 Use the default Cargo home for normal publication. In restricted environments
 where `~/.cargo` is not writable, keep Cargo state outside the repository:
@@ -165,7 +185,8 @@ creation or documented GitHub Release skip.
   crates before publishing them.
 - Confirm `CHANGELOG.md` describes the release.
 - Tag only after package validation and CI both pass.
-- Confirm the GitHub Release for the release tag is marked latest before
-  closing the release.
+- Confirm the GitHub Release for a stable release tag is marked latest before
+  closing the release. Confirm release-candidate tags are marked prerelease and
+  do not replace the stable latest release.
 - Update GitHub Project #3 and the `ROADMAP.md` backup snapshot after every
   release before treating the release as complete.
