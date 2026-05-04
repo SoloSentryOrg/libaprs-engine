@@ -6,6 +6,8 @@
 
 - Run `scripts/verify-release.sh`.
 - Run `scripts/test-publish-release-guards.sh`.
+- Run `scripts/test-supply-chain-evidence.sh` when supply-chain evidence,
+  dependency manifests, workflows, release scripts, or policy files changed.
 - Run `scripts/test-fuzz-corpus-guard.sh` and `scripts/check-fuzz-corpus.sh`
   when fuzz corpus entries or fuzz targets changed.
 - Run `scripts/check-workflow-optimizations.sh` and `scripts/verify-docs.sh`
@@ -18,6 +20,8 @@
   checks when that toolchain is installed.
 - Run `cargo audit` and `cargo deny check`, either locally or through the
   security workflow, before publishing.
+- Confirm the `Supply Chain` workflow passed for the release commit when SBOM,
+  hash, dependency, workflow, script, or release policy inputs changed.
 - Record fuzz compile and fuzz corpus hygiene results when parser, transport,
   semantic decoder, or corpus files changed.
 - Treat the Rust CI release-script job as a release dependency gate: it installs
@@ -82,6 +86,10 @@ Before running `scripts/publish-release.sh`, record or verify:
 - `LIBAPRS_REMOTE_CI=passed`: remote CI passed for the release commit. Use
   `skipped-documented` only when CI was unavailable and the release evidence
   records the reason.
+- Supply-chain evidence: `scripts/test-supply-chain-evidence.sh` passed for the
+  release commit, and any distributed `.crate`, source archive, binary, or SBOM
+  release assets have SHA-256 hashes recorded in the release evidence or
+  attached release assets.
 - `LIBAPRS_RELEASE_COMMIT="$(git rev-parse HEAD)"`: the publish target matches
   the checked-out commit.
 - `LIBAPRS_GITHUB_RELEASE=publish`: create or update the GitHub Release after

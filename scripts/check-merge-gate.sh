@@ -75,10 +75,25 @@ is_security_path() {
   esac
 }
 
+is_supply_chain_path() {
+  case "$1" in
+    Cargo.toml | Cargo.lock | crates/*/Cargo.toml | examples/downstream-smoke/Cargo.toml | \
+      examples/downstream-smoke/Cargo.lock | fuzz/Cargo.toml | fuzz/Cargo.lock | deny.toml | \
+      docs/release.md | docs/supply-chain.md | supply-chain/* | supply-chain/sbom/* | \
+      scripts/*.sh | .github/workflows/*.yml)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 required_checks() {
   needs_docs=0
   needs_rust=0
   needs_security=0
+  needs_supply_chain=0
   saw_file=0
 
   while IFS= read -r path; do
@@ -96,6 +111,10 @@ required_checks() {
     if is_security_path "$path"; then
       needs_security=1
     fi
+
+    if is_supply_chain_path "$path"; then
+      needs_supply_chain=1
+    fi
   done
 
   if [ "$saw_file" -eq 0 ]; then
@@ -112,6 +131,9 @@ required_checks() {
   fi
   if [ "$needs_security" -eq 1 ]; then
     echo "cargo-security"
+  fi
+  if [ "$needs_supply_chain" -eq 1 ]; then
+    echo "Supply Chain"
   fi
 }
 
