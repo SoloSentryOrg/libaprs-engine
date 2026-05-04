@@ -2,9 +2,10 @@
 
 ![libaprs-engine documentation header](assets/brand/docs-header.svg)
 
-This project has reached `2.0.0`. The public APIs listed in
-[Public API Boundary](public-api.md) are semver-protected integration
-contracts for the current major release line.
+This project has reached the `3.0.0-rc.1` release-candidate line without an
+intentional public API break from `2.6.0`. The public APIs listed in
+[Public API Boundary](public-api.md) are semver-protected integration contracts
+for the current major release line.
 
 ## Compatibility Policy
 
@@ -25,8 +26,8 @@ contracts for the current major release line.
   replacement path was added.
 - Soft deprecations for new integrations are tracked in release-specific
   migration plans. Historical `v2.0.0` guidance remains in
-  [`v2.0.0` Migration Plan](v2-migration.md); any future `v3.0.0` guidance must
-  be evidence-backed before release-candidate work starts.
+  [`v2.0.0` Migration Plan](v2-migration.md); `v3.0.0-rc.1` guidance is tracked
+  in [`v3.0.0` Migration Plan](v3-migration.md).
 
 ## Release Maintenance Criteria
 
@@ -47,7 +48,7 @@ Release maintenance keeps these gates true:
 
 ## Stable APIs
 
-These APIs are intended to remain source-compatible through the `2.x` release
+These APIs are intended to remain source-compatible through the `3.x` release
 line unless a secure code review finds a safety issue that requires a breaking
 change:
 

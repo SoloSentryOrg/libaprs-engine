@@ -20,8 +20,8 @@ if ! grep -F 'internal downstream evidence log' docs/downstream-feedback.md >/de
   note_failure "docs/downstream-feedback.md must be marked internal"
 fi
 
-if ! grep -F 'No `v3.0.0` breaking change is approved yet.' docs/v3-breaking-changes.md >/dev/null 2>&1; then
-  note_failure "v3 breaking-change decision must remain gated"
+if ! grep -F 'No `v3.0.0` public API breaking change is approved for `v3.0.0-rc.1`.' docs/v3-breaking-changes.md >/dev/null 2>&1; then
+  note_failure "v3 breaking-change decision must remain evidence-based"
 fi
 
 if [ "$failures" -ne 0 ]; then

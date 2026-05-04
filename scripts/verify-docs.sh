@@ -27,6 +27,7 @@ done
 
 sh scripts/check-internal-docs.sh || failures=$((failures + 1))
 sh scripts/check-v2-6-evidence.sh || failures=$((failures + 1))
+sh scripts/check-v3-rc-evidence.sh || failures=$((failures + 1))
 
 if [ "$failures" -ne 0 ]; then
   exit 1

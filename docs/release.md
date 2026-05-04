@@ -124,6 +124,23 @@ scripts/verify-docs.sh
 git diff --check
 ```
 
+## v3.0.0-rc.1 Release Candidate Preparation
+
+- Target tag: `v3.0.0-rc.1`.
+- Scope: prepare a no-intentional-break major release candidate after the
+  `v2.6.0` evidence-first track.
+- Required before publication: clean secure review, local release gate, remote
+  CI, security gate, semver review, regenerated SBOM and SHA-256 evidence,
+  GitHub Release verification, and downstream smoke against the published RC.
+- Downstream smoke manifest versions are prepared for `3.0.0-rc.1`; the
+  downstream smoke lockfile must be regenerated from crates.io after all RC
+  crates are published.
+- Migration guide: [v3.0.0 Migration Plan](v3-migration.md).
+- Release notes: [libaprs-engine v3.0.0-rc.1](release-notes-v3.0.0-rc.1.md).
+- Status: preparation only; do not treat this section as release evidence until
+  the release commit, tag, crates.io publication, GitHub Release, and
+  post-publication smoke results are recorded.
+
 ## v2.6.0 Release Evidence
 
 - Tag: `v2.6.0`.

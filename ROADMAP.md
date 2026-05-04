@@ -2,8 +2,8 @@
 
 ## BLUF
 
-- The next major version target is `v3.0.0`, but the project should earn it
-  through production-focused `2.x` releases first.
+- The next major version target is `v3.0.0`, and `v3.0.0-rc.1` is now the
+  release-candidate preparation target.
 - `v2.5.0` completed the planned `v2.1.0` through `v2.5.0` additive release
   track in one published release.
 - `v2.6.0` completed the pre-`v3.0.0` evidence-first readiness track: it stayed
@@ -11,7 +11,9 @@
 - Prioritise protocol coverage, interoperability, safe packet construction,
   production service building blocks, release assurance, and evidence gates
   before any breaking API cleanup.
-- Reserve `v3.0.0` for deliberate, evidence-backed breaking changes only.
+- Do not invent a breaking API change just to justify the major version:
+  `v3.0.0-rc.1` is a no-intentional-break release candidate unless semver
+  checks prove otherwise.
 - Every release must preserve raw bytes, fail closed on malformed packet shape,
   complete secure review, pass local and remote gates, publish crates.io
   packages, create GitHub Release evidence, update GitHub Project #3, and sync
@@ -22,7 +24,7 @@
 GitHub Project
 [#3](https://github.com/orgs/SoloSentryOrg/projects/3) is the primary roadmap
 and project-management store. This table is the repository backup snapshot,
-last synced on 2026-05-03.
+last synced on 2026-05-04.
 
 | Version or epic | Project status | Release status |
 | --- | --- | --- |
@@ -42,7 +44,7 @@ last synced on 2026-05-03.
 | `v2.4.0`: Production Service Toolkit | Done | Completed in `v2.5.0`; no standalone release |
 | `v2.5.0`: Assurance And API Readiness | Done | Released 2026-05-01 |
 | `v2.6.0`: Evidence-First Readiness | Done | Released 2026-05-03 |
-| `v3.0.0-rc.1`: Breaking API Candidate | Todo | Not released |
+| `v3.0.0-rc.1`: Major Release Candidate | In progress | Release prep in progress |
 | `v3.0.0`: Final Major Release | Todo | Not released |
 
 Release evidence is recorded in [docs/release.md](docs/release.md).
@@ -206,10 +208,12 @@ Target outcome: the project has enforceable evidence gates and stronger
 security regression coverage before deciding whether `v3.0.0-rc.1` is
 justified.
 
-## 7. `v3.0.0-rc.1`: Breaking API Candidate
+## 7. `v3.0.0-rc.1`: Major Release Candidate
 
-Priority: gated by `v2.6.0`. This release candidate should include only
-justified breaking changes with migration evidence.
+Priority: gated by `v2.6.0`. This release candidate should validate the next
+major release line without inventing a breaking API change. If semver checks or
+secure review find an actual break, fix it forward or document it as an
+intentional break before publication.
 
 Possible breaking-change candidates:
 
@@ -224,10 +228,13 @@ Possible breaking-change candidates:
 
 Required gates:
 
-- Run semver checks and document every intentional break.
+- Run semver checks and document every intentional break; unexpected breaks are
+  release blockers.
 - Publish a migration guide before the release candidate.
 - Run downstream smoke against `v3.0.0-rc.1`.
 - Keep release-candidate evidence in `docs/release.md`.
+- Regenerate SBOM and SHA-256 supply-chain evidence for the release-candidate
+  package metadata.
 - Fix any secure review, CI, conformance, or downstream findings before final
   `v3.0.0`.
 
