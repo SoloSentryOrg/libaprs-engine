@@ -104,6 +104,40 @@ elif printf '%s\n' "$release_cache_block" | grep -Fx "            target" >/dev/
   note_failure "release-script cache should not include target build artifacts"
 fi
 
+release_script_block="$(
+  awk '
+    /^  release-script:/ { in_release_job = 1 }
+    in_release_job && /^  [A-Za-z0-9_-]+:/ && $0 !~ /^  release-script:/ { in_release_job = 0 }
+    in_release_job { print }
+  ' "$workflow"
+)"
+release_script_order_issue="$(
+  printf '%s\n' "$release_script_block" |
+    awk '
+      /cargo install cargo-cyclonedx --version 0.5.9 --locked/ { install_line = NR }
+      /scripts\/verify-release\.sh/ { verify_line = NR }
+      END {
+        if (!install_line) {
+          print "missing_install"
+        } else if (!verify_line) {
+          print "missing_verify"
+        } else if (install_line > verify_line) {
+          print "install_after_verify"
+        }
+      }
+    '
+)"
+case "$release_script_order_issue" in
+  "")
+    ;;
+  missing_verify)
+    note_failure "release-script should run verify-release"
+    ;;
+  *)
+    note_failure "release-script should install pinned SBOM tool before verify-release"
+    ;;
+esac
+
 stable_only_count="$(grep -F -c "matrix.toolchain == 'stable'" "$workflow" || true)"
 if [ "$stable_only_count" -lt 5 ]; then
   note_failure "stable-only checks should avoid duplicating docs/package/default tests on MSRV"
