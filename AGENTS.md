@@ -30,6 +30,20 @@
 - Do not commit Cargo credentials, registry caches, package caches, advisory
   databases, or temporary Cargo homes.
 
+## Sub-Agent Use
+
+- Sub-agents are allowed when they provide clear benefit, such as focused
+  review, independent investigation, parallel checks, or bounded
+  implementation.
+- Use sub-agents only with explicit ownership, narrow scope, and clear expected
+  outputs.
+- Do not use sub-agents for tightly coupled edits, urgent blocking work,
+  ambiguous tasks, or changes likely to create merge conflicts.
+- For code changes, assign disjoint write scopes and require changed file paths
+  in the sub-agent summary.
+- Verify sub-agent findings and changes before relying on them, committing, or
+  merging.
+
 ## Secure Review And Release Gates
 
 - Before pushing or merging to `main`, perform a secure code review.
