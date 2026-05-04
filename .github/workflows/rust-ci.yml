@@ -164,6 +164,10 @@ jobs:
         timeout-minutes: 5
         run: scripts/install-release-tools.sh
 
+      - name: Install SBOM tool
+        timeout-minutes: 10
+        run: cargo install cargo-cyclonedx --version 0.5.9 --locked
+
       - name: Test publish guard
         run: scripts/test-publish-release-guards.sh
 
