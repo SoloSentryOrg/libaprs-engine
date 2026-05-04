@@ -3,7 +3,7 @@
 ## BLUF
 
 - The next major version target is `v3.0.0`, and `v3.0.0-rc.1` is now the
-  release-candidate preparation target.
+  published release candidate.
 - `v2.5.0` completed the planned `v2.1.0` through `v2.5.0` additive release
   track in one published release.
 - `v2.6.0` completed the pre-`v3.0.0` evidence-first readiness track: it stayed
@@ -44,8 +44,8 @@ last synced on 2026-05-04.
 | `v2.4.0`: Production Service Toolkit | Done | Completed in `v2.5.0`; no standalone release |
 | `v2.5.0`: Assurance And API Readiness | Done | Released 2026-05-01 |
 | `v2.6.0`: Evidence-First Readiness | Done | Released 2026-05-03 |
-| `v3.0.0-rc.1`: Major Release Candidate | In progress | Release prep in progress |
-| `v3.0.0`: Final Major Release | Todo | Not released |
+| `v3.0.0-rc.1`: Major Release Candidate | Done | Released 2026-05-04 as prerelease |
+| `v3.0.0`: Final Major Release | In progress | Not released |
 
 Release evidence is recorded in [docs/release.md](docs/release.md).
 

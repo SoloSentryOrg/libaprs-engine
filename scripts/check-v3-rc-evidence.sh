@@ -28,8 +28,8 @@ if ! grep -F 'No intentional public API break' docs/v3-migration.md >/dev/null 2
   note_failure "v3 migration guide must state the no-intentional-break migration"
 fi
 
-if ! grep -F '## v3.0.0-rc.1 Release Candidate Preparation' docs/release.md >/dev/null 2>&1; then
-  note_failure "docs/release.md is missing v3.0.0-rc.1 preparation evidence"
+if ! grep -F '## v3.0.0-rc.1 Release Evidence' docs/release.md >/dev/null 2>&1; then
+  note_failure "docs/release.md is missing v3.0.0-rc.1 release evidence"
 fi
 
 if [ "$failures" -ne 0 ]; then
