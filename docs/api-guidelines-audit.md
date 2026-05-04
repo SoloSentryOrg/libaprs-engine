@@ -4,14 +4,16 @@
 
 ## BLUF
 
-- Current `2.x` development remains additive and source-compatible.
+- Current `3.0.0-rc.1` release-candidate preparation remains source-compatible
+  with `2.6.0`.
 - New encoder, service-toolkit, and APRS-IS profile APIs are documented and
   covered by `api_compat` or crate-level integration tests.
 - Public helpers use explicit result types, stable machine-readable codes, and
   caller-owned storage or transport choices.
 - No new runtime, async, network, serialization, or storage dependency is added
   by these APIs.
-- No evidence currently justifies a `v3.0.0` breaking change.
+- No evidence currently justifies an intentional `v3.0.0-rc.1` public API
+  breaking change.
 
 ## Audit Scope
 
@@ -50,5 +52,5 @@ This audit covers public APIs added or expanded after `v2.0.0`:
 
 ## Future Major Decision
 
-Keep `v3.0.0` gated. Revisit only if internal downstream evidence shows that
-additive modules are no longer enough for safe integrations.
+Keep `v3.0.0` no-intentional-break unless internal downstream evidence shows
+that additive modules are no longer enough for safe integrations.

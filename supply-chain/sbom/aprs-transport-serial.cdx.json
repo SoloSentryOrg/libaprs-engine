@@ -13,9 +13,9 @@
     ],
     "component": {
       "type": "library",
-      "bom-ref": "path+repo://libaprs-engine/crates/aprs-transport-serial#2.6.0",
+      "bom-ref": "path+repo://libaprs-engine/crates/aprs-transport-serial#3.0.0-rc.1",
       "name": "aprs-transport-serial",
-      "version": "2.6.0",
+      "version": "3.0.0-rc.1",
       "description": "Serial reader helpers for libaprs-engine",
       "scope": "required",
       "licenses": [
@@ -23,7 +23,7 @@
           "expression": "MIT"
         }
       ],
-      "purl": "pkg:cargo/aprs-transport-serial@2.6.0?download_url=file://.",
+      "purl": "pkg:cargo/aprs-transport-serial@3.0.0-rc.1?download_url=file://.",
       "externalReferences": [
         {
           "type": "vcs",
@@ -33,10 +33,10 @@
       "components": [
         {
           "type": "library",
-          "bom-ref": "path+repo://libaprs-engine/crates/aprs-transport-serial#2.6.0 bin-target-0",
+          "bom-ref": "path+repo://libaprs-engine/crates/aprs-transport-serial#3.0.0-rc.1 bin-target-0",
           "name": "aprs_transport_serial",
-          "version": "2.6.0",
-          "purl": "pkg:cargo/aprs-transport-serial@2.6.0?download_url=file://.#src/lib.rs"
+          "version": "3.0.0-rc.1",
+          "purl": "pkg:cargo/aprs-transport-serial@3.0.0-rc.1?download_url=file://.#src/lib.rs"
         }
       ]
     },
@@ -50,9 +50,9 @@
   "components": [
     {
       "type": "library",
-      "bom-ref": "path+repo://libaprs-engine/crates/libaprs-engine#2.6.0",
+      "bom-ref": "path+repo://libaprs-engine/crates/libaprs-engine#3.0.0-rc.1",
       "name": "libaprs-engine",
-      "version": "2.6.0",
+      "version": "3.0.0-rc.1",
       "description": "Protocol-first APRS engine core primitives",
       "scope": "required",
       "licenses": [
@@ -60,7 +60,7 @@
           "expression": "MIT"
         }
       ],
-      "purl": "pkg:cargo/libaprs-engine@2.6.0?download_url=file://../libaprs-engine",
+      "purl": "pkg:cargo/libaprs-engine@3.0.0-rc.1?download_url=file://../libaprs-engine",
       "externalReferences": [
         {
           "type": "vcs",
@@ -300,13 +300,13 @@
   ],
   "dependencies": [
     {
-      "ref": "path+repo://libaprs-engine/crates/aprs-transport-serial#2.6.0",
+      "ref": "path+repo://libaprs-engine/crates/aprs-transport-serial#3.0.0-rc.1",
       "dependsOn": [
-        "path+repo://libaprs-engine/crates/libaprs-engine#2.6.0"
+        "path+repo://libaprs-engine/crates/libaprs-engine#3.0.0-rc.1"
       ]
     },
     {
-      "ref": "path+repo://libaprs-engine/crates/libaprs-engine#2.6.0",
+      "ref": "path+repo://libaprs-engine/crates/libaprs-engine#3.0.0-rc.1",
       "dependsOn": [
         "registry+https://github.com/rust-lang/crates.io-index#serde@1.0.228"
       ]

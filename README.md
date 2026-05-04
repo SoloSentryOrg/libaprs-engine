@@ -19,8 +19,9 @@ telemetry, indexing, and diagnostics.
   compatibility tests, examples, benchmark, optional transport adapters, and CLI
   inspector.
 - Current stable release: `v2.6.0`.
-- `v2.6.0` publishes the additive evidence-first readiness work completed
-  after `v2.5.0`.
+- Release candidate under preparation: `v3.0.0-rc.1`.
+- `v3.0.0-rc.1` carries the `v2.6.0` evidence-first readiness work into the
+  next major release line without an intentional public API break.
 - Release publication requires clean secure review, local release gates, remote
   CI, security gates, GitHub Release latest verification, and
   post-publication smoke checks.
@@ -78,7 +79,7 @@ telemetry, indexing, and diagnostics.
 
 ## Install Or Depend On It
 
-Use crates.io:
+Use the current stable crates.io release:
 
 ```toml
 [dependencies]
@@ -98,7 +99,10 @@ aprs-transport-channel = "2.6.0"
 aprs-transport-async = "2.6.0"
 ```
 
-Use a Git dependency when testing unreleased changes from this repository.
+Use exact `=3.0.0-rc.1` requirements from the
+[`v3.0.0` Migration Plan](docs/v3-migration.md) after the release candidate is
+published. Use a Git dependency when testing unreleased changes from this
+repository.
 
 ```toml
 [dependencies]
@@ -196,6 +200,8 @@ See [Security Model](docs/security.md) for details.
   go/no-go evidence for the `v2.0.0` release-candidate API break.
 - [`v3.0.0` Breaking-Change Decisions](docs/v3-breaking-changes.md): current
   go/no-go evidence for the next major release.
+- [`v3.0.0` Migration Plan](docs/v3-migration.md): release-candidate migration
+  guidance from `2.6.0`.
 - [Architecture](docs/architecture.md): boundaries, contracts, and pipeline.
 - [Security Model](docs/security.md): untrusted input handling and OWASP-aligned
   controls.
@@ -211,7 +217,7 @@ See [Security Model](docs/security.md) for details.
 - [Release Checklist](docs/release.md): pre-release steps.
 - [Security Policy](SECURITY.md): vulnerability reporting and supported
   versions.
-- [`v2.6.0` Release Notes](docs/release-notes-v2.6.0.md): evidence-first
+- [`v3.0.0-rc.1` Release Notes](docs/release-notes-v3.0.0-rc.1.md): evidence-first
   readiness highlights and migration notes.
 - [Publishing](docs/publishing.md): crates.io package and publish workflow.
 - [Contributing](CONTRIBUTING.md): development rules, verification, and secure

@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## 3.0.0-rc.1 - 2026-05-04
+
+- Prepared the first `v3.0.0` release candidate after the `v2.6.0`
+  evidence-first gates.
+- Kept the release candidate free of intentional public API breaking changes;
+  `2.6.0` users should only need dependency-version updates for RC testing.
+- Added `v3.0.0` migration guidance and updated the breaking-change decision
+  record to document the no-intentional-break release-candidate decision.
+- Updated README, current API, transport, publishing, APRS-IS profile, and
+  downstream-smoke examples to target `3.0.0-rc.1`.
+- Bumped all workspace crates to `3.0.0-rc.1`.
+
 ## 2.6.0 - 2026-05-03
 
 - Added evidence-first `v2.6.0` readiness gates before any `v3.0.0`
