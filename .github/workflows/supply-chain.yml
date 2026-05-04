@@ -1,0 +1,82 @@
+name: Supply Chain
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths:
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".github/dependabot.yml"
+      - "crates/**/Cargo.toml"
+      - "examples/downstream-smoke/Cargo.toml"
+      - "examples/downstream-smoke/Cargo.lock"
+      - "fuzz/Cargo.toml"
+      - "fuzz/Cargo.lock"
+      - "deny.toml"
+      - "docs/release.md"
+      - "docs/supply-chain.md"
+      - "supply-chain/**"
+      - "scripts/*.sh"
+      - ".github/workflows/*.yml"
+      - ".github/workflows/*.yaml"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".github/dependabot.yml"
+      - "crates/**/Cargo.toml"
+      - "examples/downstream-smoke/Cargo.toml"
+      - "examples/downstream-smoke/Cargo.lock"
+      - "fuzz/Cargo.toml"
+      - "fuzz/Cargo.lock"
+      - "deny.toml"
+      - "docs/release.md"
+      - "docs/supply-chain.md"
+      - "supply-chain/**"
+      - "scripts/*.sh"
+      - ".github/workflows/*.yml"
+      - ".github/workflows/*.yaml"
+  schedule:
+    - cron: "29 3 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supply-chain-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  supply-chain:
+    name: Supply Chain
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Rust
+        run: rustup toolchain install stable --profile minimal
+
+      - name: Cache Cargo
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-cargo-supply-chain-${{ hashFiles('**/Cargo.lock', '.github/workflows/supply-chain.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-supply-chain-
+
+      - name: Install SBOM tool
+        timeout-minutes: 10
+        run: cargo install cargo-cyclonedx --version 0.5.9 --locked
+
+      - name: Verify supply-chain evidence
+        run: scripts/test-supply-chain-evidence.sh

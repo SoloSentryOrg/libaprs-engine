@@ -26,7 +26,7 @@ expect_checks() {
 expect_checks \
   "docs-only changes require secret scan and Docs" \
   "README.md
-docs/release.md
+docs/api.md
 .github/ISSUE_TEMPLATE/bug_report.md" \
   "Secret Scan,Docs"
 
@@ -38,18 +38,36 @@ expect_checks \
 expect_checks \
   "docs verifier changes require secret scan, Docs, and Rust checks" \
   "scripts/verify-docs.sh" \
-  "Secret Scan,Docs,Rust stable,Rust 1.80.0"
+  "Secret Scan,Docs,Rust stable,Rust 1.80.0,Supply Chain"
 
 expect_checks \
   "security-sensitive changes require secret scan, Rust, and security checks" \
   "Cargo.lock" \
-  "Secret Scan,Rust stable,Rust 1.80.0,cargo-security"
+  "Secret Scan,Rust stable,Rust 1.80.0,cargo-security,Supply Chain"
 
 expect_checks \
   "mixed docs and security changes require all relevant checks including secret scan" \
   "README.md
 Cargo.toml" \
-  "Secret Scan,Docs,Rust stable,Rust 1.80.0,cargo-security"
+  "Secret Scan,Docs,Rust stable,Rust 1.80.0,cargo-security,Supply Chain"
+
+expect_checks \
+  "tracked supply-chain evidence changes require the Supply Chain check" \
+  "supply-chain/SHA256SUMS
+supply-chain/sbom/libaprs-engine.cdx.json" \
+  "Secret Scan,Rust stable,Rust 1.80.0,Supply Chain"
+
+expect_checks \
+  "hashed script and workflow changes require the Supply Chain check" \
+  "scripts/check-secrets.sh
+.github/workflows/docs.yml" \
+  "Secret Scan,Docs,Rust stable,Rust 1.80.0,Supply Chain"
+
+expect_checks \
+  "Dependabot and YAML workflow changes require the Supply Chain check" \
+  ".github/dependabot.yml
+.github/workflows/example.yaml" \
+  "Secret Scan,Rust stable,Rust 1.80.0,Supply Chain"
 
 expect_checks \
   "empty file list falls back to secret scan and Rust checks" \
