@@ -127,22 +127,54 @@ scripts/verify-docs.sh
 git diff --check
 ```
 
-## v3.0.0-rc.1 Release Candidate Preparation
+## v3.0.0-rc.1 Release Evidence
 
-- Target tag: `v3.0.0-rc.1`.
-- Scope: prepare a no-intentional-break major release candidate after the
-  `v2.6.0` evidence-first track.
-- Required before publication: clean secure review, local release gate, remote
-  CI, security gate, semver review, regenerated SBOM and SHA-256 evidence,
-  GitHub Release verification, and downstream smoke against the published RC.
-- Downstream smoke manifest versions are prepared for `3.0.0-rc.1`; the
-  downstream smoke lockfile must be regenerated from crates.io after all RC
-  crates are published.
+- Tag: `v3.0.0-rc.1`.
+- Commit: `f5612574181ba13254c82cbe3a6dd9667ee95ccf`.
+- Scope: publishes a no-intentional-break major release candidate after the
+  `v2.6.0` evidence-first track, with SBOM/hash supply-chain evidence and RC
+  prerelease publication guards.
+- Release PRs: <https://github.com/SoloSentryOrg/libaprs-engine/pull/66> and
+  <https://github.com/SoloSentryOrg/libaprs-engine/pull/67>.
+- Secure review: clean before PR creation, merge, tagging, and publication; no
+  open findings. Pre-publication findings were fixed forward before the tag:
+  downstream smoke lockfile checksums were kept on published `2.6.0` until RC
+  crates existed, README wording stopped presenting unpublished RC crates as
+  current stable, and the publish guard now marks RC GitHub Releases as
+  prerelease without replacing the stable latest release.
+- Local pre-publish gate: `scripts/verify-release.sh` passed on release-guard
+  fix commit `4fb625ce50bbb706cc74531ed981f73a917e87d2`, which had the same
+  release tree before merge. The earlier RC preparation gate also passed on
+  `177a43a8f8f9e0da92c6ef927178dee052b42b5b`.
+- Remote GitHub Actions: release PR #66 and fix-forward PR #67 passed Rust CI,
+  docs, merge gate, secret scan, and supply-chain checks. The `main` push for
+  release commit `f5612574181ba13254c82cbe3a6dd9667ee95ccf` passed Rust CI run
+  `25337775979`, including the release-script job, plus docs run
+  `25337776010`, secret-scan run `25337776016`, and supply-chain run
+  `25337776048`.
+- Semver evidence: `cargo semver-checks check-release -p libaprs-engine
+  --baseline-version 2.6.0 --release-type minor --all-features` passed as
+  no-break evidence before publication.
+- crates.io publication: all workspace crates published as `3.0.0-rc.1` and
+  verified unyanked through the crates.io API.
+- GitHub Release: `v3.0.0-rc.1` created as a prerelease, not latest, at
+  <https://github.com/SoloSentryOrg/libaprs-engine/releases/tag/v3.0.0-rc.1>.
+  `v2.6.0` remains the GitHub latest stable release.
+- Post-publication downstream smoke and package validation:
+  `cargo check --manifest-path examples/downstream-smoke/Cargo.toml --locked
+  --offline` passed against the refreshed crates.io lockfile, and dependent
+  crate `cargo package` validation passed for all transport crates and
+  `aprs-cli`. The generated downstream smoke `target` directory was removed
+  before the locked smoke rerun after Cargo stalled on stale target fingerprint
+  state; no tracked source or evidence file was removed.
 - Migration guide: [v3.0.0 Migration Plan](v3-migration.md).
 - Release notes: [libaprs-engine v3.0.0-rc.1](release-notes-v3.0.0-rc.1.md).
-- Status: preparation only; do not treat this section as release evidence until
-  the release commit, tag, crates.io publication, GitHub Release, and
-  post-publication smoke results are recorded.
+- GitHub Project #3: `v3.0.0-rc.1: Major Release Candidate` marked `Done`,
+  target date set to 2026-05-04, release evidence added to the item, and
+  `v3.0.0: Final Major Release` moved to `In progress`.
+- Notes: the release used the default Cargo home. The benchmark gate was
+  skipped because this release candidate does not change
+  parser-performance-sensitive behavior.
 
 ## v2.6.0 Release Evidence
 

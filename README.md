@@ -19,7 +19,7 @@ telemetry, indexing, and diagnostics.
   compatibility tests, examples, benchmark, optional transport adapters, and CLI
   inspector.
 - Current stable release: `v2.6.0`.
-- Release candidate under preparation: `v3.0.0-rc.1`.
+- Current release candidate: `v3.0.0-rc.1`.
 - `v3.0.0-rc.1` carries the `v2.6.0` evidence-first readiness work into the
   next major release line without an intentional public API break.
 - Release publication requires clean secure review, local release gates, remote
