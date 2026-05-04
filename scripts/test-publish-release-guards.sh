@@ -48,10 +48,16 @@ STUB
 #!/usr/bin/env sh
 set -eu
 if [ "$1" = "release" ] && [ "$2" = "view" ]; then
+  case " $* " in
+    *" --json "*)
+      printf '%s\n' "${LIBAPRS_TEST_IS_PRERELEASE:-false}"
+      exit 0
+      ;;
+  esac
   exit 1
 fi
 if [ "$1" = "release" ] && [ "$2" = "create" ]; then
-  printf '%s\n' "$3" >>"${LIBAPRS_TEST_RELEASED:?}"
+  printf '%s\n' "$*" >>"${LIBAPRS_TEST_RELEASED:?}"
   exit 0
 fi
 if [ "$1" = "release" ] && [ "$2" = "list" ]; then
@@ -72,6 +78,7 @@ run_publish() {
     LIBAPRS_TEST_PUBLISHED="$LIBAPRS_TEST_PUBLISHED" \
     LIBAPRS_TEST_RELEASED="$LIBAPRS_TEST_RELEASED" \
     LIBAPRS_TEST_RELEASE_TAG="$LIBAPRS_TEST_RELEASE_TAG" \
+    LIBAPRS_TEST_IS_PRERELEASE="${LIBAPRS_TEST_IS_PRERELEASE:-false}" \
     "$@" \
     "$ROOT_DIR/scripts/publish-release.sh"
 }
@@ -130,5 +137,61 @@ published_count="$(wc -l <"$LIBAPRS_TEST_PUBLISHED" | tr -d ' ')"
 
 released_count="$(wc -l <"$LIBAPRS_TEST_RELEASED" | tr -d ' ')"
 [ "$released_count" = "1" ] || fail "expected 1 GitHub release call, got $released_count"
+
+if ! grep -q -- "--latest" "$LIBAPRS_TEST_RELEASED"; then
+  fail "stable GitHub release was not marked latest"
+fi
+
+if grep -q -- "--prerelease" "$LIBAPRS_TEST_RELEASED"; then
+  fail "stable GitHub release was marked prerelease"
+fi
+
+if run_publish \
+  LIBAPRS_CONFIRM_PUBLISH=1 \
+  LIBAPRS_SECURE_REVIEW=clean \
+  LIBAPRS_LOCAL_RELEASE_GATE=passed \
+  LIBAPRS_SECURITY_GATE=passed \
+  LIBAPRS_REMOTE_CI=passed \
+  LIBAPRS_RELEASE_COMMIT=abc123 \
+  LIBAPRS_GITHUB_RELEASE=publish \
+  LIBAPRS_RELEASE_TAG=v9.9.9-rc.1 \
+  LIBAPRS_GITHUB_REPO=example/libaprs-engine \
+  >"$TMP_DIR/prerelease-required.out" 2>&1; then
+  fail "publish succeeded for prerelease tag without prerelease evidence"
+fi
+
+if ! grep -qi "prerelease" "$TMP_DIR/prerelease-required.out"; then
+  fail "missing prerelease failure message"
+fi
+
+: >"$LIBAPRS_TEST_PUBLISHED"
+: >"$LIBAPRS_TEST_RELEASED"
+LIBAPRS_TEST_RELEASE_TAG=v9.9.8
+LIBAPRS_TEST_IS_PRERELEASE=true
+export LIBAPRS_TEST_RELEASE_TAG LIBAPRS_TEST_IS_PRERELEASE
+
+run_publish \
+  LIBAPRS_CONFIRM_PUBLISH=1 \
+  LIBAPRS_SECURE_REVIEW=clean \
+  LIBAPRS_LOCAL_RELEASE_GATE=passed \
+  LIBAPRS_SECURITY_GATE=passed \
+  LIBAPRS_REMOTE_CI=passed \
+  LIBAPRS_RELEASE_COMMIT=abc123 \
+  LIBAPRS_GITHUB_RELEASE=publish \
+  LIBAPRS_GITHUB_RELEASE_PRERELEASE=1 \
+  LIBAPRS_RELEASE_TAG=v9.9.9-rc.1 \
+  LIBAPRS_GITHUB_REPO=example/libaprs-engine \
+  >"$TMP_DIR/prerelease-pass.out" 2>&1
+
+published_count="$(wc -l <"$LIBAPRS_TEST_PUBLISHED" | tr -d ' ')"
+[ "$published_count" = "15" ] || fail "expected 15 prerelease publish calls, got $published_count"
+
+if ! grep -q -- "--prerelease" "$LIBAPRS_TEST_RELEASED"; then
+  fail "prerelease GitHub release was not marked prerelease"
+fi
+
+if ! grep -q -- "--latest=false" "$LIBAPRS_TEST_RELEASED"; then
+  fail "prerelease GitHub release was not excluded from latest"
+fi
 
 echo "publish release guard tests passed"

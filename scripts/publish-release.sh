@@ -18,6 +18,17 @@ require_value() {
   fi
 }
 
+is_truthy() {
+  case "$1" in
+    1 | true | TRUE | yes | YES)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 if [ "${LIBAPRS_CONFIRM_PUBLISH:-0}" != "1" ]; then
   echo "Set LIBAPRS_CONFIRM_PUBLISH=1 to publish crates to crates.io." >&2
   exit 2
@@ -46,6 +57,14 @@ case "${LIBAPRS_GITHUB_RELEASE:-}" in
       echo "Refusing to publish: GitHub release publication requires LIBAPRS_GITHUB_REPO=<owner/name>." >&2
       exit 1
     fi
+    case "$LIBAPRS_RELEASE_TAG" in
+      *-*)
+        if ! is_truthy "${LIBAPRS_GITHUB_RELEASE_PRERELEASE:-0}"; then
+          echo "Refusing to publish: prerelease tags require LIBAPRS_GITHUB_RELEASE_PRERELEASE=1." >&2
+          exit 1
+        fi
+        ;;
+    esac
     ;;
   skipped-documented)
     ;;
@@ -84,23 +103,56 @@ publish_github_release() {
   tag="$LIBAPRS_RELEASE_TAG"
   repo="$LIBAPRS_GITHUB_REPO"
   title="${LIBAPRS_GITHUB_RELEASE_TITLE:-libaprs-engine $tag}"
+  prerelease=0
+
+  if is_truthy "${LIBAPRS_GITHUB_RELEASE_PRERELEASE:-0}"; then
+    prerelease=1
+  fi
 
   if gh release view "$tag" --repo "$repo" >/dev/null 2>&1; then
-    if [ -n "${LIBAPRS_GITHUB_RELEASE_NOTES_FILE:-}" ]; then
-      run gh release edit "$tag" --repo "$repo" --title "$title" --latest --verify-tag --notes-file "$LIBAPRS_GITHUB_RELEASE_NOTES_FILE"
+    if [ "$prerelease" = "1" ]; then
+      if [ -n "${LIBAPRS_GITHUB_RELEASE_NOTES_FILE:-}" ]; then
+        run gh release edit "$tag" --repo "$repo" --title "$title" --prerelease --verify-tag --notes-file "$LIBAPRS_GITHUB_RELEASE_NOTES_FILE"
+      else
+        run gh release edit "$tag" --repo "$repo" --title "$title" --prerelease --verify-tag
+      fi
     else
-      run gh release edit "$tag" --repo "$repo" --title "$title" --latest --verify-tag
+      if [ -n "${LIBAPRS_GITHUB_RELEASE_NOTES_FILE:-}" ]; then
+        run gh release edit "$tag" --repo "$repo" --title "$title" --latest --verify-tag --notes-file "$LIBAPRS_GITHUB_RELEASE_NOTES_FILE"
+      else
+        run gh release edit "$tag" --repo "$repo" --title "$title" --latest --verify-tag
+      fi
     fi
   elif [ -n "${LIBAPRS_GITHUB_RELEASE_NOTES_FILE:-}" ]; then
-    run gh release create "$tag" --repo "$repo" --title "$title" --latest --verify-tag --notes-file "$LIBAPRS_GITHUB_RELEASE_NOTES_FILE"
+    if [ "$prerelease" = "1" ]; then
+      run gh release create "$tag" --repo "$repo" --title "$title" --prerelease --latest=false --verify-tag --notes-file "$LIBAPRS_GITHUB_RELEASE_NOTES_FILE"
+    else
+      run gh release create "$tag" --repo "$repo" --title "$title" --latest --verify-tag --notes-file "$LIBAPRS_GITHUB_RELEASE_NOTES_FILE"
+    fi
   else
-    run gh release create "$tag" --repo "$repo" --title "$title" --latest --verify-tag --generate-notes
+    if [ "$prerelease" = "1" ]; then
+      run gh release create "$tag" --repo "$repo" --title "$title" --prerelease --latest=false --verify-tag --generate-notes
+    else
+      run gh release create "$tag" --repo "$repo" --title "$title" --latest --verify-tag --generate-notes
+    fi
   fi
 
   latest_tag="$(gh release list --repo "$repo" --limit 100 --json tagName,isLatest --jq '.[] | select(.isLatest == true) | .tagName')"
-  if [ "$latest_tag" != "$tag" ]; then
-    echo "Refusing to finish: GitHub latest release is '$latest_tag', expected '$tag'." >&2
-    exit 1
+  if [ "$prerelease" = "1" ]; then
+    release_is_prerelease="$(gh release view "$tag" --repo "$repo" --json isPrerelease --jq '.isPrerelease')"
+    if [ "$release_is_prerelease" != "true" ]; then
+      echo "Refusing to finish: GitHub release '$tag' is not marked prerelease." >&2
+      exit 1
+    fi
+    if [ "$latest_tag" = "$tag" ]; then
+      echo "Refusing to finish: GitHub prerelease '$tag' must not be marked latest." >&2
+      exit 1
+    fi
+  else
+    if [ "$latest_tag" != "$tag" ]; then
+      echo "Refusing to finish: GitHub latest release is '$latest_tag', expected '$tag'." >&2
+      exit 1
+    fi
   fi
 }
 
