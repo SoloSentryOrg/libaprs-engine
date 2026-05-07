@@ -1,8 +1,8 @@
-# v3.0.0-rc.1 Security Audit Summary
+# v3.0.0-rc.2 Security Audit Summary
 
 ## BLUF
 
-- Repo-wide source security audit was repeated during the `v3.0.0-rc.1`
+- Repo-wide source security audit was repeated during the `v3.0.0-rc.2`
   fix-forward pass.
 - No surviving reportable security findings remain after the fixes in commit
   `f5179df`.
@@ -45,5 +45,7 @@ added and linked.
 
 ## Remaining Release Task
 
-- [ ] Continue the normal `v3.0.0` release-candidate path after confirming any
-  additional release-manager evidence requirements.
+- [ ] Publish `v3.0.0-rc.2` through `scripts/publish-release.sh` after local
+  release gates, remote CI, security gates, and the release tag are clean.
+- [ ] Refresh downstream smoke lockfile and release evidence after crates.io
+  publication.

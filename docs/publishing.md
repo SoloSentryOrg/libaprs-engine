@@ -29,7 +29,7 @@ Publish crates in dependency order:
 The adapter and CLI crates use versioned path dependencies:
 
 ```toml
-libaprs-engine = { version = "3.0.0-rc.1", path = "../libaprs-engine" }
+libaprs-engine = { version = "3.0.0-rc.2", path = "../libaprs-engine" }
 ```
 
 Cargo uses the local path in this workspace and the version requirement when
@@ -115,10 +115,10 @@ LIBAPRS_SECURITY_GATE=passed \
 LIBAPRS_REMOTE_CI=passed \
 LIBAPRS_GITHUB_RELEASE=publish \
 LIBAPRS_GITHUB_RELEASE_PRERELEASE=1 \
-LIBAPRS_RELEASE_TAG=v3.0.0-rc.1 \
+LIBAPRS_RELEASE_TAG=v3.0.0-rc.2 \
 LIBAPRS_GITHUB_REPO=SoloSentryOrg/libaprs-engine \
 LIBAPRS_RELEASE_COMMIT="$(git rev-parse HEAD)" \
-LIBAPRS_GITHUB_RELEASE_NOTES_FILE=docs/release-notes-v3.0.0-rc.1.md \
+LIBAPRS_GITHUB_RELEASE_NOTES_FILE=docs/release-notes-v3.0.0-rc.2.md \
   scripts/publish-release.sh
 ```
 

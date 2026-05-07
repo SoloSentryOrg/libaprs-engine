@@ -4,7 +4,7 @@
 
 ## BLUF
 
-- `libaprs-engine` has reached the `3.0.0-rc.1` release-candidate line without
+- `libaprs-engine` has reached the `3.0.0-rc.2` release-candidate line without
   an intentional public API break from `2.6.0`; the core API below remains the
   semver-protected public contract.
 - The stable boundary is byte-first: callers pass `&[u8]`, successful parses

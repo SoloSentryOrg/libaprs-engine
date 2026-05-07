@@ -2,8 +2,8 @@
 
 ## BLUF
 
-- No `v3.0.0` public API breaking change is approved for `v3.0.0-rc.1`.
-- `v3.0.0-rc.1` is approved as a no-intentional-break major release candidate
+- No `v3.0.0` public API breaking change is approved for `v3.0.0-rc.2`.
+- `v3.0.0-rc.2` is approved as a no-intentional-break major release candidate
   after the `v2.6.0` evidence-first track.
 - Encoder, service-toolkit, and APRS-IS profile helpers are additive modules,
   not breaking API replacements.
@@ -16,11 +16,11 @@
 
 | Candidate | Status | Rationale |
 | --- | --- | --- |
-| Split codec, semantic, policy, diagnostic, and encoder modules more aggressively | Not approved for `v3.0.0-rc.1` | Additive modules are working; no downstream report shows current grouping causes unsafe use. |
-| Replace broad semantic enum variants with narrower typed views | Not approved for `v3.0.0-rc.1` | `AprsData` still provides useful byte-preserving access and can grow additively. |
-| Introduce stronger transport receive-loop traits | Not approved for `v3.0.0-rc.1` | Existing adapter-specific helpers keep runtime and network ownership with callers. |
-| Rename diagnostic or policy codes | Not approved for `v3.0.0-rc.1` | Stable codes are already used in docs and tests; no ambiguity report exists. |
-| Change feature organization | Not approved for `v3.0.0-rc.1` | Current optional features remain small and documented. |
+| Split codec, semantic, policy, diagnostic, and encoder modules more aggressively | Not approved for `v3.0.0-rc.2` | Additive modules are working; no downstream report shows current grouping causes unsafe use. |
+| Replace broad semantic enum variants with narrower typed views | Not approved for `v3.0.0-rc.2` | `AprsData` still provides useful byte-preserving access and can grow additively. |
+| Introduce stronger transport receive-loop traits | Not approved for `v3.0.0-rc.2` | Existing adapter-specific helpers keep runtime and network ownership with callers. |
+| Rename diagnostic or policy codes | Not approved for `v3.0.0-rc.2` | Stable codes are already used in docs and tests; no ambiguity report exists. |
+| Change feature organization | Not approved for `v3.0.0-rc.2` | Current optional features remain small and documented. |
 
 ## Evidence Required Before Approval
 
@@ -35,8 +35,9 @@ Before any candidate can move to approved:
 
 ## Current Decision
 
-Prepare `v3.0.0-rc.1` as a no-intentional-break release candidate. The release
+Prepare `v3.0.0-rc.2` as a no-intentional-break release candidate. The release
 candidate validates version metadata, package publication, migration guidance,
 downstream smoke, SBOM/hash evidence, and remote gates for the next major line.
-No public API removal, rename, or semantic behavior break is approved in this
-record.
+No public API removal, rename, or parser semantic behavior break is approved in
+this record. The finite default TCP timeout change is documented as security
+hardening with an explicit opt-out through `TcpReadOptions`.

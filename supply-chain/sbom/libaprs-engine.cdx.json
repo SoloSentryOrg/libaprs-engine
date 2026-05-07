@@ -13,9 +13,9 @@
     ],
     "component": {
       "type": "library",
-      "bom-ref": "path+repo://libaprs-engine/crates/libaprs-engine#3.0.0-rc.1",
+      "bom-ref": "path+repo://libaprs-engine/crates/libaprs-engine#3.0.0-rc.2",
       "name": "libaprs-engine",
-      "version": "3.0.0-rc.1",
+      "version": "3.0.0-rc.2",
       "description": "Protocol-first APRS engine core primitives",
       "scope": "required",
       "licenses": [
@@ -23,7 +23,7 @@
           "expression": "MIT"
         }
       ],
-      "purl": "pkg:cargo/libaprs-engine@3.0.0-rc.1?download_url=file://.",
+      "purl": "pkg:cargo/libaprs-engine@3.0.0-rc.2?download_url=file://.",
       "externalReferences": [
         {
           "type": "vcs",
@@ -33,10 +33,10 @@
       "components": [
         {
           "type": "library",
-          "bom-ref": "path+repo://libaprs-engine/crates/libaprs-engine#3.0.0-rc.1 bin-target-0",
+          "bom-ref": "path+repo://libaprs-engine/crates/libaprs-engine#3.0.0-rc.2 bin-target-0",
           "name": "libaprs_engine",
-          "version": "3.0.0-rc.1",
-          "purl": "pkg:cargo/libaprs-engine@3.0.0-rc.1?download_url=file://.#src/lib.rs"
+          "version": "3.0.0-rc.2",
+          "purl": "pkg:cargo/libaprs-engine@3.0.0-rc.2?download_url=file://.#src/lib.rs"
         }
       ]
     },
@@ -280,7 +280,7 @@
   ],
   "dependencies": [
     {
-      "ref": "path+repo://libaprs-engine/crates/libaprs-engine#3.0.0-rc.1",
+      "ref": "path+repo://libaprs-engine/crates/libaprs-engine#3.0.0-rc.2",
       "dependsOn": [
         "registry+https://github.com/rust-lang/crates.io-index#serde@1.0.228"
       ]

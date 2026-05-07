@@ -7,17 +7,17 @@ publish = false
 [workspace]
 
 [dependencies]
-libaprs-engine = { version = "3.0.0-rc.1", features = ["serde"] }
-aprs-transport-file = "3.0.0-rc.1"
-aprs-transport-tcp = "3.0.0-rc.1"
-aprs-transport-aprs-is = "3.0.0-rc.1"
-aprs-transport-async = "3.0.0-rc.1"
-aprs-transport-ax25 = "3.0.0-rc.1"
-aprs-transport-channel = "3.0.0-rc.1"
-aprs-transport-corpus = "3.0.0-rc.1"
-aprs-transport-file-watch = "3.0.0-rc.1"
-aprs-transport-http = "3.0.0-rc.1"
-aprs-transport-kiss = "3.0.0-rc.1"
-aprs-transport-mqtt = "3.0.0-rc.1"
-aprs-transport-serial = "3.0.0-rc.1"
-aprs-transport-udp = "3.0.0-rc.1"
+libaprs-engine = { version = "3.0.0-rc.2", features = ["serde"] }
+aprs-transport-file = "3.0.0-rc.2"
+aprs-transport-tcp = "3.0.0-rc.2"
+aprs-transport-aprs-is = "3.0.0-rc.2"
+aprs-transport-async = "3.0.0-rc.2"
+aprs-transport-ax25 = "3.0.0-rc.2"
+aprs-transport-channel = "3.0.0-rc.2"
+aprs-transport-corpus = "3.0.0-rc.2"
+aprs-transport-file-watch = "3.0.0-rc.2"
+aprs-transport-http = "3.0.0-rc.2"
+aprs-transport-kiss = "3.0.0-rc.2"
+aprs-transport-mqtt = "3.0.0-rc.2"
+aprs-transport-serial = "3.0.0-rc.2"
+aprs-transport-udp = "3.0.0-rc.2"

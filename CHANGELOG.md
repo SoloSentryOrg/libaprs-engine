@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 3.0.0-rc.2 - 2026-05-07
+
+- Prepared a security fix-forward release candidate after `3.0.0-rc.1`.
+- Escaped user-controlled CLI diagnostics for unknown options, invalid
+  `--fail-on` values, and input path read/open errors.
+- Hardened APRS-IS login/profile helpers to reject all ASCII control bytes.
+- Added finite default TCP connect/read timeouts with explicit caller override
+  through `TcpReadOptions`.
+- Added tracked security-audit outcome evidence for the fix-forward pass.
+- Bumped all workspace crates to `3.0.0-rc.2`.
+
 ## 3.0.0-rc.1 - 2026-05-04
 
 - Prepared the first `v3.0.0` release candidate after the `v2.6.0`
