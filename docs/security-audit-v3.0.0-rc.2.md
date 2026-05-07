@@ -43,9 +43,11 @@ added and linked.
 - [x] Merged PR #69 into `main`.
 - [x] Reran `scripts/verify-release.sh` from fresh `main` after merge.
 
-## Remaining Release Task
+## Release Outcome
 
-- [ ] Publish `v3.0.0-rc.2` through `scripts/publish-release.sh` after local
-  release gates, remote CI, security gates, and the release tag are clean.
-- [ ] Refresh downstream smoke lockfile and release evidence after crates.io
+- [x] Published `v3.0.0-rc.2` through `scripts/publish-release.sh` after local
+  release gates, remote CI, security gates, and the release tag were clean.
+- [x] Created GitHub Release `v3.0.0-rc.2` as a prerelease so stable `v2.6.0`
+  remains the latest release.
+- [x] Refreshed downstream smoke lockfile and release evidence after crates.io
   publication.

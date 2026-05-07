@@ -2,8 +2,8 @@
 
 ## BLUF
 
-- The next major version target is `v3.0.0`, and `v3.0.0-rc.2` is the
-  security fix-forward release-candidate target.
+- The next major version target is `v3.0.0`, and `v3.0.0-rc.2` is published as
+  the security fix-forward release candidate.
 - `v2.5.0` completed the planned `v2.1.0` through `v2.5.0` additive release
   track in one published release.
 - `v2.6.0` completed the pre-`v3.0.0` evidence-first readiness track: it stayed
@@ -45,7 +45,7 @@ last synced on 2026-05-07.
 | `v2.5.0`: Assurance And API Readiness | Done | Released 2026-05-01 |
 | `v2.6.0`: Evidence-First Readiness | Done | Released 2026-05-03 |
 | `v3.0.0-rc.1`: Major Release Candidate | Done | Released 2026-05-04 as prerelease |
-| `v3.0.0-rc.2`: Security Fix-Forward Release Candidate | In progress | Not released |
+| `v3.0.0-rc.2`: Security Fix-Forward Release Candidate | Done | Released 2026-05-07 as prerelease |
 | `v3.0.0`: Final Major Release | In progress | Not released |
 
 Release evidence is recorded in [docs/release.md](docs/release.md).
@@ -244,24 +244,26 @@ fresh unproven build.
 
 ## 7.1. `v3.0.0-rc.2`: Security Fix-Forward Release Candidate
 
+Status: completed and released as a prerelease on 2026-05-07.
+
 Priority: fix-forward after the published `v3.0.0-rc.1` candidate. This release
-candidate should publish the security hardening merged after `rc.1` without
-adding an intentional public API break.
+candidate published the security hardening merged after `rc.1` without adding
+an intentional public API break.
 
-Required gates:
+Completed gates:
 
-- Publish a fresh prerelease version because `3.0.0-rc.1` is already published
-  and immutable on crates.io.
+- Published a fresh prerelease version because `3.0.0-rc.1` is already
+  published and immutable on crates.io.
 - Preserve the no-intentional-public-API-break decision.
-- Run the full local release gate, remote CI, secure review, dependency
+- Ran the full local release gate, remote CI, secure review, dependency
   policy checks, SBOM/hash evidence checks, and semver checks.
-- Publish crates through `scripts/publish-release.sh` with a prerelease GitHub
+- Published crates through `scripts/publish-release.sh` with a prerelease GitHub
   Release so stable `v2.6.0` remains the latest release.
-- Refresh downstream smoke lockfile and release evidence after crates.io
+- Refreshed downstream smoke lockfile and release evidence after crates.io
   publication.
 
-Target outcome: `v3.0.0-rc.2` becomes the tested candidate for final
-`v3.0.0` promotion.
+Target outcome: `v3.0.0-rc.2` is the tested candidate for final `v3.0.0`
+promotion.
 
 ## 8. `v3.0.0`: Final Major Release
 

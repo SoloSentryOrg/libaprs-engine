@@ -127,14 +127,15 @@ scripts/verify-docs.sh
 git diff --check
 ```
 
-## v3.0.0-rc.2 Release Preparation Evidence
+## v3.0.0-rc.2 Release Evidence
 
-- Target tag: `v3.0.0-rc.2`.
-- Target version: all workspace crates are prepared as `3.0.0-rc.2`.
+- Tag: `v3.0.0-rc.2`.
+- Commit: `310671ff5a0395a806c9f2a036dec4e5aad5241f`.
 - Scope: security fix-forward release candidate after the already-published
   `v3.0.0-rc.1` prerelease. This candidate includes CLI diagnostic escaping,
   APRS-IS ASCII-control rejection, finite default TCP timeouts, and tracked
   audit outcome evidence.
+- Release PR: <https://github.com/SoloSentryOrg/libaprs-engine/pull/71>.
 - Secure review: repo-wide source security audit found no surviving reportable
   findings after the fix-forward pass. Evidence is tracked in
   [v3.0.0-rc.2 Security Audit Summary](security-audit-v3.0.0-rc.2.md).
@@ -143,10 +144,36 @@ git diff --check
   security hardening with explicit `TcpReadOptions` opt-out.
 - Release notes: [libaprs-engine v3.0.0-rc.2](release-notes-v3.0.0-rc.2.md).
 - Migration guide: [v3.0.0 Migration Plan](v3-migration.md).
-- Post-publication requirements: publish through `scripts/publish-release.sh`,
-  verify the GitHub Release is a prerelease and not latest, refresh downstream
-  smoke against crates.io `3.0.0-rc.2`, update this section with tag, commit,
-  crates.io, GitHub Release, remote CI, and Project #3 evidence.
+- Local pre-publish gate: `scripts/verify-release.sh` passed on release-prep
+  branch commit `9af951f` and again from fresh `main` at release commit
+  `310671ff5a0395a806c9f2a036dec4e5aad5241f` before publication.
+- Remote GitHub Actions: release PR #71 passed Docs, Merge Gate, Rust 1.80.0,
+  Rust stable, Secret Scan, cargo-security, and Supply Chain checks. The
+  `main` push for release commit `310671ff5a0395a806c9f2a036dec4e5aad5241f`
+  passed Rust CI run `25520220839`, Security run `25520220848`, Docs run
+  `25520220876`, Secret Scan run `25520220867`, and Supply Chain run
+  `25520220852`.
+- Semver evidence: `cargo semver-checks check-release -p libaprs-engine`
+  passed as part of the release gate with no required semver update from
+  `v2.6.0` to `v3.0.0-rc.2`.
+- crates.io publication: all workspace crates were published as
+  `3.0.0-rc.2` through `scripts/publish-release.sh` and verified by
+  `cargo search` after publication.
+- GitHub Release: `v3.0.0-rc.2` created as a prerelease, not latest, at
+  <https://github.com/SoloSentryOrg/libaprs-engine/releases/tag/v3.0.0-rc.2>.
+  `v2.6.0` remains the GitHub latest stable release.
+- Post-publication downstream smoke: `cargo update --manifest-path
+  examples/downstream-smoke/Cargo.toml` refreshed the lockfile to crates.io
+  `3.0.0-rc.2` checksums. `cargo check --manifest-path
+  examples/downstream-smoke/Cargo.toml --locked` passed, and
+  `cargo check --manifest-path examples/downstream-smoke/Cargo.toml --locked
+  --offline` passed after the online check populated the local cache.
+- Post-publication package validation: dependent crate package validation
+  passed through `LIBAPRS_RUN_DOWNSTREAM_SMOKE=1 LIBAPRS_PACKAGE_ALL=1
+  scripts/verify-release.sh` on the post-release evidence branch.
+- GitHub Project #3: `v3.0.0-rc.2: Security Fix-Forward Release Candidate`
+  marked `Done` with target date 2026-05-07, and `v3.0.0: Final Major Release`
+  remains `In progress`.
 
 ## v3.0.0-rc.1 Release Evidence
 
