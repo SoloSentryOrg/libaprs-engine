@@ -2,7 +2,7 @@
 
 ## BLUF
 
-- No intentional public API break is approved for `v3.0.0-rc.1`.
+- No intentional public API break is approved for `v3.0.0-rc.2`.
 - Existing `2.6.0` parser, policy, engine, transport, encoder, service, and
   diagnostic integrations should only need dependency-version updates for RC
   testing.
@@ -19,20 +19,20 @@ For release-candidate validation, pin the exact RC version:
 
 ```toml
 [dependencies]
-libaprs-engine = { version = "=3.0.0-rc.1", features = ["serde"] }
-aprs-transport-file = "=3.0.0-rc.1"
-aprs-transport-tcp = "=3.0.0-rc.1"
-aprs-transport-aprs-is = "=3.0.0-rc.1"
-aprs-transport-kiss = "=3.0.0-rc.1"
-aprs-transport-serial = "=3.0.0-rc.1"
-aprs-transport-udp = "=3.0.0-rc.1"
-aprs-transport-http = "=3.0.0-rc.1"
-aprs-transport-file-watch = "=3.0.0-rc.1"
-aprs-transport-mqtt = "=3.0.0-rc.1"
-aprs-transport-ax25 = "=3.0.0-rc.1"
-aprs-transport-corpus = "=3.0.0-rc.1"
-aprs-transport-channel = "=3.0.0-rc.1"
-aprs-transport-async = "=3.0.0-rc.1"
+libaprs-engine = { version = "=3.0.0-rc.2", features = ["serde"] }
+aprs-transport-file = "=3.0.0-rc.2"
+aprs-transport-tcp = "=3.0.0-rc.2"
+aprs-transport-aprs-is = "=3.0.0-rc.2"
+aprs-transport-kiss = "=3.0.0-rc.2"
+aprs-transport-serial = "=3.0.0-rc.2"
+aprs-transport-udp = "=3.0.0-rc.2"
+aprs-transport-http = "=3.0.0-rc.2"
+aprs-transport-file-watch = "=3.0.0-rc.2"
+aprs-transport-mqtt = "=3.0.0-rc.2"
+aprs-transport-ax25 = "=3.0.0-rc.2"
+aprs-transport-corpus = "=3.0.0-rc.2"
+aprs-transport-channel = "=3.0.0-rc.2"
+aprs-transport-async = "=3.0.0-rc.2"
 ```
 
 Use normal semver requirements only after deciding whether to move from the RC
@@ -40,7 +40,11 @@ to final `3.0.0`.
 
 ## Source Migration
 
-No source migration is expected from `2.6.0` to `3.0.0-rc.1`.
+No source migration is expected from `2.6.0` to `3.0.0-rc.2`.
+
+The only behavior hardening in `v3.0.0-rc.2` is that TCP address helpers use
+finite default connect and read timeouts. Callers that intentionally require
+indefinite blocking can set the `TcpReadOptions` timeout fields to `None`.
 
 The stable integration path remains:
 
@@ -73,7 +77,7 @@ fn main() -> Result<(), libaprs_engine::ParseError> {
 Before adopting the RC downstream:
 
 - run the application test suite,
-- run `cargo update -p libaprs-engine --precise 3.0.0-rc.1` where applicable,
+- run `cargo update -p libaprs-engine --precise 3.0.0-rc.2` where applicable,
 - verify packet input still enters as bytes rather than text,
 - verify malformed packet shape still fails closed, and
 - report any compile, semver, or behavioral regression before final `3.0.0`.

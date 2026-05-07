@@ -2,8 +2,8 @@
 
 ## BLUF
 
-- The next major version target is `v3.0.0`, and `v3.0.0-rc.1` is now the
-  published release candidate.
+- The next major version target is `v3.0.0`, and `v3.0.0-rc.2` is the
+  security fix-forward release-candidate target.
 - `v2.5.0` completed the planned `v2.1.0` through `v2.5.0` additive release
   track in one published release.
 - `v2.6.0` completed the pre-`v3.0.0` evidence-first readiness track: it stayed
@@ -12,7 +12,7 @@
   production service building blocks, release assurance, and evidence gates
   before any breaking API cleanup.
 - Do not invent a breaking API change just to justify the major version:
-  `v3.0.0-rc.1` is a no-intentional-break release candidate unless semver
+  `v3.0.0-rc.2` is a no-intentional-break release candidate unless semver
   checks prove otherwise.
 - Every release must preserve raw bytes, fail closed on malformed packet shape,
   complete secure review, pass local and remote gates, publish crates.io
@@ -24,7 +24,7 @@
 GitHub Project
 [#3](https://github.com/orgs/SoloSentryOrg/projects/3) is the primary roadmap
 and project-management store. This table is the repository backup snapshot,
-last synced on 2026-05-04.
+last synced on 2026-05-07.
 
 | Version or epic | Project status | Release status |
 | --- | --- | --- |
@@ -45,6 +45,7 @@ last synced on 2026-05-04.
 | `v2.5.0`: Assurance And API Readiness | Done | Released 2026-05-01 |
 | `v2.6.0`: Evidence-First Readiness | Done | Released 2026-05-03 |
 | `v3.0.0-rc.1`: Major Release Candidate | Done | Released 2026-05-04 as prerelease |
+| `v3.0.0-rc.2`: Security Fix-Forward Release Candidate | In progress | Not released |
 | `v3.0.0`: Final Major Release | In progress | Not released |
 
 Release evidence is recorded in [docs/release.md](docs/release.md).
@@ -205,8 +206,8 @@ without approving a major-version break.
   separate reviewed exception.
 
 Target outcome: the project has enforceable evidence gates and stronger
-security regression coverage before deciding whether `v3.0.0-rc.1` is
-justified.
+security regression coverage before deciding whether a `v3.0.0` release
+candidate is justified.
 
 ## 7. `v3.0.0-rc.1`: Major Release Candidate
 
@@ -240,6 +241,27 @@ Required gates:
 
 Target outcome: `v3.0.0` is a promotion of a tested release candidate, not a
 fresh unproven build.
+
+## 7.1. `v3.0.0-rc.2`: Security Fix-Forward Release Candidate
+
+Priority: fix-forward after the published `v3.0.0-rc.1` candidate. This release
+candidate should publish the security hardening merged after `rc.1` without
+adding an intentional public API break.
+
+Required gates:
+
+- Publish a fresh prerelease version because `3.0.0-rc.1` is already published
+  and immutable on crates.io.
+- Preserve the no-intentional-public-API-break decision.
+- Run the full local release gate, remote CI, secure review, dependency
+  policy checks, SBOM/hash evidence checks, and semver checks.
+- Publish crates through `scripts/publish-release.sh` with a prerelease GitHub
+  Release so stable `v2.6.0` remains the latest release.
+- Refresh downstream smoke lockfile and release evidence after crates.io
+  publication.
+
+Target outcome: `v3.0.0-rc.2` becomes the tested candidate for final
+`v3.0.0` promotion.
 
 ## 8. `v3.0.0`: Final Major Release
 

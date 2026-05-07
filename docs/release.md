@@ -127,6 +127,27 @@ scripts/verify-docs.sh
 git diff --check
 ```
 
+## v3.0.0-rc.2 Release Preparation Evidence
+
+- Target tag: `v3.0.0-rc.2`.
+- Target version: all workspace crates are prepared as `3.0.0-rc.2`.
+- Scope: security fix-forward release candidate after the already-published
+  `v3.0.0-rc.1` prerelease. This candidate includes CLI diagnostic escaping,
+  APRS-IS ASCII-control rejection, finite default TCP timeouts, and tracked
+  audit outcome evidence.
+- Secure review: repo-wide source security audit found no surviving reportable
+  findings after the fix-forward pass. Evidence is tracked in
+  [v3.0.0-rc.2 Security Audit Summary](security-audit-v3.0.0-rc.2.md).
+- Breaking-change decision: no intentional public API break is approved for
+  `v3.0.0-rc.2`. The finite default TCP timeout change is documented as
+  security hardening with explicit `TcpReadOptions` opt-out.
+- Release notes: [libaprs-engine v3.0.0-rc.2](release-notes-v3.0.0-rc.2.md).
+- Migration guide: [v3.0.0 Migration Plan](v3-migration.md).
+- Post-publication requirements: publish through `scripts/publish-release.sh`,
+  verify the GitHub Release is a prerelease and not latest, refresh downstream
+  smoke against crates.io `3.0.0-rc.2`, update this section with tag, commit,
+  crates.io, GitHub Release, remote CI, and Project #3 evidence.
+
 ## v3.0.0-rc.1 Release Evidence
 
 - Tag: `v3.0.0-rc.1`.

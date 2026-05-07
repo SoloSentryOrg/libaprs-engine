@@ -19,8 +19,8 @@ telemetry, indexing, and diagnostics.
   compatibility tests, examples, benchmark, optional transport adapters, and CLI
   inspector.
 - Current stable release: `v2.6.0`.
-- Current release candidate: `v3.0.0-rc.1`.
-- `v3.0.0-rc.1` carries the `v2.6.0` evidence-first readiness work into the
+- Current release candidate target: `v3.0.0-rc.2`.
+- `v3.0.0-rc.2` carries the `v2.6.0` evidence-first readiness work into the
   next major release line without an intentional public API break.
 - Release publication requires clean secure review, local release gates, remote
   CI, security gates, GitHub Release latest or prerelease verification, and
@@ -99,7 +99,7 @@ aprs-transport-channel = "2.6.0"
 aprs-transport-async = "2.6.0"
 ```
 
-Use exact `=3.0.0-rc.1` requirements from the
+Use exact `=3.0.0-rc.2` requirements from the
 [`v3.0.0` Migration Plan](docs/v3-migration.md) after the release candidate is
 published. Use a Git dependency when testing unreleased changes from this
 repository.
@@ -217,7 +217,7 @@ See [Security Model](docs/security.md) for details.
 - [Release Checklist](docs/release.md): pre-release steps.
 - [Security Policy](SECURITY.md): vulnerability reporting and supported
   versions.
-- [`v3.0.0-rc.1` Release Notes](docs/release-notes-v3.0.0-rc.1.md): evidence-first
+- [`v3.0.0-rc.2` Release Notes](docs/release-notes-v3.0.0-rc.2.md): evidence-first
   readiness highlights and migration notes.
 - [Publishing](docs/publishing.md): crates.io package and publish workflow.
 - [Contributing](CONTRIBUTING.md): development rules, verification, and secure

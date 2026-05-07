@@ -2,7 +2,7 @@
 
 ![libaprs-engine documentation header](assets/brand/docs-header.svg)
 
-This project has reached the `3.0.0-rc.1` release-candidate line without an
+This project has reached the `3.0.0-rc.2` release-candidate line without an
 intentional public API break from `2.6.0`. The public APIs listed in
 [Public API Boundary](public-api.md) are semver-protected integration contracts
 for the current major release line.
@@ -26,7 +26,7 @@ for the current major release line.
   replacement path was added.
 - Soft deprecations for new integrations are tracked in release-specific
   migration plans. Historical `v2.0.0` guidance remains in
-  [`v2.0.0` Migration Plan](v2-migration.md); `v3.0.0-rc.1` guidance is tracked
+  [`v2.0.0` Migration Plan](v2-migration.md); `v3.0.0-rc.2` guidance is tracked
   in [`v3.0.0` Migration Plan](v3-migration.md).
 
 ## Release Maintenance Criteria

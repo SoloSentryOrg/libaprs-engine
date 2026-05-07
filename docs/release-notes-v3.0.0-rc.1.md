@@ -33,8 +33,8 @@
   source, semver, or behavior regression before final `3.0.0`.
 - Post-publication downstream smoke must regenerate its lockfile from crates.io
   so checksum evidence matches the published RC crates.
-- The RC fix-forward audit summary is tracked in
-  [v3.0.0-rc.1 Security Audit Summary](security-audit-v3.0.0-rc.1.md).
+- The post-`rc.1` fix-forward audit is tracked with the superseding
+  `v3.0.0-rc.2` release-candidate evidence.
 
 ## Release Gates
 

@@ -4,7 +4,7 @@
 
 ## BLUF
 
-- Current `3.0.0-rc.1` release-candidate preparation remains source-compatible
+- Current `3.0.0-rc.2` release-candidate preparation remains source-compatible
   with `2.6.0`.
 - New encoder, service-toolkit, and APRS-IS profile APIs are documented and
   covered by `api_compat` or crate-level integration tests.
@@ -12,7 +12,7 @@
   caller-owned storage or transport choices.
 - No new runtime, async, network, serialization, or storage dependency is added
   by these APIs.
-- No evidence currently justifies an intentional `v3.0.0-rc.1` public API
+- No evidence currently justifies an intentional `v3.0.0-rc.2` public API
   breaking change.
 
 ## Audit Scope
