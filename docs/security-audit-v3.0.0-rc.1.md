@@ -34,12 +34,16 @@
 All commands passed. `scripts/verify-docs.sh` also passed after this summary was
 added and linked.
 
-## PR Task List
+## PR Outcome
 
-- [x] Add tracked security-audit summary for release evidence.
-- [ ] Push `codex/repo-security-audit-fix-forward`.
-- [ ] Open PR to `main`.
-- [ ] Wait for CI, security, merge-gate, and supply-chain checks.
-- [ ] Fix forward on the same branch if any check fails.
-- [ ] Merge only when all checks and secure-review findings are clean.
-- [ ] Rerun release verification from fresh `main` after merge.
+- [x] Added tracked security-audit summary for release evidence.
+- [x] Pushed `codex/repo-security-audit-fix-forward`.
+- [x] Opened PR #69 to `main`.
+- [x] Passed remote Docs, Rust CI, Secret Scan, and Merge Gate checks.
+- [x] Merged PR #69 into `main`.
+- [x] Reran `scripts/verify-release.sh` from fresh `main` after merge.
+
+## Remaining Release Task
+
+- [ ] Continue the normal `v3.0.0` release-candidate path after confirming any
+  additional release-manager evidence requirements.
