@@ -29,8 +29,9 @@ pub struct AprsIsLogin<'a> {
 impl AprsIsLogin<'_> {
     /// Builds the APRS-IS login line terminated with CRLF.
     ///
-    /// Values containing CR or LF are rejected to prevent line injection into
-    /// the APRS-IS control stream.
+    /// Values containing CR, LF, or other ASCII control bytes are rejected to
+    /// prevent control-line injection. Prefer [`Self::profile_line`] when
+    /// fields may come from untrusted input.
     pub fn line(&self) -> Result<String, AprsIsLoginError> {
         validate_login_field("callsign", self.callsign)?;
         validate_login_field("software", self.software)?;
@@ -78,7 +79,7 @@ impl AprsIsLogin<'_> {
 /// APRS-IS login line validation error.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum AprsIsLoginError {
-    /// A login field contains CR or LF and would inject another line.
+    /// A login field contains CR, LF, or another ASCII control byte.
     LineInjection { field: &'static str },
 }
 
@@ -95,9 +96,10 @@ impl AprsIsLoginError {
 impl std::fmt::Display for AprsIsLoginError {
     fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::LineInjection { field } => {
-                write!(formatter, "APRS-IS login field contains CR or LF: {field}")
-            }
+            Self::LineInjection { field } => write!(
+                formatter,
+                "APRS-IS login field contains CR, LF, or control byte: {field}"
+            ),
         }
     }
 }
@@ -107,7 +109,7 @@ impl std::error::Error for AprsIsLoginError {}
 /// APRS-IS profile validation error.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum AprsIsProfileError {
-    /// A profile field contains CR or LF and would inject another line.
+    /// A profile field contains CR, LF, or another ASCII control byte.
     LineInjection { field: &'static str },
     /// A callsign does not fit the conservative AX.25-like login shape.
     InvalidCallsign,
@@ -136,7 +138,7 @@ impl std::fmt::Display for AprsIsProfileError {
             Self::LineInjection { field } => {
                 write!(
                     formatter,
-                    "APRS-IS profile field contains CR or LF: {field}"
+                    "APRS-IS profile field contains CR, LF, or control byte: {field}"
                 )
             }
             Self::InvalidCallsign => formatter.write_str("APRS-IS profile callsign is invalid"),
@@ -351,14 +353,14 @@ fn read_all(reader: impl Read, max_bytes: usize) -> io::Result<Vec<u8>> {
 }
 
 fn validate_profile_field(field: &'static str, value: &str) -> Result<(), AprsIsProfileError> {
-    if value.as_bytes().contains(&b'\r') || value.as_bytes().contains(&b'\n') {
+    if value.as_bytes().iter().any(u8::is_ascii_control) {
         return Err(AprsIsProfileError::LineInjection { field });
     }
     Ok(())
 }
 
 fn validate_login_field(field: &'static str, value: &str) -> Result<(), AprsIsLoginError> {
-    if value.as_bytes().contains(&b'\r') || value.as_bytes().contains(&b'\n') {
+    if value.as_bytes().iter().any(u8::is_ascii_control) {
         return Err(AprsIsLoginError::LineInjection { field });
     }
     Ok(())

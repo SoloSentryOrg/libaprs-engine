@@ -20,7 +20,7 @@ parser, preserving the protocol-first boundary.
 | Crate | Boundary | Primary use | Security note |
 | --- | --- | --- | --- |
 | `aprs-transport-file` | Newline-separated byte buffers and files | Offline logs, stdin-style files | Bounded path helpers reject oversized batches and packet lines |
-| `aprs-transport-tcp` | Blocking `Read` and TCP address helpers | TCP-connected packet streams | Reader helpers reject oversized batches and packet lines; `TcpReadOptions` keeps connection and read timeouts caller-owned |
+| `aprs-transport-tcp` | Blocking `Read` and TCP address helpers | TCP-connected packet streams | Reader helpers reject oversized batches and packet lines; `TcpReadOptions` applies finite default timeouts that callers can override |
 | `aprs-transport-aprs-is` | APRS-IS login, filters, q constructs, and comment filtering | APRS-IS clients | Server comment lines are filtered before parsing and packet lines are bounded |
 | `aprs-transport-kiss` | KISS frame encoding and decoding | TNC, serial, or TCP KISS streams | Invalid escapes and oversized decoded payloads fail closed |
 | `aprs-transport-serial` | Serial-like byte readers | TNC serial pipelines | Reader helpers reject oversized batches and packet lines; serial configuration stays application-owned |
@@ -101,9 +101,9 @@ silently weakening packet parsing.
 
 For reconnecting services, keep session ownership in the application. The
 compile-tested `crates/aprs-transport-aprs-is/examples/session_reconnect.rs`
-example shows an APRS-IS login line, bounded reader helper, retry loop, backoff,
-and `Engine::process_event()` integration without adding networking behavior to
-the parser core.
+example shows a profile-validated APRS-IS login line, bounded reader helper,
+retry loop, backoff, and `Engine::process_event()` integration without adding
+networking behavior to the parser core.
 
 ## TCP With Caller-Owned Timeouts
 

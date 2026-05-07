@@ -41,6 +41,12 @@ fn aprs_is_login_line_rejects_line_injection() {
             software: "libaprs-engine 1.1.0",
             filter: Some("r/49/-72/50\r\nbad"),
         },
+        AprsIsLogin {
+            callsign: "N0CALL",
+            passcode: -1,
+            software: "libaprs-engine\t1.1.0",
+            filter: None,
+        },
     ];
 
     for login in cases {
@@ -74,6 +80,20 @@ fn aprs_is_profile_login_requires_uppercase_callsign_and_valid_filter() {
     assert_eq!(
         lowercase.profile_line().expect_err("lowercase callsign"),
         AprsIsProfileError::LowercaseCallsign
+    );
+
+    let control_byte = AprsIsLogin {
+        callsign: "N0CALL-7",
+        passcode: -1,
+        software: "libaprs-engine\u{1b}",
+        filter: None,
+    };
+
+    assert_eq!(
+        control_byte
+            .profile_line()
+            .expect_err("control bytes fail closed"),
+        AprsIsProfileError::LineInjection { field: "software" }
     );
 }
 

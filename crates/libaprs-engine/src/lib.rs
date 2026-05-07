@@ -451,7 +451,7 @@ const TRANSPORT_SUPPORT: &[TransportSupport] = &[
         crate_name: "aprs-transport-tcp",
         boundary: "blocking TCP or Read packet streams",
         status: SupportStatus::Supported,
-        notes: "caller owns socket timeouts and reconnect behavior",
+        notes: "finite default socket timeouts; caller owns reconnect behavior",
     },
     TransportSupport {
         crate_name: "aprs-transport-aprs-is",

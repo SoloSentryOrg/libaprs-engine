@@ -5,7 +5,8 @@ use std::time::Duration;
 
 use aprs_transport_tcp::{
     read_packet_lines_from_reader, read_packet_lines_from_reader_with_limit,
-    read_packet_lines_from_tcp_addr_with_options, TcpReadOptions,
+    read_packet_lines_from_tcp_addr_with_options, TcpReadOptions, DEFAULT_TCP_CONNECT_TIMEOUT,
+    DEFAULT_TCP_READ_TIMEOUT,
 };
 
 #[test]
@@ -69,6 +70,14 @@ fn tcp_addr_helper_applies_caller_owned_read_timeout() {
         io::ErrorKind::TimedOut | io::ErrorKind::WouldBlock
     ));
     server.join().expect("server thread");
+}
+
+#[test]
+fn tcp_options_default_uses_finite_timeouts() {
+    let options = TcpReadOptions::default();
+
+    assert_eq!(options.connect_timeout, Some(DEFAULT_TCP_CONNECT_TIMEOUT));
+    assert_eq!(options.read_timeout, Some(DEFAULT_TCP_READ_TIMEOUT));
 }
 
 #[test]

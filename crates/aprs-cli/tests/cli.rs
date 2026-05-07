@@ -111,6 +111,30 @@ fn cli_rejects_oversized_file_input() {
 }
 
 #[test]
+fn cli_diagnostic_errors_escape_control_characters() {
+    let binary = env!("CARGO_BIN_EXE_aprs-cli");
+    let output = Command::new(binary)
+        .arg("--bad\noption")
+        .output()
+        .expect("CLI should run");
+
+    assert_eq!(output.status.code(), Some(2));
+    let stderr = String::from_utf8(output.stderr).expect("stderr should be utf8");
+    assert!(stderr.contains("unknown option: \"--bad\\noption\""));
+    assert!(!stderr.contains("unknown option: --bad\noption"));
+
+    let output = Command::new(binary)
+        .args(["--fail-on", "bad\rvalue"])
+        .output()
+        .expect("CLI should run");
+
+    assert_eq!(output.status.code(), Some(2));
+    let stderr = String::from_utf8(output.stderr).expect("stderr should be utf8");
+    assert!(stderr.contains("invalid --fail-on value: \"bad\\rvalue\""));
+    assert!(!stderr.contains("invalid --fail-on value: bad\rvalue"));
+}
+
+#[test]
 fn cli_validate_command_reports_validity() {
     let binary = env!("CARGO_BIN_EXE_aprs-cli");
     let output = Command::new(binary)

@@ -14,6 +14,12 @@ use libaprs_engine::{
     read_all_with_limit, LineTransport, DEFAULT_TRANSPORT_READ_LIMIT, MAX_PACKET_LEN,
 };
 
+/// Default timeout for establishing a TCP connection.
+pub const DEFAULT_TCP_CONNECT_TIMEOUT: Duration = Duration::from_secs(10);
+
+/// Default timeout for reads after a TCP connection is established.
+pub const DEFAULT_TCP_READ_TIMEOUT: Duration = Duration::from_secs(10);
+
 /// TCP read options owned by the caller.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct TcpReadOptions {
@@ -51,8 +57,8 @@ impl TcpReadOptions {
 impl Default for TcpReadOptions {
     fn default() -> Self {
         Self {
-            connect_timeout: None,
-            read_timeout: None,
+            connect_timeout: Some(DEFAULT_TCP_CONNECT_TIMEOUT),
+            read_timeout: Some(DEFAULT_TCP_READ_TIMEOUT),
             max_bytes: DEFAULT_TRANSPORT_READ_LIMIT,
         }
     }
