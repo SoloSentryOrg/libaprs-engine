@@ -30,7 +30,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         software: "libaprs-engine-downstream-smoke 3.0.0-rc.1",
         filter: Some("r/49/-72/50"),
     };
-    assert!(aprs_is_login.line()?.ends_with("\r\n"));
+    assert!(aprs_is_login.profile_line()?.ends_with("\r\n"));
 
     let aprs_is_packets = read_aprs_is_packet_lines(b"# banner\nN0CALL>APRS:>aprs-is\n");
     assert_eq!(aprs_is_packets.len(), 1);

@@ -28,6 +28,9 @@ conservative address metadata needed to establish safe structure.
 See [Threat Model](threat-model.md) for the per-crate untrusted boundaries,
 primary abuse cases, and required controls.
 
+For the current release-candidate audit evidence, see
+[v3.0.0-rc.1 Security Audit Summary](security-audit-v3.0.0-rc.1.md).
+
 The current trusted boundary is:
 
 ```text

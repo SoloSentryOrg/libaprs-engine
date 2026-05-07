@@ -51,7 +51,7 @@ fn run_receive_session<R>(
 where
     R: io::Read,
 {
-    let login_line = login.line().map_err(io::Error::other)?;
+    let login_line = login.profile_line().map_err(io::Error::other)?;
 
     for attempt in 0..plan.max_attempts {
         match connect(attempt) {

@@ -186,7 +186,13 @@ fn parse_args(args: impl IntoIterator<Item = String>) -> Result<CliOptions, Stri
                 options.fail_on = parse_fail_on(&value)?;
             }
             "--help" | "-h" => return Err(usage()),
-            _ if arg.starts_with('-') => return Err(format!("unknown option: {arg}\n{}", usage())),
+            _ if arg.starts_with('-') => {
+                return Err(format!(
+                    "unknown option: {}\n{}",
+                    diagnostic_value(&arg),
+                    usage()
+                ));
+            }
             _ => {
                 if options.input_path.replace(arg).is_some() {
                     return Err(format!("multiple input paths supplied\n{}", usage()));
@@ -203,7 +209,11 @@ fn parse_fail_on(value: &str) -> Result<FailOn, String> {
         "none" => Ok(FailOn::None),
         "malformed" => Ok(FailOn::Malformed),
         "rejected" => Ok(FailOn::Rejected),
-        _ => Err(format!("invalid --fail-on value: {value}\n{}", usage())),
+        _ => Err(format!(
+            "invalid --fail-on value: {}\n{}",
+            diagnostic_value(value),
+            usage()
+        )),
     }
 }
 
@@ -224,11 +234,14 @@ fn matches_filter(options: &CliOptions, semantic: &str) -> bool {
 
 fn read_input(path: Option<&str>) -> Result<Vec<u8>, String> {
     match path {
-        Some(path) => read_all_with_limit(
-            File::open(path).map_err(|err| format!("failed to open {path}: {err}"))?,
-            libaprs_engine::DEFAULT_TRANSPORT_READ_LIMIT,
-        )
-        .map_err(|err| format!("failed to read {path}: {err}")),
+        Some(path) => {
+            let display_path = diagnostic_value(path);
+            read_all_with_limit(
+                File::open(path).map_err(|err| format!("failed to open {display_path}: {err}"))?,
+                libaprs_engine::DEFAULT_TRANSPORT_READ_LIMIT,
+            )
+            .map_err(|err| format!("failed to read {display_path}: {err}"))
+        }
         None => read_all_with_limit(io::stdin(), libaprs_engine::DEFAULT_TRANSPORT_READ_LIMIT)
             .map_err(|err| format!("failed to read stdin: {err}")),
     }
@@ -379,6 +392,10 @@ fn json_escape(value: &str) -> String {
 
 fn lossy(bytes: &[u8]) -> String {
     String::from_utf8_lossy(bytes).into_owned()
+}
+
+fn diagnostic_value(value: &str) -> String {
+    format!("{value:?}")
 }
 
 fn usage() -> String {

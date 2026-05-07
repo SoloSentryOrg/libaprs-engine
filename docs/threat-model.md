@@ -41,7 +41,7 @@ no lossy text conversion before the codec boundary.
 | `aprs-transport-file` | packet files and reader-backed file input | oversized files, overlong lines, invalid UTF-8 | bounded reads, per-packet limits, byte-preserving records |
 | `aprs-transport-file-watch` | appended file bytes | unbounded append growth, partial records | appended-byte limits, packet-line limits, caller-owned polling policy |
 | `aprs-transport-corpus` | corpus directories and files | private data leakage, oversized corpus files, unstable ordering | bounded file reads, stable ordering, fuzz corpus guard for regression seeds |
-| `aprs-transport-tcp` | TCP streams and generic readers | stalled streams, overlong lines, retry storms | caller-owned timeouts/reconnects, bounded reads, packet-line limits |
+| `aprs-transport-tcp` | TCP streams and generic readers | stalled streams, overlong lines, retry storms | finite default timeouts, caller-owned reconnects, bounded reads, packet-line limits |
 | `aprs-transport-aprs-is` | APRS-IS server lines and login filters | line injection, server comments, oversized lines | CRLF-safe login construction, comment filtering, line limits |
 | `aprs-transport-serial` | serial readers | partial records, invalid bytes, oversized batches | caller-owned serial configuration, bounded reads, packet-line limits |
 | `aprs-transport-http` | HTTP body bytes | oversized request bodies, malformed line framing | body-size limits, packet-line limits, no text normalization |
