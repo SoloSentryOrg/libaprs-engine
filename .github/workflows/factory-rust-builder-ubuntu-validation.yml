@@ -54,6 +54,14 @@ jobs:
           set -eu
           printf '%s' "$TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
 
+      - name: Verify factory image access
+        run: |
+          set -eu
+          if ! docker manifest inspect "$RUST_BUILDER_UBUNTU_IMAGE" >/dev/null 2>&1; then
+            echo "::error title=Factory image digest not readable::Grant this repository read access to the GHCR package under Manage Actions access, or set a least-privilege GHCR_READ_TOKEN with read:packages for this repository."
+            exit 1
+          fi
+
       - name: Pull factory Rust builder image
         run: |
           set -eu

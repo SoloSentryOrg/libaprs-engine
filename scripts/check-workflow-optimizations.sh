@@ -89,6 +89,8 @@ require_text_in_file "$factory_rust_builder_workflow" "name: Factory Rust Builde
 require_text_in_file "$factory_rust_builder_workflow" "contents: read" "factory rust-builder workflow should use read-only contents permissions"
 require_text_in_file "$factory_rust_builder_workflow" "packages: read" "factory rust-builder workflow should use read-only package permissions"
 require_text_in_file "$factory_rust_builder_workflow" "ghcr.io/solosentryorg/rust-builder-ubuntu@sha256:" "factory rust-builder workflow should consume an immutable factory digest"
+require_text_in_file "$factory_rust_builder_workflow" "docker manifest inspect" "factory rust-builder workflow should preflight GHCR digest readability"
+require_text_in_file "$factory_rust_builder_workflow" "Factory image digest not readable" "factory rust-builder workflow should report clear GHCR access failures"
 reject_text_in_file "$factory_rust_builder_workflow" "docker build" "factory rust-builder workflow should not build consumer-side images"
 reject_text_in_file "$factory_rust_builder_workflow" "docker push" "factory rust-builder workflow should not publish consumer-side images"
 reject_text_in_file "$factory_rust_builder_workflow" "UBUNTU_PRO_TOKEN" "factory rust-builder workflow should not consume Ubuntu Pro secrets"
