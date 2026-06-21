@@ -1,0 +1,96 @@
+name: Factory Rust Builder Ubuntu Validation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/factory-rust-builder-ubuntu-validation.yml"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "crates/**/Cargo.toml"
+      - "examples/downstream-smoke/Cargo.toml"
+      - "examples/downstream-smoke/Cargo.lock"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/factory-rust-builder-ubuntu-validation.yml"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "crates/**/Cargo.toml"
+      - "examples/downstream-smoke/Cargo.toml"
+      - "examples/downstream-smoke/Cargo.lock"
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: factory-rust-builder-ubuntu-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  RUST_BUILDER_UBUNTU_IMAGE: ghcr.io/solosentryorg/rust-builder-ubuntu@sha256:a0749bb9a26e6120ccb3dedc7d2a7d0c7d138b9b3544a0073ffcc42716cb4c59
+  GHCR_TOKEN: ${{ secrets.GHCR_READ_TOKEN || secrets.GHCR_TOKEN || github.token }}
+
+jobs:
+  validate-rust-builder-ubuntu:
+    name: Validate rust-builder-ubuntu consumer compatibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Log in to GHCR
+        env:
+          TOKEN: ${{ env.GHCR_TOKEN }}
+        run: |
+          set -eu
+          printf '%s' "$TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+
+      - name: Verify factory image access
+        run: |
+          set -eu
+          if ! docker manifest inspect "$RUST_BUILDER_UBUNTU_IMAGE" >/dev/null 2>&1; then
+            echo "::error title=Factory image digest not readable::Grant this repository read access to the GHCR package under Manage Actions access, or set a least-privilege GHCR_READ_TOKEN with read:packages for this repository."
+            exit 1
+          fi
+
+      - name: Pull factory Rust builder image
+        run: |
+          set -eu
+          docker pull "$RUST_BUILDER_UBUNTU_IMAGE"
+
+      - name: Validate Rust consumer compatibility
+        run: |
+          set -eu
+          docker run --rm \
+            --mount "type=bind,source=${PWD},target=/work,readonly" \
+            --workdir /work \
+            --env CARGO_HOME=/tmp/cargo-home \
+            --env CARGO_TARGET_DIR=/tmp/libaprs-target \
+            "$RUST_BUILDER_UBUNTU_IMAGE" \
+            bash -euxo pipefail -c '
+              rustc --version
+              cargo --version
+              cargo clippy --version
+              rustfmt --version
+              rustup target list --installed | grep -Fx x86_64-unknown-linux-musl
+
+              cargo fmt --all --check
+              cargo fmt --manifest-path fuzz/Cargo.toml --all --check
+              cargo test
+              cargo test --all-features
+              cargo test --examples
+              cargo clippy --all-targets --all-features -- -D warnings
+              cargo check --manifest-path examples/downstream-smoke/Cargo.toml
+
+              tmp="$(mktemp -d)"
+              trap "rm -rf \"$tmp\"" EXIT
+              cargo new --bin "$tmp/hello-gnu"
+              cargo build --manifest-path "$tmp/hello-gnu/Cargo.toml"
+              cargo new --bin "$tmp/hello-musl"
+              cargo build --manifest-path "$tmp/hello-musl/Cargo.toml" --target x86_64-unknown-linux-musl
+            '
