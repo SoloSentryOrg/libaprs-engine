@@ -30,7 +30,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  RUST_BUILDER_UBUNTU_IMAGE: ghcr.io/solosentryorg/rust-builder-ubuntu@sha256:a0749bb9a26e6120ccb3dedc7d2a7d0c7d138b9b3544a0073ffcc42716cb4c59
+  RUST_BUILDER_UBUNTU_IMAGE: ghcr.io/solosentryorg/rust-builder-ubuntu@sha256:f8d8ffae9266ce29f1272ae7b7a51d342ecab85ec10ecb85b53679784d06bc3f
   GHCR_TOKEN: ${{ secrets.GHCR_READ_TOKEN || secrets.GHCR_TOKEN || github.token }}
 
 jobs:
