@@ -89,11 +89,25 @@ is_supply_chain_path() {
   esac
 }
 
+is_factory_rust_builder_path() {
+  case "$1" in
+    Cargo.toml | Cargo.lock | crates/*/Cargo.toml | examples/downstream-smoke/Cargo.toml | \
+      examples/downstream-smoke/Cargo.lock | fuzz/Cargo.toml | fuzz/Cargo.lock | \
+      .github/workflows/factory-rust-builder-ubuntu-validation.yml)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 required_checks() {
   needs_docs=0
   needs_rust=0
   needs_security=0
   needs_supply_chain=0
+  needs_factory_rust_builder=0
   saw_file=0
 
   while IFS= read -r path; do
@@ -115,6 +129,10 @@ required_checks() {
     if is_supply_chain_path "$path"; then
       needs_supply_chain=1
     fi
+
+    if is_factory_rust_builder_path "$path"; then
+      needs_factory_rust_builder=1
+    fi
   done
 
   if [ "$saw_file" -eq 0 ]; then
@@ -134,6 +152,9 @@ required_checks() {
   fi
   if [ "$needs_supply_chain" -eq 1 ]; then
     echo "Supply Chain"
+  fi
+  if [ "$needs_factory_rust_builder" -eq 1 ]; then
+    echo "Validate rust-builder-ubuntu consumer compatibility"
   fi
 }
 

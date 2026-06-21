@@ -43,13 +43,13 @@ expect_checks \
 expect_checks \
   "security-sensitive changes require secret scan, Rust, and security checks" \
   "Cargo.lock" \
-  "Secret Scan,Rust stable,Rust 1.80.0,cargo-security,Supply Chain"
+  "Secret Scan,Rust stable,Rust 1.80.0,cargo-security,Supply Chain,Validate rust-builder-ubuntu consumer compatibility"
 
 expect_checks \
   "mixed docs and security changes require all relevant checks including secret scan" \
   "README.md
 Cargo.toml" \
-  "Secret Scan,Docs,Rust stable,Rust 1.80.0,cargo-security,Supply Chain"
+  "Secret Scan,Docs,Rust stable,Rust 1.80.0,cargo-security,Supply Chain,Validate rust-builder-ubuntu consumer compatibility"
 
 expect_checks \
   "tracked supply-chain evidence changes require the Supply Chain check" \
@@ -68,6 +68,11 @@ expect_checks \
   ".github/dependabot.yml
 .github/workflows/example.yaml" \
   "Secret Scan,Rust stable,Rust 1.80.0,Supply Chain"
+
+expect_checks \
+  "factory Rust builder workflow changes require the factory validation check" \
+  ".github/workflows/factory-rust-builder-ubuntu-validation.yml" \
+  "Secret Scan,Rust stable,Rust 1.80.0,Supply Chain,Validate rust-builder-ubuntu consumer compatibility"
 
 expect_checks \
   "empty file list falls back to secret scan and Rust checks" \
