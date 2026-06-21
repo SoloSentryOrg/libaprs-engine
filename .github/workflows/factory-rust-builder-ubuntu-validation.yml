@@ -11,8 +11,6 @@ on:
       - "crates/**/Cargo.toml"
       - "examples/downstream-smoke/Cargo.toml"
       - "examples/downstream-smoke/Cargo.lock"
-      - "fuzz/Cargo.toml"
-      - "fuzz/Cargo.lock"
   pull_request:
     branches: ["main"]
     paths:
@@ -22,8 +20,6 @@ on:
       - "crates/**/Cargo.toml"
       - "examples/downstream-smoke/Cargo.toml"
       - "examples/downstream-smoke/Cargo.lock"
-      - "fuzz/Cargo.toml"
-      - "fuzz/Cargo.lock"
 
 permissions:
   contents: read
@@ -89,6 +85,7 @@ jobs:
               cargo test --all-features
               cargo test --examples
               cargo clippy --all-targets --all-features -- -D warnings
+              cargo check --manifest-path examples/downstream-smoke/Cargo.toml
 
               tmp="$(mktemp -d)"
               trap "rm -rf \"$tmp\"" EXIT

@@ -75,6 +75,12 @@ expect_checks \
   "Secret Scan,Rust stable,Rust 1.80.0,Supply Chain,Validate rust-builder-ubuntu consumer compatibility"
 
 expect_checks \
+  "fuzz workspace changes do not require the sparse factory rust-builder validation check" \
+  "fuzz/Cargo.toml
+fuzz/Cargo.lock" \
+  "Secret Scan,Rust stable,Rust 1.80.0,cargo-security,Supply Chain"
+
+expect_checks \
   "empty file list falls back to secret scan and Rust checks" \
   "" \
   "Secret Scan,Rust stable,Rust 1.80.0"

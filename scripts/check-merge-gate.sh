@@ -92,7 +92,7 @@ is_supply_chain_path() {
 is_factory_rust_builder_path() {
   case "$1" in
     Cargo.toml | Cargo.lock | crates/*/Cargo.toml | examples/downstream-smoke/Cargo.toml | \
-      examples/downstream-smoke/Cargo.lock | fuzz/Cargo.toml | fuzz/Cargo.lock | \
+      examples/downstream-smoke/Cargo.lock | \
       .github/workflows/factory-rust-builder-ubuntu-validation.yml)
       return 0
       ;;
