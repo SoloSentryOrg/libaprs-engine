@@ -56,7 +56,7 @@ jobs:
         run: rustup component add clippy rustfmt
 
       - name: Cache Cargo registry
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cargo/registry
@@ -132,7 +132,7 @@ jobs:
           rustup component add clippy --toolchain 1.80.0
 
       - name: Cache Cargo registry
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cargo/registry
@@ -151,7 +151,7 @@ jobs:
         run: echo "week=$(date -u +%G-%V)" >> "$GITHUB_OUTPUT"
 
       - name: Cache advisory database
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cargo/advisory-db
           key: ${{ runner.os }}-cargo-advisory-release-script-${{ steps.advisory-cache.outputs.week }}-${{ hashFiles('.github/workflows/rust-ci.yml', 'scripts/install-release-tools.sh') }}
