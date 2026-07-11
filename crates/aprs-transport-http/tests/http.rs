@@ -20,6 +20,25 @@ fn http_body_reader_rejects_input_over_configured_limit() {
 }
 
 #[test]
+fn http_body_reader_accepts_input_at_configured_limit() {
+    let input = b"N0CALL>APRS:>fits\n";
+    let packets =
+        read_packet_lines_from_body_with_limit(input, input.len()).expect("exact limit must pass");
+
+    assert_eq!(packets, vec![b"N0CALL>APRS:>fits".to_vec()]);
+}
+
+#[test]
+fn http_body_reader_rejects_input_when_limit_is_one_byte_smaller() {
+    let input = b"N0CALL>APRS:>fits\n";
+    let error = read_packet_lines_from_body_with_limit(input, input.len() - 1)
+        .expect_err("one-byte-smaller limit must fail");
+
+    assert_eq!(error.kind(), std::io::ErrorKind::InvalidData);
+    assert_eq!(error.to_string(), "transport.oversized_input");
+}
+
+#[test]
 fn http_body_reader_rejects_packet_line_over_protocol_limit() {
     let mut input = b"N0CALL>APRS:>".to_vec();
     input.resize(
