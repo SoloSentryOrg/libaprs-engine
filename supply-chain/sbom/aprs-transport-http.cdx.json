@@ -132,16 +132,16 @@
     },
     {
       "type": "library",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#serde@1.0.228",
+      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#serde@1.0.229",
       "author": "Erick Tryzelaar <erick.tryzelaar@gmail.com>, David Tolnay <dtolnay@gmail.com>",
       "name": "serde",
-      "version": "1.0.228",
+      "version": "1.0.229",
       "description": "A generic serialization/deserialization framework",
       "scope": "required",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "9a8e94ea7f378bd32cbbd37198a4a91436180c5bb472411e48b5ec2e2124ae9e"
+          "content": "4148590afebada386688f18773da617792bf2ef03ffc1e4cbd2b1d45b023e0ba"
         }
       ],
       "licenses": [
@@ -149,7 +149,7 @@
           "expression": "MIT OR Apache-2.0"
         }
       ],
-      "purl": "pkg:cargo/serde@1.0.228",
+      "purl": "pkg:cargo/serde@1.0.229",
       "externalReferences": [
         {
           "type": "documentation",
@@ -167,16 +167,16 @@
     },
     {
       "type": "library",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#serde_core@1.0.228",
+      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#serde_core@1.0.229",
       "author": "Erick Tryzelaar <erick.tryzelaar@gmail.com>, David Tolnay <dtolnay@gmail.com>",
       "name": "serde_core",
-      "version": "1.0.228",
+      "version": "1.0.229",
       "description": "Serde traits only, with no support for derive -- use the `serde` crate instead",
       "scope": "required",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "41d385c7d4ca58e59fc732af25c3983b67ac852c1a25000afe1175de458b67ad"
+          "content": "67dca2c9c51e58a4791a4b1ed58308b39c64224d349a935ab5039aa360942a48"
         }
       ],
       "licenses": [
@@ -184,7 +184,7 @@
           "expression": "MIT OR Apache-2.0"
         }
       ],
-      "purl": "pkg:cargo/serde_core@1.0.228",
+      "purl": "pkg:cargo/serde_core@1.0.229",
       "externalReferences": [
         {
           "type": "documentation",
@@ -202,16 +202,16 @@
     },
     {
       "type": "library",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#serde_derive@1.0.228",
+      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#serde_derive@1.0.229",
       "author": "Erick Tryzelaar <erick.tryzelaar@gmail.com>, David Tolnay <dtolnay@gmail.com>",
       "name": "serde_derive",
-      "version": "1.0.228",
+      "version": "1.0.229",
       "description": "Macros 1.1 implementation of #[derive(Serialize, Deserialize)]",
       "scope": "required",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "d540f220d3187173da220f885ab66608367b6574e925011a9353e4badda91d79"
+          "content": "e7a5d71263a5a7d47b41f6b3f06ba276f10cc18b0931f1799f710578e2309348"
         }
       ],
       "licenses": [
@@ -219,7 +219,7 @@
           "expression": "MIT OR Apache-2.0"
         }
       ],
-      "purl": "pkg:cargo/serde_derive@1.0.228",
+      "purl": "pkg:cargo/serde_derive@1.0.229",
       "externalReferences": [
         {
           "type": "documentation",
@@ -237,16 +237,16 @@
     },
     {
       "type": "library",
-      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#syn@2.0.117",
+      "bom-ref": "registry+https://github.com/rust-lang/crates.io-index#syn@3.0.2",
       "author": "David Tolnay <dtolnay@gmail.com>",
       "name": "syn",
-      "version": "2.0.117",
+      "version": "3.0.2",
       "description": "Parser for Rust source code",
       "scope": "required",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "e665b8803e7b1d2a727f4023456bbbbe74da67099c585258af0ad9c5013b9b99"
+          "content": "a207d6d6a2b7fc470b80443726053f18a2481b7e1eee970597051596567987a3"
         }
       ],
       "licenses": [
@@ -254,7 +254,7 @@
           "expression": "MIT OR Apache-2.0"
         }
       ],
-      "purl": "pkg:cargo/syn@2.0.117",
+      "purl": "pkg:cargo/syn@3.0.2",
       "externalReferences": [
         {
           "type": "documentation",
@@ -308,7 +308,7 @@
     {
       "ref": "path+repo://libaprs-engine/crates/libaprs-engine#3.0.0-rc.2",
       "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#serde@1.0.228"
+        "registry+https://github.com/rust-lang/crates.io-index#serde@1.0.229"
       ]
     },
     {
@@ -324,28 +324,28 @@
       ]
     },
     {
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#serde@1.0.228",
+      "ref": "registry+https://github.com/rust-lang/crates.io-index#serde@1.0.229",
       "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#serde_core@1.0.228",
-        "registry+https://github.com/rust-lang/crates.io-index#serde_derive@1.0.228"
+        "registry+https://github.com/rust-lang/crates.io-index#serde_core@1.0.229",
+        "registry+https://github.com/rust-lang/crates.io-index#serde_derive@1.0.229"
       ]
     },
     {
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#serde_core@1.0.228",
+      "ref": "registry+https://github.com/rust-lang/crates.io-index#serde_core@1.0.229",
       "dependsOn": [
-        "registry+https://github.com/rust-lang/crates.io-index#serde_derive@1.0.228"
+        "registry+https://github.com/rust-lang/crates.io-index#serde_derive@1.0.229"
       ]
     },
     {
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#serde_derive@1.0.228",
+      "ref": "registry+https://github.com/rust-lang/crates.io-index#serde_derive@1.0.229",
       "dependsOn": [
         "registry+https://github.com/rust-lang/crates.io-index#proc-macro2@1.0.106",
         "registry+https://github.com/rust-lang/crates.io-index#quote@1.0.45",
-        "registry+https://github.com/rust-lang/crates.io-index#syn@2.0.117"
+        "registry+https://github.com/rust-lang/crates.io-index#syn@3.0.2"
       ]
     },
     {
-      "ref": "registry+https://github.com/rust-lang/crates.io-index#syn@2.0.117",
+      "ref": "registry+https://github.com/rust-lang/crates.io-index#syn@3.0.2",
       "dependsOn": [
         "registry+https://github.com/rust-lang/crates.io-index#proc-macro2@1.0.106",
         "registry+https://github.com/rust-lang/crates.io-index#quote@1.0.45",
