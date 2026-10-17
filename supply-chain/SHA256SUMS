@@ -1,6 +1,6 @@
 587a2d98f4dca854692940758b3f0f5e1df8333f511e3aef75004abf40f3be7d  .github/dependabot.yml
 0044363aee7a5d5ed05f2ff8ee2fa5d588feaad37097c06888ebb40857e0be50  .github/workflows/docs.yml
-681f327c612c0910434b595f60057af1cf214f8c430a9add0d589358757fdb76  .github/workflows/factory-rust-builder-ubuntu-validation.yml
+d409b8ea53f75ba2afb703065bcb834f3467dec169b6d14284a0ac93e8414613  .github/workflows/factory-rust-builder-ubuntu-validation.yml
 b678ff2b2a071274dcbd4f272160c97f75eb03ac9b7570f9d3195b4a64403d65  .github/workflows/merge-gate.yml
 a5c81a05767bd9c9832d2494643ccd68a266896b823b25bbc57eac9d699925a8  .github/workflows/rust-ci.yml
 32d287ff65e10ab559a48c76513ec144bb80bf763d4dbc43f40d9731ad3d1c44  .github/workflows/secret-scan.yml
