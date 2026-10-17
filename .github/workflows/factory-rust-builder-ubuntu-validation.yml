@@ -30,7 +30,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  RUST_BUILDER_UBUNTU_IMAGE: ghcr.io/solosentryorg/rust-builder-ubuntu@sha256:3f429ad9332bdc90009a66042bcaabec0b4e9e33175f731320f0d9c558ca6dee
+  RUST_BUILDER_UBUNTU_IMAGE: ghcr.io/solosentryorg/rust-builder-ubuntu@sha256:cc4657456ce883c95e367e976158955b5832c3eb05b751191c7bcd1789f0c021
   GHCR_TOKEN: ${{ secrets.GHCR_READ_TOKEN || secrets.GHCR_TOKEN || github.token }}
 
 jobs:
@@ -40,6 +40,17 @@ jobs:
     timeout-minutes: 30
 
     steps:
+      - name: Enforce Rust builder exception expiry
+        run: |
+          set -eu
+          # Owner decision: https://github.com/SoloSentryOrg/org-image-factory/issues/296#issuecomment-6223994092
+          # Additional finding: https://github.com/SoloSentryOrg/org-image-factory/issues/296#issuecomment-6224337942
+          expiry="$(date -u -d '2027-01-16T20:17:00Z' +%s)"
+          if [ "$(date -u +%s)" -ge "$expiry" ]; then
+            echo "::error title=Rust builder exception expired::Use a verified patched factory digest or obtain a new owner decision."
+            exit 1
+          fi
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # tag: v7
 
