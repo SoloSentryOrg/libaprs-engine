@@ -193,8 +193,8 @@ while :; do
 
     line="$(
       gh api "/repos/$GITHUB_REPOSITORY/commits/$HEAD_SHA/check-runs?per_page=100" \
-        --jq ".check_runs[] | select(.name == \"$check_name\") | [.status, (.conclusion // \"\")] | @tsv" \
-        | tail -n 1 || true
+        --jq "[.check_runs[] | select(.name == \"$check_name\" and .app.id == 15368)] | max_by(.id) | if . == null then empty else [.status, (.conclusion // \"\")] | @tsv end" \
+        || true
     )"
 
     if [ -z "$line" ]; then
