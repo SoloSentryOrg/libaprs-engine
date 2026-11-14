@@ -1,0 +1,24 @@
+name: Merge gate tests
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: gate-tests-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  gate-regression:
+    name: Merge Gate Regression
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Verify candidate gate selection and rerun decisions
+        run: |
+          scripts/test-merge-gate-guard.sh
+          python3 scripts/test-merge-gate-reruns.py
