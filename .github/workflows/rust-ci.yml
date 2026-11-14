@@ -101,6 +101,13 @@ jobs:
         if: ${{ matrix.toolchain == 'stable' }}
         run: cargo package -p libaprs-engine
 
+      - name: Verify public API compatibility with current Rust
+        if: ${{ matrix.toolchain == 'stable' }}
+        run: |
+          scripts/install-release-tools.sh cargo-semver-checks
+          sh scripts/test-semver-validator.sh
+          cargo semver-checks check-release -p libaprs-engine
+
       - name: Downstream smoke
         if: ${{ matrix.toolchain == 'stable' && github.event_name == 'workflow_dispatch' && inputs.downstream_smoke == 'true' }}
         run: cargo check --manifest-path examples/downstream-smoke/Cargo.toml
