@@ -31,6 +31,13 @@
 - The release-script job is intentionally skipped for pull requests and runs on
   `main` pushes or manual dispatch. Pull requests use the Rust matrix and docs
   fast-lane checks for quicker feedback.
+- The stable Rust matrix lane also runs the pinned `cargo-semver-checks` on
+  pull requests, catching validator/rustdoc incompatibility before merge.
+  `scripts/test-semver-validator.sh` checks that compatible fixture APIs pass
+  and a removed public function produces a semver violation, not a tool error.
+  Version `0.51.0` supports Rust `1.99` and rustdoc JSON `v61`, and requires
+  Rust `1.93+` to run. This is the validator's runtime requirement; the library
+  MSRV remains `1.80.0` and its separate test/clippy lane remains mandatory.
 - GitHub Actions Cargo caches intentionally include registry and git state, not
   `target`, to avoid runner disk exhaustion during post-job cache compression.
 - Security workflows install pinned prebuilt release/security tools instead of

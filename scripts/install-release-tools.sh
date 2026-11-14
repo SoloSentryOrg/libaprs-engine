@@ -34,8 +34,9 @@ install_release_tool() {
 
   case "$name" in
     cargo-semver-checks)
-      url="https://github.com/obi1kenobi/cargo-semver-checks/releases/download/v0.47.0/cargo-semver-checks-x86_64-unknown-linux-musl.tar.gz"
-      sha256="daea6dfdebf9b15ce902a8af2fc6b9c2e86ddd49af17a9c5a656939289588f68"
+      # v0.51 supports Rust 1.99 / rustdoc JSON v61; validator runtime needs Rust 1.93+.
+      url="https://github.com/obi1kenobi/cargo-semver-checks/releases/download/v0.51.0/cargo-semver-checks-x86_64-unknown-linux-musl.tar.gz"
+      sha256="396c8508d973c83de52660943a057e971b586f7511c3ba695762373452b43d5b"
       ;;
     cargo-audit)
       url="https://github.com/rustsec/rustsec/releases/download/cargo-audit/v0.22.1/cargo-audit-x86_64-unknown-linux-musl-v0.22.1.tgz"
